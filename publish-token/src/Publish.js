@@ -1,20 +1,18 @@
-import React from 'react';
+import React, { Component } from 'react';
 import './App.css';
 import Button from '@material-ui/core/Button';
-import { createTheme, makeStyles, ThemeProvider, withStyles } from '@material-ui/core/styles';
+import { createTheme, ThemeProvider, withStyles } from '@material-ui/core/styles';
 import { blue} from '@material-ui/core/colors';
 import { Helmet } from 'react-helmet';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import Link from '@material-ui/core/Link';
 import AppBar from '@material-ui/core/AppBar';
-import Paper from '@material-ui/core/Paper';
-import Stepper from '@material-ui/core/Stepper';
-import Step from '@material-ui/core/Step';
-import StepLabel from '@material-ui/core/StepLabel';
-import BasicInfo from './BasicInfo';
-import UploadPDF from './UploadPDF';
-import Review from './Review';
+import TextField from '@material-ui/core/TextField';
+import Container from '@material-ui/core/Container';
+import Avatar from '@material-ui/core/Avatar';
+import Grid from '@material-ui/core/Grid';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+
 
 const theme = createTheme({
   palette: {
@@ -36,7 +34,8 @@ const theme = createTheme({
   },
 });
 
-const useStyles = makeStyles((theme) => ({
+
+const styles = theme => ({
   icon: {
     marginRight: theme.spacing(2),
   },
@@ -46,67 +45,149 @@ const useStyles = makeStyles((theme) => ({
 		borderColor: '#e3f2fd',
 		fontSize: 14,
   },
-	layout: {
-    width: 'auto',
-    [theme.breakpoints.up(600 + theme.spacing(2) * 2)]: {
-      width: 600,
-      marginLeft: '28%',
-      marginRight: '30%',
-    },
-  },
   paper: {
-		background: "#bbdefb",
-		width: 800,
-    marginTop: theme.spacing(5),
-    marginBottom: theme.spacing(3),
-    padding: theme.spacing(1),
-		boxShadow: '2px 4px 5px grey',
-    [theme.breakpoints.up(600 + theme.spacing(3) * 2)]: {
-      marginTop: theme.spacing(6),
-      marginBottom: theme.spacing(6),
-      padding: theme.spacing(3),
-    },
-  },
-  stepper: {
-		background: "#bbdefb",
-    padding: theme.spacing(3, 0, 5),
-  },
-  buttons: {
+    marginTop: theme.spacing(8),
     display: 'flex',
-    justifyContent: 'flex-end',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
-  button: {
-    marginTop: theme.spacing(3),
-    marginLeft: theme.spacing(1),
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: blue[500],
+		width: 60,
+		height: 60
   },
-}));
+  form: {
+    width: '170%', // Fix IE 11 issue.
+    marginTop: theme.spacing(10),
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2),
+  },
+});
 
-const steps = ['Basic Info', 'Review Basic Info','Upload PDF file'];
 
-function getStepContent(step) {
-  switch (step) {
-    case 0:
-      return <BasicInfo />;
-		case 1:
-			return <Review />;
-    case 2:
-      return <UploadPDF />;
-    default:
-      throw new Error('Unknown step');
-  }
-}
+// function Publish() {
+class Publish extends Component {
+	state = {
+    name: '',
+		total_edition_num: 0,
+		sharing_percentage: 0,
+		inputs: [],
+		payments: {
+			0: {
+				"address": '',
+				"baseline": 0,
+				"price": 0
+			}
+		},
+  };
 
-function Publish() {
-		const classes = useStyles();
-		const [activeStep, setActiveStep] = React.useState(0);
+	handleGetPubName = (event) => {
+		this.setState({
+      name : event.target.value,
+    })
+	}
 
-		const handleNext = () => {
-			setActiveStep(activeStep + 1);
-		};
-	
-		const handleBack = () => {
-			setActiveStep(activeStep - 1);
-		};
+	handleGetTotalEditionNum = (event) => {
+		var edition_num = 0
+		if(event.target.value >= 0) edition_num = event.target.value
+		this.setState({
+      total_edition_num : edition_num,
+    })
+	}
+
+	handleGetSharingPercent = (event) => {
+		var sharing_percentage = event.target.value
+		if(event.target.value < 0) sharing_percentage = 0
+		if(event.target.value > 100) sharing_percentage = 100
+		this.setState({
+      sharing_percentage : sharing_percentage,
+    })
+	}
+
+	handleAdd = (event) => {
+		var inputs = this.state.inputs
+		inputs.push(this.state.inputs.length + 1)
+		this.setState({
+      inputs : inputs,
+    })
+		var pay = {
+			"address": '',
+			"baseline": 0,
+			"price": 0
+		}
+		var len = Object.keys(this.state.payments).length
+		var pays = this.state.payments
+		pays[len] = pay
+		this.setState({
+      payments : pays,
+    })
+	}
+
+	handleGetAddress = (index, event) => {
+		if (this.state.payments[index] == undefined){
+			var pay = {}
+			pay["address"] = event.target.value
+			var pays = {}
+			pays[index] = pay
+			this.setState({
+				payments : pays,
+			})
+		}else {
+			var pay = this.state.payments[index]
+			pay["address"] = event.target.value
+			var pays = this.state.payments
+			pays[index] = pay
+			this.setState({
+				payments : pays,
+			})
+		}
+	}
+
+	handleGetBaseline = (index, event) => {
+		if (this.state.payments[index] == undefined){
+			var pay = {}
+			pay["baseline"] = event.target.value
+			var pays = {}
+			pays[index] = pay
+			this.setState({
+				payments : pays,
+			})
+		}else {
+			var pay = this.state.payments[index]
+			pay["baseline"] = event.target.value
+			var pays = this.state.payments
+			pays[index] = pay
+			this.setState({
+				payments : pays,
+			})
+		}
+	}
+
+	handleGetSellPrice = (index, event) => {
+		if (this.state.payments[index] == undefined){
+			var pay = {}
+			pay["price"] = event.target.value
+			var pays = {}
+			pays[index] = pay
+			this.setState({
+				payments : pays,
+			})
+		}else {
+			var pay = this.state.payments[index]
+			pay["price"] = event.target.value
+			var pays = this.state.payments
+			pays[index] = pay
+			this.setState({
+				payments : pays,
+			})
+		}
+		console.log(this.state.payments[index]["address"])
+	}
+
+	render(){
+		const { classes } = this.props
 
 		return (
 			<React.Fragment>
@@ -117,8 +198,8 @@ function Publish() {
 				<ThemeProvider theme={theme}>
 					<AppBar position="static" style={{height: '80px'}}>
 						<Toolbar style={{marginTop: '10px'}}>
-							<Typography variant="h3" color="inherit" noWrap style={{marginLeft: "150px"}}>
-								Publish Token
+							<Typography variant="h2" color="inherit" noWrap style={{marginLeft: "120px"}}>
+								<b>Publish Token</b>
 							</Typography>
 							<Button variant="outlined" size="large" style={{marginLeft: "50%"}} className={classes.btn} href='/'>
 								<b>HOME PAGE</b>
@@ -132,52 +213,145 @@ function Publish() {
 						</Toolbar>
 					</AppBar>
 				</ThemeProvider>
-				<main className={classes.layout}>
-					<Paper className={classes.paper}>
-						<Typography component="h1" variant="h4" align="center">
-							<b>Publish</b>
+				<Container component="main" maxWidth="xs">
+					<div className={classes.paper}>
+						<Avatar className={classes.avatar}>
+							<InfoOutlinedIcon style={{ fontSize: 30 }}/>
+						</Avatar>
+						<Typography component="h1" variant="h3">
+							Publication Information
 						</Typography>
-						<Stepper activeStep={activeStep} className={classes.stepper}>
-							{steps.map((label) => (
-								<Step key={label} >
-									<StepLabel>{label}</StepLabel>
-								</Step>
-							))}
-						</Stepper>
-						<React.Fragment>
-							{activeStep === steps.length ? (
+						<form className={classes.form} noValidate>
+							<Grid container spacing={2}>
+								<Grid item xs={12} >
+									<TextField
+										variant="outlined"
+										required
+										fullWidth
+										id="firstName"
+										label="Publication Name"
+										autoFocus
+										onChange = {this.handleGetPubName}
+										value = {this.state.name}
+									/>
+								</Grid>
+								<Grid item xs={12}>
+									<TextField
+										variant="outlined"
+										type = "number"
+										required
+										fullWidth
+										label="Total Edition Amount"
+										onChange = {this.handleGetTotalEditionNum}
+										helperText="Please note that the total edition amount should be larger than 0"
+										value = {this.state.total_edition_num}
+									/>
+								</Grid>
+								<Grid item xs={12}>
+									<TextField
+										variant="outlined"
+										type = "number"
+										required
+										fullWidth
+										label="Sharing Percentage"
+										onChange = {this.handleGetSharingPercent}
+										value = {this.state.total_edition_num}
+										helperText="Please note that the sharing percentage should be between 0 - 100"
+									/>
+								</Grid>
 								<React.Fragment>
-									<Typography variant="h3" gutterBottom >
-										Thank you for your publish.
-									</Typography>
-								</React.Fragment>
-							) : (
-								<React.Fragment>
-									{getStepContent(activeStep)}
-									<div className={classes.buttons}>
-										{activeStep !== 0 && (
-											<Button onClick={handleBack} className={classes.button}>
-												Back
-											</Button>
-										)}
-										<Button
-											variant="contained"
-											color="primary"
-											onClick={handleNext}
-											className={classes.button}
-										>
-											{activeStep === steps.length - 1 ? 'Publish' : 'Next'}
-										</Button>
+									<Grid item xs={6}>
+										<TextField
+											variant="outlined"
+											type = "text"
+											required
+											fullWidth
+											label="Payment Token Address"
+											onChange = {this.handleGetAddress.bind(this, 0)}
+											value = {this.state.payments[0]["address"]}
+										/>
+									</Grid>
+									<Grid item xs={2}>
+										<TextField
+											variant="outlined"
+											type = "number"
+											required
+											fullWidth
+											label="Baseline"
+											onChange = {this.handleGetBaseline.bind(this, 0)}
+											value = {this.state.payments[0]["baseline"]}
+										/>
+									</Grid>
+									<Grid item xs={2}>
+										<TextField
+											variant="outlined"
+											type = "number"
+											required
+											fullWidth
+											label="Sell Price"
+											onChange = {this.handleGetSellPrice.bind(this, 0)}
+											value = {this.state.payments[0]["price"]}
+										/>
+									</Grid>
+									<Grid container justifyContent="flex-end" xs={2}>
+										<Button variant="contained" color="primary" size="large" onClick={this.handleAdd}> + </Button>
+									</Grid>
+									<div>
+										{
+											this.state.inputs.map((item, index) => {
+												return(
+													<Grid container spacing={2} key={index} style={{marginLeft: "1px"}}>
+													{/* <div key={index}> */}
+														<Grid item>
+															<TextField
+																variant="outlined"
+																type = "text"
+																required
+																fullWidth
+																label="Payment Token Address"
+																style={{width: "330px"}}
+																onChange = {this.handleGetAddress.bind(this, index+1)}
+																value = {this.state.payments[index+1]["address"]}
+															/>
+														</Grid>
+														<Grid item >
+															<TextField
+																variant="outlined"
+																type = "number"
+																required
+																fullWidth
+																label="Baseline"
+																style={{width: "95px"}}
+																onChange = {this.handleGetBaseline.bind(this, index+1)}
+																value = {this.state.payments[index+1]["baseline"]}
+															/>
+														</Grid>
+														<Grid item>
+															<TextField
+																variant="outlined"
+																type = "number"
+																required
+																fullWidth
+																label="Sell Price"
+																style={{width: "95px"}}
+																onChange = {this.handleGetSellPrice.bind(this, index+1)}
+																value = {this.state.payments[index+1]["price"]}
+															/>
+														</Grid>
+													</Grid>
+												)
+											})
+										}
 									</div>
 								</React.Fragment>
-							)}
-						</React.Fragment>
-					</Paper>
-				</main>
-
+							</Grid>
+						</form>
+					</div>
+				</Container>
 			</React.Fragment>
 			
 		);
+	}
 }
 
-export default Publish;
+export default withStyles(styles, { withTheme: true })(Publish);

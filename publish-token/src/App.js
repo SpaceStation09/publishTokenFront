@@ -45,11 +45,11 @@ function App() {
         {/* <p style={{fontSize: "50px", fontFamily: "Georgia"}}><b> Publish Token </b></p> */}
       </header>
       <div className="body">
-        <Typography variant="h2" align="center" color="textSecondary" style={{fontFamily: "Georgia"}}>
+        <Typography variant="h3" align="center" color="textSecondary" style={{fontFamily: "Georgia", width:'40%'}}>
           <b>A ERC721 Token Trying to Solve Existing Publishing Dilemma</b>
         </Typography>
 
-        <Typography variant="h3" align="center" color="textSecondary" style={{marginTop : "20px", fontFamily: "Georgia", marginBottom: "50px"}}>
+        <Typography variant="h4" align="center" color="textSecondary" style={{marginTop : "20px", fontFamily: "Georgia", marginBottom: "50px", width: '50%'}}>
           <b>Publish All You Love & Support All You Love</b>
         </Typography>
 
