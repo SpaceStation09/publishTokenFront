@@ -12,6 +12,11 @@ import Container from '@material-ui/core/Container';
 import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import { Upload, message } from 'antd';
+import { InboxOutlined } from '@ant-design/icons';
+import Dragger from 'antd/lib/upload/Dragger';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import 'antd/dist/antd.css';
 
 
 const theme = createTheme({
@@ -64,7 +69,37 @@ const styles = theme => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+	fileBtn: {
+		padding: '10px 30px 10px 30px',
+    background: '#66C1E4',
+    border: 'none',
+    color: '#FFF',
+    boxShadow: '1px 1px 1px #4C6E91',
+	},
+	button: {
+    margin: theme.spacing(1),
+  },
 });
+
+const props = {
+  name: 'file',
+  multiple: true,
+  // action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+  onChange(info) {
+    const { status } = info.file;
+    if (status !== 'uploading') {
+      console.log(info.file, info.fileList);
+    }
+    if (status === 'done') {
+      message.success(`${info.file.name} file uploaded successfully.`);
+    } else if (status === 'error') {
+      message.error(`${info.file.name} file upload failed.`);
+    }
+  },
+  onDrop(e) {
+    console.log('Dropped files', e.dataTransfer.files);
+  },
+};
 
 
 // function Publish() {
@@ -186,6 +221,15 @@ class Publish extends Component {
 		console.log(this.state.payments[index]["address"])
 	}
 
+	submit = (event) => {
+		event.preventDefault();
+		let formData = new FormData(event.target)
+		fetch('http://127.0.0.1:3001/file/upload', {
+			method: 'POST',
+			body: formData
+		}).then(response => console.log(response))
+	}
+
 	render(){
 		const { classes } = this.props
 
@@ -207,7 +251,7 @@ class Publish extends Component {
 							<Button variant="outlined" size="large" style={{marginLeft: "3%"}} className={classes.btn} href='/#/buy'>
 								<b>GO TO BUY</b>
 							</Button>
-							<Button variant="outlined" size="large" style={{marginLeft: "3%"}} className={classes.btn} href='/'>
+							<Button variant="outlined" size="large" style={{marginLeft: "3%"}} className={classes.btn} href='/#/sell'>
 								GO TO SELL
 							</Button>
 						</Toolbar>
@@ -346,6 +390,29 @@ class Publish extends Component {
 								</React.Fragment>
 							</Grid>
 						</form>
+						<Dragger style = {{marginTop: 50, width: 650, minHeight: 150}}>
+							<p className="ant-upload-drag-icon">
+								<InboxOutlined />
+							</p>
+							<p className="ant-upload-text">Click or drag file to this area to upload</p>
+							<p className="ant-upload-hint">
+								Support for a single or bulk upload. Strictly prohibit from uploading company data or other
+								band files
+							</p>
+						</Dragger>
+						{/* <Button variant="outlined" size="large" style={{marginLeft: "3%"}} className={classes.btn} href='/'>
+							Publish
+						</Button> */}
+						<Button
+							variant="contained"
+							color="primary"
+							className={classes.button}
+							startIcon={<CloudUploadIcon />}
+							style = {{marginTop: 50, width: 150, height: 40, marginBottom: 50}}
+						>
+							Publish
+						</Button>
+
 					</div>
 				</Container>
 			</React.Fragment>

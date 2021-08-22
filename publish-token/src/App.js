@@ -73,7 +73,7 @@ function App() {
 
           <Grid item xs>
             <ThemeProvider theme={theme}>
-              <Button variant="contained" color="primary" size="large" style={{marginLeft: "3%"}} className={classes.btn} href='/#/buy'>
+              <Button variant="contained" color="primary" size="large" style={{marginLeft: "3%"}} className={classes.btn} href='/#/sell'>
                 Sell Token
 							</Button>
             </ThemeProvider>
