@@ -57,7 +57,7 @@ const styles = theme => ({
   },
   form: {
     width: '170%', // Fix IE 11 issue.
-    marginTop: theme.spacing(10),
+    marginTop: theme.spacing(7),
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
@@ -263,7 +263,7 @@ class Publish extends Component {
 							<Avatar className={classes.avatar}>
 								<InfoOutlinedIcon style={{ fontSize: 30 }}/>
 							</Avatar>
-							<Typography component="h1" variant="h2" style={{ marginTop: "3%" }}>
+							<Typography component="h1" variant="h2" style={{ marginTop: "3%", fontFamily: 'Ubuntu'}}>
 								<b>Publication Information</b>
 							</Typography>
 							<form className={classes.form} noValidate>
