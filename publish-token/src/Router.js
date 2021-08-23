@@ -5,6 +5,7 @@ import App from './App';
 import Publish from './Publish';
 import Buy from './Buy';
 import Sell from './Sell';
+import NFTInfo from './NFTInfo';
 
 
 const BasicRoute = () => (
@@ -14,6 +15,7 @@ const BasicRoute = () => (
             <Route exact path="/publish" component={Publish}/>
             <Route exact path="/buy" component={Buy}/>
             <Route exact path="/sell" component={Sell}/>
+            <Route exact path="/NFT" component={NFTInfo} />
         </Switch>
     </HashRouter>
 );

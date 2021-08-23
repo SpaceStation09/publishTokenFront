@@ -6,7 +6,7 @@ import { blue} from '@material-ui/core/colors';
 import { Helmet } from 'react-helmet';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import AppBar from '@material-ui/core/AppBar';
+import GitHubIcon from '@material-ui/icons/GitHub';
 import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
 import Avatar from '@material-ui/core/Avatar';
@@ -16,26 +16,19 @@ import { Upload, message } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import Dragger from 'antd/lib/upload/Dragger';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import AddIcon from '@material-ui/icons/Add';
+import Fab from '@material-ui/core/Fab';
 import 'antd/dist/antd.css';
 
 
 const theme = createTheme({
   palette: {
-    primary: blue,
-  },
-	typography: {
-    fontFamily: [
-      '-apple-system',
-      'BlinkMacSystemFont',
-      '"Segoe UI"',
-      'Roboto',
-      '"Helvetica Neue"',
-      'Arial',
-      'sans-serif',
-      '"Apple Color Emoji"',
-      '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"',
-    ].join(','),
+		primary: {
+			main: '#2196f3',
+		},
+		secondary: {
+			main: '#FDFEFE',
+		},
   },
 });
 
@@ -44,12 +37,12 @@ const styles = theme => ({
   icon: {
     marginRight: theme.spacing(2),
   },
-  btn: {
-    color: theme.palette.getContrastText(blue[500]),
+	btn: {
+		color: '#424949',
 		borderWidth: 2,
 		borderColor: '#e3f2fd',
-		fontSize: 14,
-  },
+		fontSize: 16,
+	},
   paper: {
     marginTop: theme.spacing(8),
     display: 'flex',
@@ -78,6 +71,10 @@ const styles = theme => ({
 	},
 	button: {
     margin: theme.spacing(1),
+		fontSize: 20,
+		borderRadius: 25,
+		color: '#FFFFFF',
+		backgroundColor: '#2196f3'
   },
 });
 
@@ -240,183 +237,185 @@ class Publish extends Component {
 				</Helmet>
 			
 				<ThemeProvider theme={theme}>
-					<AppBar position="static" style={{height: '80px'}}>
-						<Toolbar style={{marginTop: '10px'}}>
-							<Typography variant="h2" color="inherit" noWrap style={{marginLeft: "120px"}}>
-								<b>Publish Token</b>
-							</Typography>
-							<Button variant="outlined" size="large" style={{marginLeft: "50%"}} className={classes.btn} href='/'>
-								<b>HOME PAGE</b>
-							</Button>
-							<Button variant="outlined" size="large" style={{marginLeft: "3%"}} className={classes.btn} href='/#/buy'>
-								<b>GO TO BUY</b>
-							</Button>
-							<Button variant="outlined" size="large" style={{marginLeft: "3%"}} className={classes.btn} href='/#/sell'>
-								GO TO SELL
-							</Button>
-						</Toolbar>
-					</AppBar>
-				</ThemeProvider>
-				<Container component="main" maxWidth="xs">
-					<div className={classes.paper}>
-						<Avatar className={classes.avatar}>
-							<InfoOutlinedIcon style={{ fontSize: 30 }}/>
-						</Avatar>
-						<Typography component="h1" variant="h3">
-							Publication Information
+					<Toolbar style={{ marginTop: 15, marginBottom: 10 }}>
+						<Typography component="h1" variant="h3" color="inherit" noWrap style={{ fontFamily: 'Teko', marginLeft: "100px" }}>
+							<b>PUBLISH TOKEN</b>
 						</Typography>
-						<form className={classes.form} noValidate>
-							<Grid container spacing={2}>
-								<Grid item xs={12} >
-									<TextField
-										variant="outlined"
-										required
-										fullWidth
-										id="firstName"
-										label="Publication Name"
-										autoFocus
-										onChange = {this.handleGetPubName}
-										value = {this.state.name}
-									/>
-								</Grid>
-								<Grid item xs={12}>
-									<TextField
-										variant="outlined"
-										type = "number"
-										required
-										fullWidth
-										label="Total Edition Amount"
-										onChange = {this.handleGetTotalEditionNum}
-										helperText="Please note that the total edition amount should be larger than 0"
-										value = {this.state.total_edition_num}
-									/>
-								</Grid>
-								<Grid item xs={12}>
-									<TextField
-										variant="outlined"
-										type = "number"
-										required
-										fullWidth
-										label="Sharing Percentage"
-										onChange = {this.handleGetSharingPercent}
-										value = {this.state.total_edition_num}
-										helperText="Please note that the sharing percentage should be between 0 - 100"
-									/>
-								</Grid>
-								<React.Fragment>
-									<Grid item xs={6}>
-										<TextField
-											variant="outlined"
-											type = "text"
-											required
-											fullWidth
-											label="Payment Token Address"
-											onChange = {this.handleGetAddress.bind(this, 0)}
-											value = {this.state.payments[0]["address"]}
-										/>
-									</Grid>
-									<Grid item xs={2}>
-										<TextField
-											variant="outlined"
-											type = "number"
-											required
-											fullWidth
-											label="Baseline"
-											onChange = {this.handleGetBaseline.bind(this, 0)}
-											value = {this.state.payments[0]["baseline"]}
-										/>
-									</Grid>
-									<Grid item xs={2}>
-										<TextField
-											variant="outlined"
-											type = "number"
-											required
-											fullWidth
-											label="Sell Price"
-											onChange = {this.handleGetSellPrice.bind(this, 0)}
-											value = {this.state.payments[0]["price"]}
-										/>
-									</Grid>
-									<Grid container justifyContent="flex-end" xs={2}>
-										<Button variant="contained" color="primary" size="large" onClick={this.handleAdd}> + </Button>
-									</Grid>
-									<div>
-										{
-											this.state.inputs.map((item, index) => {
-												return(
-													<Grid container spacing={2} key={index} style={{marginLeft: "1px"}}>
-													{/* <div key={index}> */}
-														<Grid item>
-															<TextField
-																variant="outlined"
-																type = "text"
-																required
-																fullWidth
-																label="Payment Token Address"
-																style={{width: "330px"}}
-																onChange = {this.handleGetAddress.bind(this, index+1)}
-																value = {this.state.payments[index+1]["address"]}
-															/>
-														</Grid>
-														<Grid item >
-															<TextField
-																variant="outlined"
-																type = "number"
-																required
-																fullWidth
-																label="Baseline"
-																style={{width: "95px"}}
-																onChange = {this.handleGetBaseline.bind(this, index+1)}
-																value = {this.state.payments[index+1]["baseline"]}
-															/>
-														</Grid>
-														<Grid item>
-															<TextField
-																variant="outlined"
-																type = "number"
-																required
-																fullWidth
-																label="Sell Price"
-																style={{width: "95px"}}
-																onChange = {this.handleGetSellPrice.bind(this, index+1)}
-																value = {this.state.payments[index+1]["price"]}
-															/>
-														</Grid>
-													</Grid>
-												)
-											})
-										}
-									</div>
-								</React.Fragment>
-							</Grid>
-						</form>
-						<Dragger style = {{marginTop: 50, width: 650, minHeight: 150}}>
-							<p className="ant-upload-drag-icon">
-								<InboxOutlined />
-							</p>
-							<p className="ant-upload-text">Click or drag file to this area to upload</p>
-							<p className="ant-upload-hint">
-								Support for a single or bulk upload. Strictly prohibit from uploading company data or other
-								band files
-							</p>
-						</Dragger>
-						{/* <Button variant="outlined" size="large" style={{marginLeft: "3%"}} className={classes.btn} href='/'>
-							Publish
-						</Button> */}
-						<Button
-							variant="contained"
-							color="primary"
-							className={classes.button}
-							startIcon={<CloudUploadIcon />}
-							style = {{marginTop: 50, width: 150, height: 40, marginBottom: 50}}
-						>
-							Publish
+						<Button size="large" style={{ marginLeft: "55%" }} className={classes.btn} href='/'>
+							<b>HOME PAGE</b>
 						</Button>
+						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/publish'>
+							<b>PUBLISH</b>
+						</Button>
+						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sell'>
+							<b>SELL</b>
+						</Button>
+						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/buy'>
+							<b>BUY</b>
+						</Button>
+						<Button size="large" href='https://github.com/SpaceStation09/publishTokenFront/tree/master/publish-token' target="_blank">
+							<GitHubIcon />
+						</Button>
+					</Toolbar>
 
-					</div>
-				</Container>
+					<Container component="main" maxWidth="xs">
+						<div className={classes.paper}>
+							<Avatar className={classes.avatar}>
+								<InfoOutlinedIcon style={{ fontSize: 30 }}/>
+							</Avatar>
+							<Typography component="h1" variant="h2" style={{ marginTop: "3%" }}>
+								<b>Publication Information</b>
+							</Typography>
+							<form className={classes.form} noValidate>
+								<Grid container spacing={2}>
+									<Grid item xs={12} >
+										<TextField
+											variant="outlined"
+											required
+											fullWidth
+											id="firstName"
+											label="Publication Name"
+											autoFocus
+											onChange = {this.handleGetPubName}
+											value = {this.state.name}
+										/>
+									</Grid>
+									<Grid item xs={12}>
+										<TextField
+											variant="outlined"
+											type = "number"
+											required
+											fullWidth
+											label="Total Edition Amount"
+											onChange = {this.handleGetTotalEditionNum}
+											helperText="Please note that the total edition amount should be larger than 0"
+											value = {this.state.total_edition_num}
+										/>
+									</Grid>
+									<Grid item xs={12}>
+										<TextField
+											variant="outlined"
+											type = "number"
+											required
+											fullWidth
+											label="Sharing Percentage"
+											onChange = {this.handleGetSharingPercent}
+											value = {this.state.total_edition_num}
+											helperText="Please note that the sharing percentage should be between 0 - 100"
+										/>
+									</Grid>
+									<React.Fragment>
+										<Grid item xs={6}>
+											<TextField
+												variant="outlined"
+												type = "text"
+												required
+												fullWidth
+												label="Payment Token Address"
+												onChange = {this.handleGetAddress.bind(this, 0)}
+												value = {this.state.payments[0]["address"]}
+											/>
+										</Grid>
+										<Grid item xs={2}>
+											<TextField
+												variant="outlined"
+												type = "number"
+												required
+												fullWidth
+												label="Baseline"
+												onChange = {this.handleGetBaseline.bind(this, 0)}
+												value = {this.state.payments[0]["baseline"]}
+											/>
+										</Grid>
+										<Grid item xs={2}>
+											<TextField
+												variant="outlined"
+												type = "number"
+												required
+												fullWidth
+												label="Sell Price"
+												onChange = {this.handleGetSellPrice.bind(this, 0)}
+												value = {this.state.payments[0]["price"]}
+											/>
+										</Grid>
+										<Grid item xs={2}>
+											<Fab color="primary" aria-label="add" onClick={this.handleAdd} style={{ marginLeft: 30}}>
+												<AddIcon />
+											</Fab>
+										</Grid>
+
+										<div>
+											{
+												this.state.inputs.map((item, index) => {
+													return(
+														<Grid container spacing={2} key={index} style={{ marginLeft: "1px"}}>
+															<Grid item>
+																<TextField
+																	variant="outlined"
+																	type = "text"
+																	required
+																	fullWidth
+																	label="Payment Token Address"
+																	style={{width: "330px"}}
+																	onChange = {this.handleGetAddress.bind(this, index+1)}
+																	value = {this.state.payments[index+1]["address"]}
+																/>
+															</Grid>
+															<Grid item >
+																<TextField
+																	variant="outlined"
+																	type = "number"
+																	required
+																	fullWidth
+																	label="Baseline"
+																	style={{width: "95px"}}
+																	onChange = {this.handleGetBaseline.bind(this, index+1)}
+																	value = {this.state.payments[index+1]["baseline"]}
+																/>
+															</Grid>
+															<Grid item>
+																<TextField
+																	variant="outlined"
+																	type = "number"
+																	required
+																	fullWidth
+																	label="Sell Price"
+																	style={{width: "95px"}}
+																	onChange = {this.handleGetSellPrice.bind(this, index+1)}
+																	value = {this.state.payments[index+1]["price"]}
+																/>
+															</Grid>
+														</Grid>
+													)
+												})
+											}
+										</div>
+									</React.Fragment>
+								</Grid>
+							</form>
+							<Dragger style = {{marginTop: 50, width: 650, minHeight: 150}}>
+								<p className="ant-upload-drag-icon">
+									<InboxOutlined />
+								</p>
+								<p className="ant-upload-text">Click or drag file to this area to upload</p>
+								<p className="ant-upload-hint">
+									Support for a single or bulk upload. Strictly prohibit from uploading company data or other
+									band files
+								</p>
+							</Dragger>
+							<Button
+								variant="contained"
+								className={classes.button}
+								startIcon={<CloudUploadIcon />}
+								style = {{marginTop: 50, width: 200, height: 50, marginBottom: 50}}
+							>
+								Publish
+							</Button>
+
+						</div>
+					</Container>
+				</ThemeProvider>
 			</React.Fragment>
-			
 		);
 	}
 }

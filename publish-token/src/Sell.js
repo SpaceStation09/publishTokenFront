@@ -6,35 +6,23 @@ import { blue} from '@material-ui/core/colors';
 import { Helmet } from 'react-helmet';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import AppBar from '@material-ui/core/AppBar';
+import GitHubIcon from '@material-ui/icons/GitHub';
 import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
 import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import MonetizationOnOutlinedIcon from '@material-ui/icons/MonetizationOnOutlined';
-import { Upload, message } from 'antd';
-import { InboxOutlined } from '@ant-design/icons';
-import Dragger from 'antd/lib/upload/Dragger';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import LocalAtmIcon from '@material-ui/icons/LocalAtm';
 import 'antd/dist/antd.css';
 
 const theme = createTheme({
 	palette: {
-		primary: blue,
-	},
-		typography: {
-		fontFamily: [
-			'-apple-system',
-			'BlinkMacSystemFont',
-			'"Segoe UI"',
-			'Roboto',
-			'"Helvetica Neue"',
-			'Arial',
-			'sans-serif',
-			'"Apple Color Emoji"',
-			'"Segoe UI Emoji"',
-			'"Segoe UI Symbol"',
-		].join(','),
+		primary: {
+			main: '#2196f3',
+		},
+		secondary: {
+			main: '#FDFEFE',
+		},
 	},
 });
 
@@ -42,12 +30,21 @@ const styles = theme => ({
   icon: {
     marginRight: theme.spacing(2),
   },
-  btn: {
-    color: theme.palette.getContrastText(blue[500]),
+	btn: {
+		color: '#424949',
 		borderWidth: 2,
 		borderColor: '#e3f2fd',
-		fontSize: 14,
-  },
+		fontSize: 16,
+	},
+	btnSell: {
+		marginTop: 50,
+		margin: theme.spacing(1),
+		fontSize: 20,
+		borderRadius: 25,
+		color: '#FFFFFF',
+		backgroundColor: '#2196f3',
+		width: '50%'
+	},
   paper: {
     marginTop: theme.spacing(8),
     display: 'flex',
@@ -63,19 +60,6 @@ const styles = theme => ({
   form: {
     width: '170%', // Fix IE 11 issue.
     marginTop: theme.spacing(5),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-	fileBtn: {
-		padding: '10px 30px 10px 30px',
-    background: '#66C1E4',
-    border: 'none',
-    color: '#FFF',
-    boxShadow: '1px 1px 1px #4C6E91',
-	},
-	button: {
-    margin: theme.spacing(1),
   },
 });
 
@@ -120,87 +104,96 @@ class Sell extends Component {
 		return (
 			<React.Fragment>
 				<Helmet>
-					<title>Publish Token | Publish</title>
+					<title>Publish Token | Sell</title>
 				</Helmet>
 			
 				<ThemeProvider theme={theme}>
-					<AppBar position="static" style={{height: '80px'}}>
-						<Toolbar style={{marginTop: '10px'}}>
-							<Typography variant="h2" color="inherit" noWrap style={{marginLeft: "120px"}}>
-								<b>Publish Token</b>
-							</Typography>
-							<Button variant="outlined" size="large" style={{marginLeft: "50%"}} className={classes.btn} href='/'>
-								<b>HOME PAGE</b>
-							</Button>
-							<Button variant="outlined" size="large" style={{marginLeft: "3%"}} className={classes.btn} href='/#/buy'>
-								<b>GO TO BUY</b>
-							</Button>
-							<Button variant="outlined" size="large" style={{marginLeft: "3%"}} className={classes.btn} href='/#/publish'>
-								GO TO Publish
-							</Button>
-						</Toolbar>
-					</AppBar>
-				</ThemeProvider>
-				<Container component="main" maxWidth="xs">
-					<div className={classes.paper}>
-						<Avatar className={classes.avatar}>
-							<MonetizationOnOutlinedIcon style={{ fontSize: 30 }}/>
-						</Avatar>
-						<Typography component="h1" variant="h3">
-							Sell Information
+					<Toolbar style={{ marginTop: 15, marginBottom: 10 }}>
+						<Typography component="h1" variant="h3" color="inherit" noWrap style={{ fontFamily: 'Teko', marginLeft: "100px" }}>
+							<b>PUBLISH TOKEN</b>
 						</Typography>
-						<form className={classes.form} noValidate>
-							<Grid container spacing={2}>
-								<Grid item xs={12} >
-									<TextField
-										variant="outlined"
-										required
-										fullWidth
-										label="To Address"
-										autoFocus
-										onChange = {this.handleGetToAddr}
-										value = {this.state.toAddress}
-									/>
-								</Grid>
-								<Grid item xs={12}>
-									<TextField
-										variant="outlined"
-										type = "number"
-										required
-										fullWidth
-										label="Sell Price"
-										onChange = {this.handleGetSellPrice}
-										value = {this.state.price}
-									/>
-								</Grid>
-								<Grid item xs={12}>
-									<TextField
-										variant="outlined"
-										required
-										fullWidth
-										label="Payment Token Address"
-										onChange = {this.handleGetTokenAddr}
-										value = {this.state.token_addr}
-									/>
-								</Grid>
-								<Grid item xs={12}>
-									<TextField
-										variant="outlined"
-										type = "number"
-										required
-										fullWidth
-										label="NFT ID"
-										onChange = {this.handleGetNFTId}
-										value = {this.state.NFT_id}
-									/>
-								</Grid>
-							</Grid>
-						</form>
-						<Button variant="contained" size="large" color="Primary" style={{marginTop: "10%", width: 150, height: 40}} >
-							<b>Sell</b>
+						<Button size="large" style={{ marginLeft: "55%" }} className={classes.btn} href='/'>
+							<b>HOME PAGE</b>
 						</Button>
-					</div>
-				</Container>
+						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/publish'>
+							<b>PUBLISH</b>
+						</Button>
+						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sell'>
+							<b>SELL</b>
+						</Button>
+						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/buy'>
+							<b>BUY</b>
+						</Button>
+						<Button size="large" href='https://github.com/SpaceStation09/publishTokenFront/tree/master/publish-token' target="_blank">
+							<GitHubIcon />
+						</Button>
+					</Toolbar>
+					<Container component="main" maxWidth="xs">
+						<div className={classes.paper}>
+							<Avatar className={classes.avatar}>
+								<MonetizationOnOutlinedIcon style={{ fontSize: 30 }}/>
+							</Avatar>
+							<Typography component="h1" variant="h3">
+								Sell Information
+							</Typography>
+							<form className={classes.form} noValidate>
+								<Grid container spacing={2}>
+									<Grid item xs={12} >
+										<TextField
+											variant="outlined"
+											required
+											fullWidth
+											label="To Address"
+											autoFocus
+											onChange = {this.handleGetToAddr}
+											value = {this.state.toAddress}
+										/>
+									</Grid>
+									<Grid item xs={12}>
+										<TextField
+											variant="outlined"
+											type = "number"
+											required
+											fullWidth
+											label="Sell Price"
+											onChange = {this.handleGetSellPrice}
+											value = {this.state.price}
+										/>
+									</Grid>
+									<Grid item xs={12}>
+										<TextField
+											variant="outlined"
+											required
+											fullWidth
+											label="Payment Token Address"
+											onChange = {this.handleGetTokenAddr}
+											value = {this.state.token_addr}
+										/>
+									</Grid>
+									<Grid item xs={12}>
+										<TextField
+											variant="outlined"
+											type = "number"
+											required
+											fullWidth
+											label="NFT ID"
+											onChange = {this.handleGetNFTId}
+											value = {this.state.NFT_id}
+										/>
+									</Grid>
+								</Grid>
+							</form>
+							<Button 
+								variant="contained" 
+								color="primary" 
+								startIcon={<LocalAtmIcon />}
+								className={classes.btnSell}
+							>
+								<b>Sell</b>
+							</Button>
+						</div>
+					</Container>
+				</ThemeProvider>
 			</React.Fragment>
 		);
 	}
