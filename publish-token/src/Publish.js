@@ -4,9 +4,7 @@ import Button from '@material-ui/core/Button';
 import { createTheme, ThemeProvider, withStyles } from '@material-ui/core/styles';
 import { blue} from '@material-ui/core/colors';
 import { Helmet } from 'react-helmet';
-import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import GitHubIcon from '@material-ui/icons/GitHub';
 import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
 import Avatar from '@material-ui/core/Avatar';
@@ -16,8 +14,7 @@ import { Upload, message } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import Dragger from 'antd/lib/upload/Dragger';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import AddIcon from '@material-ui/icons/Add';
-import Fab from '@material-ui/core/Fab';
+import { Input, InputNumber } from 'antd';
 import 'antd/dist/antd.css';
 import TopBar from './TopBar';
 
@@ -77,6 +74,16 @@ const styles = theme => ({
 		color: '#FFFFFF',
 		backgroundColor: '#2196f3'
   },
+	input: {
+		height: 40,
+		borderRadius: 5,
+	},
+	inputNum: {
+		height: 40,
+		borderRadius: 5,
+		width: 675,
+		fontSize: 20,
+	}
 });
 
 const props = {
@@ -104,16 +111,8 @@ const props = {
 class Publish extends Component {
 	state = {
     name: '',
-		total_edition_num: 0,
-		sharing_percentage: 0,
-		inputs: [],
-		payments: {
-			0: {
-				"address": '',
-				"baseline": 0,
-				"price": 0
-			}
-		},
+		bonusFee: 0,
+		price: 0
   };
 
 	handleGetPubName = (event) => {
@@ -122,41 +121,18 @@ class Publish extends Component {
     })
 	}
 
-	handleGetTotalEditionNum = (event) => {
-		var edition_num = 0
-		if(event.target.value >= 0) edition_num = event.target.value
+	handleGetBonusFee = (value) => {
 		this.setState({
-      total_edition_num : edition_num,
+			bonusFee : value,
     })
 	}
 
-	handleGetSharingPercent = (event) => {
-		var sharing_percentage = event.target.value
-		if(event.target.value < 0) sharing_percentage = 0
-		if(event.target.value > 100) sharing_percentage = 100
+	handleGetPrice = (value) => {
 		this.setState({
-      sharing_percentage : sharing_percentage,
-    })
+			price: value,
+		})
 	}
 
-	handleAdd = (event) => {
-		var inputs = this.state.inputs
-		inputs.push(this.state.inputs.length + 1)
-		this.setState({
-      inputs : inputs,
-    })
-		var pay = {
-			"address": '',
-			"baseline": 0,
-			"price": 0
-		}
-		var len = Object.keys(this.state.payments).length
-		var pays = this.state.payments
-		pays[len] = pay
-		this.setState({
-      payments : pays,
-    })
-	}
 
 	handleGetAddress = (index, event) => {
 		if (this.state.payments[index] == undefined){
@@ -241,69 +217,64 @@ class Publish extends Component {
 					<TopBar />
 					<Container component="main" maxWidth="xs">
 						<div className={classes.paper}>
-							<Avatar className={classes.avatar}>
-								<InfoOutlinedIcon style={{ fontSize: 30 }}/>
-							</Avatar>
 							<Typography component="h1" variant="h2" style={{ marginTop: "3%", fontFamily: 'Ubuntu'}}>
-								<b>Publication Information</b>
+								<b>发布作品信息</b>
 							</Typography>
 							<form className={classes.form} noValidate>
 								<Grid container spacing={2}>
 									<Grid item xs={12} >
-										<TextField
-											variant="outlined"
-											required
-											fullWidth
-											id="firstName"
-											label="Publication Name"
-											autoFocus
-											onChange = {this.handleGetPubName}
-											value = {this.state.name}
+										<label for="pubName" style= {{fontSize: 16, marginBottom: 10, marginLeft: 5}}>作品名字 *</label>
+										<Input 
+											placeholder="Publication Name" 
+											allowClear 
+											id="pubName"
+											onChange={this.handleGetPubName}
+											value={this.state.name}
+											className={classes.input}
 										/>
 									</Grid>
 									<Grid item xs={12}>
-										<TextField
-											variant="outlined"
-											type = "number"
-											required
-											fullWidth
-											label="Total Edition Amount"
-											onChange = {this.handleGetTotalEditionNum}
-											helperText="Please note that the total edition amount should be larger than 0"
-											value = {this.state.total_edition_num}
+										<label for="bonusFee" style={{ fontSize: 16, marginBottom: 10, marginLeft: 5 }}>抽成比例 *</label>
+										<InputNumber
+											id="bonusFee"
+											defaultValue={0}
+											min={0}
+											max={100}
+											formatter={value => `${value}%`}
+											parser={value => value.replace('%', '')}
+											onChange={this.handleGetBonusFee}
+											className={classes.inputNum}
 										/>
 									</Grid>
 									<Grid item xs={12}>
-										<TextField
-											variant="outlined"
-											type = "number"
-											required
-											fullWidth
-											label="Sharing Percentage"
-											onChange = {this.handleGetSharingPercent}
-											value = {this.state.total_edition_num}
-											helperText="Please note that the sharing percentage should be between 0 - 100"
+										<label for="price" style={{ fontSize: 16, marginBottom: 10, marginLeft: 5 }}>售卖价格 *</label>
+										<InputNumber
+											id="price"
+											defaultValue={0}
+											min={0}
+											onChange={this.handleGetPrice}
+											className={classes.inputNum}
 										/>
 									</Grid>
 								</Grid>
 							</form>
-							<Dragger style = {{marginTop: 50, width: 650, minHeight: 150}}>
+							<Dragger style = {{marginTop: 50, width: 680, minHeight: 200}}>
 								<p className="ant-upload-drag-icon">
 									<InboxOutlined />
 								</p>
-								<p className="ant-upload-text">Click or drag file to this area to upload</p>
+								<p className="ant-upload-text">上传文件请点击或者拖拽文件到此处</p>
 								<p className="ant-upload-hint">
-									Support for a single or bulk upload. Strictly prohibit from uploading company data or other
-									band files
+									支持单个文件的上传和多个文件的上传，支持多种类型文件的上传
 								</p>
 							</Dragger>
+							
 							<Button
 								variant="contained"
 								className={classes.button}
 								startIcon={<CloudUploadIcon />}
 								style = {{marginTop: 50, width: 200, height: 50, marginBottom: 50}}
 							>
-								Publish
+								发布作品
 							</Button>
 
 						</div>
