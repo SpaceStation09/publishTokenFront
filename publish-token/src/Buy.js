@@ -61,14 +61,13 @@ class Buy extends Component {
 		const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 		return (
-			<div className="App">
+			<div>
 				<Helmet>
 					<title>Publish Token | Marketplace</title>
 				</Helmet>
 			
 				<ThemeProvider theme={theme}>
 					<TopBar />
-				
 					<main>
 						<div className={classes.heroContent}>
 							<Container maxWidth="sm">
@@ -99,9 +98,6 @@ class Buy extends Component {
 													</Typography>
 													<Typography>
 														This is the first collection of short essays/commentaries by Lu Xun.
-														{/* It contains 41 articles he published between 1918-1924.
-													Sharp, poignant, varying vastly on their topic, length, and style, these articles redefined the genre of "essay" in Chinese literature,
-													as well as played an important part in the new cultural movement. */}
 													</Typography>
 												</CardContent>
 												<CardActions>

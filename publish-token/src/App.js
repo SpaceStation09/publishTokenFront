@@ -42,6 +42,7 @@ const styles = theme => ({
   },
   paper: {
     marginTop: theme.spacing(7),
+    textAlign: 'center'
   },
   container: {
     maxWidth: '100%'
@@ -63,7 +64,7 @@ class App extends Component {
   render() {
     const { classes } = this.props
     return(
-      <div className="App">
+      <div>
         <Helmet>
           <title>Publish Token | HOME</title>
         </Helmet>

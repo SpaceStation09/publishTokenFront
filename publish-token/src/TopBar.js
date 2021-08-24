@@ -86,42 +86,44 @@ class TopBar extends Component {
     }
 
     return (
-      <Toolbar>
-        <Grid container direction="row" justifyContent="flex-start">
-          <Grid item xs={2} style={{ marginTop: 25, marginBottom: 10}}>
-            <Typography component="h1" variant="h2" color="inherit" noWrap style={{ fontFamily: 'Teko'}}>
-              <b>Spark</b>
-            </Typography>
+      <div className="App">
+        <Toolbar>
+          <Grid container direction="row" justifyContent="flex-start">
+            <Grid item xs={2} style={{ marginTop: 25, marginBottom: 10 }}>
+              <Typography component="h1" variant="h2" color="inherit" noWrap style={{ fontFamily: 'Teko' }}>
+                <b>Spark</b>
+              </Typography>
+            </Grid>
+            <Grid item xs={5} style={{ marginTop: 25, marginBottom: 10 }}>
+
+            </Grid>
+            <Grid item xs={5} style={{ marginTop: 15, marginBottom: 10 }}>
+              <Button size="large" className={classes.btn} href='/'>
+                <b>首页</b>
+              </Button>
+              <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/publish'>
+                <b>发布</b>
+              </Button>
+              <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sell'>
+                <b>售卖</b>
+              </Button>
+              <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/buy'>
+                <b>购买</b>
+              </Button>
+
+
+              <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/collections'>
+                <b>我的NFTs</b>
+              </Button>
+
+              <Button size="large" href='https://github.com/SpaceStation09/publishTokenFront/tree/master/publish-token' target="_blank">
+                <GitHubIcon />
+              </Button>
+              {account_info()}
+            </Grid>
           </Grid>
-          <Grid item xs={5} style={{ marginTop: 25, marginBottom: 10}}>
-
-          </Grid>
-          <Grid item xs={5} style={{ marginTop: 15, marginBottom: 10 }}>
-            <Button size="large" className={classes.btn} href='/'>
-              <b>首页</b>
-            </Button>
-            <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/publish'>
-              <b>发布</b>
-            </Button>
-            <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sell'>
-              <b>售卖</b>
-            </Button>
-            <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/buy'>
-              <b>购买</b>
-            </Button>
-
-
-            <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/collections'>
-              <b>我的NFTs</b>
-            </Button>
-
-            <Button size="large" href='https://github.com/SpaceStation09/publishTokenFront/tree/master/publish-token' target="_blank">
-              <GitHubIcon />
-            </Button>
-            {account_info()}
-          </Grid>
-        </Grid>
-      </Toolbar>
+        </Toolbar>
+      </div>
     );
   }
 }

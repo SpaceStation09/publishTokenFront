@@ -101,7 +101,7 @@ class Sell extends Component {
 	render(){
 		const { classes } = this.props
 		return (
-			<div className="App">
+			<div >
 				<Helmet>
 					<title>Publish Token | Sell</title>
 				</Helmet>
