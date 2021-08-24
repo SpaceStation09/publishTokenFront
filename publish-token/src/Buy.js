@@ -9,9 +9,8 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Container from '@material-ui/core/Container';
 import { Helmet } from 'react-helmet';
-import Toolbar from '@material-ui/core/Toolbar';
+import TopBar from './TopBar';
 import Typography from '@material-ui/core/Typography';
-import GitHubIcon from '@material-ui/icons/GitHub'
 
 const theme = createTheme({
 	palette: {
@@ -62,80 +61,62 @@ class Buy extends Component {
 		const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 		return (
-			<div>
+			<div className="App">
 				<Helmet>
 					<title>Publish Token | Marketplace</title>
 				</Helmet>
 			
 				<ThemeProvider theme={theme}>
-					<Toolbar style={{ marginTop: 15, marginBottom: 10 }}>
-						<Typography component="h1" variant="h3" color="inherit" noWrap style={{ fontFamily: 'Teko', marginLeft: "100px" }}>
-							<b>PUBLISH TOKEN</b>
-						</Typography>
-						<Button size="large" style={{ marginLeft: "55%" }} className={classes.btn} href='/'>
-							<b>HOME PAGE</b>
-						</Button>
-						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/publish'>
-							<b>PUBLISH</b>
-						</Button>
-						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sell'>
-							<b>SELL</b>
-						</Button>
-						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/buy'>
-							<b>BUY</b>
-						</Button>
-						<Button size="large" href='https://github.com/SpaceStation09/publishTokenFront/tree/master/publish-token' target="_blank">
-							<GitHubIcon />
-						</Button>
-					</Toolbar>
-				</ThemeProvider>
-				<main>
-					<div className={classes.heroContent}>
-						<Container maxWidth="sm">
-							<Typography component="h1" variant="h1" align="center" color="textPrimary" gutterBottom>
-								NFT Marketplace
-							</Typography>
-							<Typography variant="h5" align="center" color="textSecondary" paragraph>
-								You can explore the marketplace and buy the NFT you like here. 
-								If you are interested in any NFT, please click 'Details' button for detail.
-							</Typography>
-						</Container>
-					</div>
+					<TopBar />
+				
+					<main>
+						<div className={classes.heroContent}>
+							<Container maxWidth="sm">
+								<Typography component="h1" variant="h1" align="center" color="textPrimary" gutterBottom>
+									NFT Marketplace
+								</Typography>
+								<Typography variant="h5" align="center" color="textSecondary" paragraph>
+									You can explore the marketplace and buy the NFT you like here. 
+									If you are interested in any NFT, please click 'Details' button for detail.
+								</Typography>
+							</Container>
+						</div>
 
-					<Container className={classes.cardGrid} maxWidth="md">
-						<Grid container spacing={4}>
-							{cards.map((card) => {
-								return(
-									<Grid item key={card} xs={12} sm={6} md={4}>
-										<Card className={classes.card}>
-											<CardMedia
-												className={classes.cardMedia}
-												image="https://pic3.zhimg.com/v2-9ff4eafdba05f4e68e2fd1a1c0da5a5a_r.jpg"
-												title="Image title"
-											/>
-											<CardContent className={classes.cardContent}>
-												<Typography gutterBottom variant="h5" component="h2">
-													<b>Hot Wind</b>
-												</Typography>
-												<Typography>
-													This is the first collection of short essays/commentaries by Lu Xun.
-													{/* It contains 41 articles he published between 1918-1924.
-												Sharp, poignant, varying vastly on their topic, length, and style, these articles redefined the genre of "essay" in Chinese literature,
-												as well as played an important part in the new cultural movement. */}
-												</Typography>
-											</CardContent>
-											<CardActions>
-												<Button size="small" color="primary" href='/#/NFT' target="_blank">
-													<b>Details </b>
-												</Button>
-											</CardActions>
-										</Card>
-									</Grid>
+						<Container className={classes.cardGrid} maxWidth="md">
+							<Grid container spacing={4}>
+								{cards.map((card) => {
+									return(
+										<Grid item key={card} xs={12} sm={6} md={4}>
+											<Card className={classes.card}>
+												<CardMedia
+													className={classes.cardMedia}
+													image="https://pic3.zhimg.com/v2-9ff4eafdba05f4e68e2fd1a1c0da5a5a_r.jpg"
+													title="Image title"
+												/>
+												<CardContent className={classes.cardContent}>
+													<Typography gutterBottom variant="h5" component="h2">
+														<b>Hot Wind</b>
+													</Typography>
+													<Typography>
+														This is the first collection of short essays/commentaries by Lu Xun.
+														{/* It contains 41 articles he published between 1918-1924.
+													Sharp, poignant, varying vastly on their topic, length, and style, these articles redefined the genre of "essay" in Chinese literature,
+													as well as played an important part in the new cultural movement. */}
+													</Typography>
+												</CardContent>
+												<CardActions>
+													<Button size="small" color="primary" href='/#/NFT' target="_blank">
+														<b>Details </b>
+													</Button>
+												</CardActions>
+											</Card>
+										</Grid>
+									)}
 								)}
-							)}
-						</Grid>
-					</Container>
-				</main>
+							</Grid>
+						</Container>
+					</main>
+				</ThemeProvider>
 			</div>
 		);
 	}
