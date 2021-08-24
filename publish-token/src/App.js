@@ -27,16 +27,18 @@ const styles = theme => ({
     color: '#FFFFFF',
     borderWidth: 2,
     borderColor: '#e3f2fd',
-    fontSize: 14,
+    fontSize: 16,
     borderRadius: 25,
+    width: 150
   },
   btnSecond: {
     marginTop: theme.spacing(3),
     color: '#03A9F4',
     borderWidth: 3,
     borderColor: '#03A9F4',
-    fontSize: 14,
+    fontSize: 16,
     borderRadius: 25,
+    width: 150
   },
   paper: {
     marginTop: theme.spacing(7),
@@ -84,12 +86,12 @@ class App extends Component {
                   <Grid container justifyContent="center">
                     <Grid item xs={3} >
                       <Button size="large" variant="contained" color="secondary" className={classes.btnMain} href='/#/publish'>
-                        <b>Go To Publish</b>
+                        <b>去发布</b>
                       </Button>
                     </Grid>
                     <Grid item xs={2} >
                       <Button size="large" variant="outlined" color="secondary" className={classes.btnSecond} href='/#/buy'>
-                        <b>Go To Buy</b>
+                        <b>去购买</b>
                       </Button>
                     </Grid>
                   </Grid>
