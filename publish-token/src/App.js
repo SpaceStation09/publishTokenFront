@@ -75,7 +75,7 @@ class App extends Component {
             <div className={classes.paper}>
               <Grid container justifyContent="center">
                 <Grid item xs={6}>
-                  <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 100, marginTop: 180}}>
+                  <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 100, marginTop: '25%'}}>
                     <b>PUBLISH TOKEN</b>
                   </Typography>
                   <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 30}}>
@@ -90,7 +90,7 @@ class App extends Component {
                         <b>去发布</b>
                       </Button>
                     </Grid>
-                    <Grid item xs={2} >
+                    <Grid item xs={3} >
                       <Button size="large" variant="outlined" color="secondary" className={classes.btnSecond} href='/#/buy'>
                         <b>去购买</b>
                       </Button>
