@@ -12,7 +12,7 @@ import { Helmet } from 'react-helmet';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import GitHubIcon from '@material-ui/icons/GitHub'
-
+import TopBar from "./TopBar";
 const theme = createTheme({
 	palette: {
 		primary: {
@@ -57,6 +57,7 @@ const styles = theme => ({
 });
 
 class Buy extends Component {
+	
 	render(){
 		const { classes } = this.props
 		const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -68,26 +69,7 @@ class Buy extends Component {
 				</Helmet>
 			
 				<ThemeProvider theme={theme}>
-					<Toolbar style={{ marginTop: 15, marginBottom: 10 }}>
-						<Typography component="h1" variant="h3" color="inherit" noWrap style={{ fontFamily: 'Teko', marginLeft: "100px" }}>
-							<b>PUBLISH TOKEN</b>
-						</Typography>
-						<Button size="large" style={{ marginLeft: "55%" }} className={classes.btn} href='/'>
-							<b>HOME PAGE</b>
-						</Button>
-						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/publish'>
-							<b>PUBLISH</b>
-						</Button>
-						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sell'>
-							<b>SELL</b>
-						</Button>
-						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/buy'>
-							<b>BUY</b>
-						</Button>
-						<Button size="large" href='https://github.com/SpaceStation09/publishTokenFront/tree/master/publish-token' target="_blank">
-							<GitHubIcon />
-						</Button>
-					</Toolbar>
+					<TopBar />
 				</ThemeProvider>
 				<main>
 					<div className={classes.heroContent}>
@@ -131,7 +113,8 @@ class Buy extends Component {
 											</CardActions>
 										</Card>
 									</Grid>
-								)}
+								)
+							}
 							)}
 						</Grid>
 					</Container>

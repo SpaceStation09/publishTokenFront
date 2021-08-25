@@ -19,7 +19,7 @@ import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import AddIcon from '@material-ui/icons/Add';
 import Fab from '@material-ui/core/Fab';
 import 'antd/dist/antd.css';
-
+import TopBar from "./TopBar";
 
 const theme = createTheme({
   palette: {
@@ -125,8 +125,8 @@ class Publish extends Component {
 		var edition_num = 0
 		if(event.target.value >= 0) edition_num = event.target.value
 		this.setState({
-      total_edition_num : edition_num,
-    })
+      		total_edition_num : edition_num,
+    	})
 	}
 
 	handleGetSharingPercent = (event) => {
@@ -237,26 +237,7 @@ class Publish extends Component {
 				</Helmet>
 			
 				<ThemeProvider theme={theme}>
-					<Toolbar style={{ marginTop: 15, marginBottom: 10 }}>
-						<Typography component="h1" variant="h3" color="inherit" noWrap style={{ fontFamily: 'Teko', marginLeft: "100px" }}>
-							<b>PUBLISH TOKEN</b>
-						</Typography>
-						<Button size="large" style={{ marginLeft: "55%" }} className={classes.btn} href='/'>
-							<b>HOME PAGE</b>
-						</Button>
-						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/publish'>
-							<b>PUBLISH</b>
-						</Button>
-						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sell'>
-							<b>SELL</b>
-						</Button>
-						<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/buy'>
-							<b>BUY</b>
-						</Button>
-						<Button size="large" href='https://github.com/SpaceStation09/publishTokenFront/tree/master/publish-token' target="_blank">
-							<GitHubIcon />
-						</Button>
-					</Toolbar>
+					<TopBar />
 
 					<Container component="main" maxWidth="xs">
 						<div className={classes.paper}>
