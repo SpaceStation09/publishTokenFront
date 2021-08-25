@@ -135,9 +135,9 @@ class Publish extends Component {
 		})
 	}
 
-	handleGetDescription = (value) => {
+	handleGetDescription = (e) => {
 		this.setState({
-			description: value,
+			description: e.target.value,
 		})
 	}
 
@@ -181,9 +181,9 @@ class Publish extends Component {
 			onChange(info) {
 				const imgType = ['png', 'jpg', 'jpeg', 'svg']
 				const { status } = info.file;
-				if (status !== 'uploading') {
+				// if (status !== 'uploading') {
 					
-				}
+				// }
 				if (status === 'done') {
 					var fileName = info.file.name
 					var index = fileName.lastIndexOf('.')
@@ -319,6 +319,9 @@ class Publish extends Component {
 								style = {{marginTop: 50, width: 200, height: 50, marginBottom: 50}}
 							>
 								发布作品
+							</Button>
+							<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sellSingle'>
+								<b>售卖</b>
 							</Button>
 						</div>
 					</Container>
