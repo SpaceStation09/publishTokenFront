@@ -66,7 +66,7 @@ class App extends Component {
     return(
       <div>
         <Helmet>
-          <title>Publish Token | HOME</title>
+          <title>SparkNFT | HOME</title>
         </Helmet>
 
         <ThemeProvider theme={theme}>
@@ -74,15 +74,21 @@ class App extends Component {
           <Container component="main" className={classes.container}>
             <div className={classes.paper}>
               <Grid container justifyContent="center">
+<<<<<<< HEAD
                 <Grid item xs={10}>
                   <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 100, marginTop: 180}}>
                     <b>PUBLISH TOKEN</b>
+=======
+                <Grid item xs={6}>
+                  <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 100, marginTop: '25%'}}>
+                    <b>SparkNFT</b>
+>>>>>>> 597fb9e4ed1b7b6da5ae1aa9a81f576cb30b1b9a
                   </Typography>
                   <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 30}}>
-                    <b>A ERC721 Token Trying to Solve Existing Publishing Dilemma</b>
+                    <b>人人传播，互相支持，仿若星星之火，点亮一片世界。</b>
                   </Typography>
-                  <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 25}}>
-                    Publish All You Love & Support All You Love
+                  <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 20}}>
+                    发布你爱的 & 支持你爱的 & 传播你爱的
                   </Typography>
                   <Grid container justifyContent="center">
                     <Grid item xs={3} >

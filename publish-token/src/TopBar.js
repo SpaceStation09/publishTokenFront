@@ -92,7 +92,7 @@ class TopBar extends Component {
           <Grid container direction="row" justifyContent="flex-start">
             <Grid item xs={2} style={{ marginTop: 25, marginBottom: 10 }}>
               <Typography component="h1" variant="h2" color="inherit" noWrap style={{ fontFamily: 'Teko' }}>
-                <b>Spark</b>
+                <b>SparkNFT</b>
               </Typography>
             </Grid>
             <Grid item xs={5} style={{ marginTop: 25, marginBottom: 10 }}>
