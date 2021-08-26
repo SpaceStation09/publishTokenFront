@@ -19,6 +19,8 @@ import Web3 from 'web3';
 import { CodeOutlined } from '@ant-design/icons';
 import { render } from '@testing-library/react';
 import TopBar from "./TopBar";
+import BigNumber from 'bignumber.js';
+import NFT from "./ShillNFT";
 var $;
 $ = require('jquery');
 
@@ -94,6 +96,7 @@ const styles = theme => ({
 });
 
 class Collections extends Component {
+    gateway = 'https://gateway.pinata.cloud/ipfs/';
     web3;
     cards = [];
     // constructor(props) {
@@ -117,27 +120,31 @@ class Collections extends Component {
          //setUser(account);
     }
 
-    loadNft = async (url,event) => {
+    loadNft = async () => {
         if(!window.ethereum.isConnected()) {
             alert("请先链接metamask");
             return;
         }
         const chainId = await window.ethereum.request({ method: 'eth_chainId' });
         console.log(chainId);
-        if(chainId !== '0x1') {
-            alert("请切换至以太坊主网");
+        if(chainId !== '0x4') {
+            alert("请切换至rinkeby网络");
             return;
         }
         this.web3 = new Web3(window.ethereum);
         this.web3.eth.getBlockNumber().then(console.log);
         this.cards = [];
-        console.log(url);
+        let hash = 'QmPsymsaqMZsiwLHXepXtEpYMq3xtnBLLbPgTEyybz1idQ';
+        let url = this.gateway + hash;
         let data = await $.getJSON(url);
         for(let i = 0; i < 4; i++) {
             let element = {
                 id: i,
-                title: i,
+                title: data.Name,
                 description: data.description,
+                bonusFee: data.BonusFee,
+                image: data.Cover,
+                hash: hash
             }
             this.cards.push(element);
         }
@@ -145,6 +152,52 @@ class Collections extends Component {
         
         this.setState({viewable: true ,});
     };
+
+    getNft = async() => {
+      var number = new BigNumber(10);
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const account = accounts[0];
+      let options = {
+        filter: {_from: account},
+        fromblock: "9180396",
+      }
+      let nft = new this.web3.eth.Contrac(NFT.abi, '');
+      let sendOption = {
+        filter: {_from: account},
+        fromblock: "9180396",
+      }
+      let receiveOption = {
+        filter: {_to: account},
+        fromblock: "9180396",
+      }
+      let sendLog = await nft.getPastEvents("Transfer", sendOption);
+      let receiveLog = await nft.getPastEvents("Transfer", receiveOption);
+      this.web3.getPastLogs();
+      let showId = [];
+      let balanceMap = new Map();
+      sendLog.map( (log) => {
+        let id = new BigNumber(log.returnValues.id);
+        showId.push(id);
+        balanceMap.set(id, balanceMap.get(id) + 1);
+      });
+      sendLog.map( (log) => {
+        let id = new BigNumber(log.returnValues.id);
+        showId.push(id);
+        balanceMap.set(id, balanceMap.get(id) - 1);
+      });
+      let viewMap = new Map();
+      let balance = [];
+      showId.map( (id) => {
+        if(viewMap.get(id) == false) {
+          if(balanceMap.get(id) > 0) {
+            balance.push(id);
+          }
+          viewMap.set(id, false);
+        }
+        
+      });
+      return balance;
+    }
 
     
 
@@ -154,7 +207,7 @@ class Collections extends Component {
         const showAccount = document.querySelector('.showAccount');
         //const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9,10,11];
         const { classes } = this.props
-		
+        const gateway = this.gateway;
         // 
 
         
@@ -192,12 +245,13 @@ class Collections extends Component {
         }
         
         function showCard(card) {
+            console.log(gateway + card.image);
             let res = (
                 <Grid item key={card.id} xs={12} sm={6} md={4}>
                     <Card className={classes.card}>
                         <CardMedia
                             className={classes.cardMedia}
-                            image="https://pic3.zhimg.com/v2-9ff4eafdba05f4e68e2fd1a1c0da5a5a_r.jpg"
+                            image={gateway + card.image}
                             title="Image title" 
                         />
                         <CardContent className={classes.cardContent}>
@@ -213,8 +267,8 @@ class Collections extends Component {
                         </CardContent>
                         <CardActions>
                             <Button size="small" variant="contained"  color="primary" target="_blank">
-                                <Link to={{pathname: '/NFT' , state: {title: card.title , des: card.description}}}>
-                                <b>Details </b>
+                                <Link to={{pathname: '/NFT/' +  card.hash }}>
+                                <b>查看 </b>
                                 </Link>
                             </Button>
                         </CardActions>
@@ -223,38 +277,7 @@ class Collections extends Component {
             );
             
             return res;
-            // cards.map((card) => {
-            //     //alert(card);			
-            //     return (
-            //         <Grid item key={card} xs={12} sm={6} md={4}>
-            //             <Card className={classes.card}>
-            //                 <CardMedia
-            //                     className={classes.cardMedia}
-            //                     image="https://pic3.zhimg.com/v2-9ff4eafdba05f4e68e2fd1a1c0da5a5a_r.jpg"
-            //                     title="Image title" 
-            //                 />
-            //                 <CardContent className={classes.cardContent}>
-            //                     <Typography gutterBottom variant="h5" component="h2">
-            //                         <b>Hot Wind</b>
-            //                     </Typography>
-            //                     <Typography>
-            //                         This is the first collection of short essays/commentaries by Lu Xun.
-            //                         {/* It contains 41 articles he published between 1918-1924.
-            //                     Sharp, poignant, varying vastly on their topic, length, and style, these articles redefined the genre of "essay" in Chinese literature,
-            //                     as well as played an important part in the new cultural movement. */}
-            //                     </Typography>
-            //                 </CardContent>
-            //                 <CardActions>
-            //                     <Button size="small" color="primary" href='/#/NFT' target="_blank">
-            //                         <b>Details </b>
-            //                     </Button>
-            //                 </CardActions>
-            //             </Card>
-            //         </Grid>
-               
-            //         );
-            // }
-        // )
+
         }
 		return (
 			<div>
@@ -276,7 +299,7 @@ class Collections extends Component {
                   </Typography>
                   <Grid container justifyContent="center">
                     <Grid item xs={3} >
-                      <Button size="large" variant="contained" color="secondary" id='viewButton' className={classes.btnMain} onClick={this.loadNft.bind(this,'https://gateway.pinata.cloud/ipfs/QmcE5MMSeknnT4FG1UGzZV1u52fBUYPTTqwx5KXqN2Zyxr')}>
+                      <Button size="large" variant="contained" color="secondary" id='viewButton' className={classes.btnMain} onClick={this.loadNft}>
                         <b>查看我的收藏</b>
                       </Button>
                     </Grid>

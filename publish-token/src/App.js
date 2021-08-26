@@ -74,15 +74,9 @@ class App extends Component {
           <Container component="main" className={classes.container}>
             <div className={classes.paper}>
               <Grid container justifyContent="center">
-<<<<<<< HEAD
-                <Grid item xs={10}>
-                  <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 100, marginTop: 180}}>
-                    <b>PUBLISH TOKEN</b>
-=======
                 <Grid item xs={6}>
                   <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 100, marginTop: '25%'}}>
                     <b>SparkNFT</b>
->>>>>>> 597fb9e4ed1b7b6da5ae1aa9a81f576cb30b1b9a
                   </Typography>
                   <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 30}}>
                     <b>人人传播，互相支持，仿若星星之火，点亮一片世界。</b>
