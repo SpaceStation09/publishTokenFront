@@ -5,12 +5,18 @@ import Grid from '@material-ui/core/Grid';
 import { createTheme, ThemeProvider, withStyles } from '@material-ui/core/styles';
 import { Helmet } from 'react-helmet';
 import TopBar from './TopBar';
-import { blue } from '@material-ui/core/colors';
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import Typography from '@material-ui/core/Typography';
 import axios from 'axios';
 import Paper from '@material-ui/core/Paper';
 import Container from '@material-ui/core/Container';
 import MonetizationOnOutlinedIcon from '@material-ui/icons/MonetizationOnOutlined';
+import { Input, InputNumber } from 'antd';
+import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 
 const metadata_json = 'QmPsymsaqMZsiwLHXepXtEpYMq3xtnBLLbPgTEyybz1idQ'
 // const metadata = { 
@@ -34,25 +40,34 @@ const theme = createTheme({
 });
 
 const styles = theme => ({
-  icon: {
-    marginRight: theme.spacing(2),
-  },
   container: {
-    maxWidth: '100%'
+    maxWidth: 1500,
+    // backgroundColor: '#2196f3'
   },
   paper: {
-    marginTop: theme.spacing(7),
-    textAlign: 'center'
+    marginTop: theme.spacing(1),
+    textAlign: 'center',
+    maxWidth: 1500,
   },
   btnSell: {
     margin: theme.spacing(1),
-    fontSize: 20,
+    fontSize: 16,
     borderRadius: 10,
     borderWidth: 2,
     borderColor: '#2196f3',
     color: '#2196f3',
     marginLeft: '10%',
-    width: 150
+    width: 100
+  },
+  inputNum: {
+    height: 40,
+    borderRadius: 5,
+    width: 550,
+    fontSize: 20,
+  },
+  input: {
+    height: 40,
+    borderRadius: 5,
   },
 });
 
@@ -60,18 +75,19 @@ class SellSingle extends Component {
   state = {
     name: '',
     bonusFee: 0,
-    price: 0,
     cover: '',
+    coverURL: '',
+    description: '',
+    price: 0,
     ipfsHashPub: '',
     ipfsHashCover: '',
     ipfsHashMeta: '',
-    description: '',
     shareTimes: 0,
-    coverURL: ''
+    open: false,
+    address: ''
   };
 
   async componentWillMount() {
-    var object = this;
     var url = "https://ipfs.io/ipfs/" + metadata_json
     let name
     let descrip
@@ -98,20 +114,59 @@ class SellSingle extends Component {
     console.log(this.state.coverURL)
   }
 
+  handleClickOpen = (e) => {
+    this.setState({
+      open: true,
+    })
+  }
+
+  handleClose = (e) => {
+    this.setState({
+      open: false,
+    })
+  }
+
+  handleGetPrice = (value) => {
+    this.setState({
+      price: value,
+    })
+  }
+
+  handleGetAddr = (e) => {
+    this.setState({
+      address: e.target.value,
+    })
+  }
+
+  sell = (e) => {
+    // TODO: call smart contract to transfer nft
+    this.setState({
+      open: false,
+    })
+  }
+
   render() {
     const { classes } = this.props
 
     return (
       <div>
         <Helmet>
-          <title>Publish Token | Sell</title>
+          <title>SparkNFT | Sell</title>
         </Helmet>
 
         <ThemeProvider theme={theme}>
           <TopBar />
           <Container component="main" className={classes.container}>
+            <Button
+              color="primary"
+              startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
+              href='/#/publish'
+              style={{ marginTop: 50, marginBottom: 100, fontSize: 22 }}
+            >
+              回到我的NFTs
+            </Button>
             <div className={classes.paper}>
-              <Grid container justifyContent="flex-start" spacing= {3}>
+              <Grid container justifyContent="space-evenly" spacing= {5}>
                 <Grid item xs={4} style={{ maxWidth: 600}}>
                   <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: '40%'}}>
                     <img style={{ width: 300, marginTop: 20}} src={this.state.coverURL}></img>  
@@ -130,11 +185,47 @@ class SellSingle extends Component {
                   <Button
                     variant="outlined"
                     color="primary"
-                    startIcon={<MonetizationOnOutlinedIcon style={{fontSize: 30}}/>}
+                    startIcon={<MonetizationOnOutlinedIcon style={{fontSize: 22}}/>}
                     className={classes.btnSell}
+                    onClick = {this.handleClickOpen}
                   >
                     售卖
                   </Button>
+                  <Dialog
+                    open={this.state.open}
+                    onClose={this.handleClose}
+                    aria-labelledby="form-dialog-title"
+                  >
+                    <DialogTitle id="form-dialog-title">填写售卖信息</DialogTitle>
+                    <DialogContent>
+                      <DialogContentText>
+                        请在下方区域填写你希望售卖的价格，以及售卖对象的钱包地址。
+                      </DialogContentText>
+                        <label style={{ fontSize: 14, marginBottom: 10 }}>售卖价格 *</label>
+                        <InputNumber
+                          defaultValue={0}
+                          min={0}
+                          onChange={this.handleGetPrice}
+                          className={classes.inputNum}
+                        />
+                      <label style={{ fontSize: 14, marginBottom: 10, marginTop: 10 }}>买方钱包地址 *</label>
+                      <Input
+                        placeholder="买方钱包地址"
+                        allowClear
+                        id="pubName"
+                        onChange={this.handleGetAddr}
+                        className={classes.input}
+                      />
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={this.handleClose} color="primary">
+                        取消
+                      </Button>
+                      <Button variant="contained" onClick={this.sell} color="primary">
+                        卖出
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
                 </Grid>
               </Grid>
             </div>

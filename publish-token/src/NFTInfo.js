@@ -58,7 +58,7 @@ class NFTInfo extends Component{
     return (
       <div>
         <Helmet>
-          <title>Publish Token | NFT</title>
+          <title>SparkNFT | Sell</title>
         </Helmet>
 
         <ThemeProvider theme={theme}>

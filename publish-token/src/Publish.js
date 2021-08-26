@@ -231,7 +231,7 @@ class Publish extends Component {
 		return (
 			<div>
 				<Helmet>
-					<title>Publish Token | Publish</title>
+					<title>SparkNFT | Sell</title>
 				</Helmet>
 			
 				<ThemeProvider theme={theme}>
@@ -246,7 +246,7 @@ class Publish extends Component {
 									<Grid item xs={12} >
 										<label for="pubName" style= {{fontSize: 18, marginBottom: 10}}>作品名字 *</label>
 										<Input 
-											placeholder="Publication Name" 
+											placeholder="作品名称" 
 											allowClear 
 											id="pubName"
 											onChange={this.handleGetPubName}
