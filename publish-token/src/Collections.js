@@ -1,5 +1,6 @@
 
 import React, { Component,useState,setState } from 'react';
+import { Link } from 'react-router-dom';
 import './App.css';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -18,21 +19,27 @@ import Web3 from 'web3';
 import { CodeOutlined } from '@ant-design/icons';
 import { render } from '@testing-library/react';
 import TopBar from "./TopBar";
+var $;
+$ = require('jquery');
+
 const theme = createTheme({
-	palette: {
-		primary: {
-			main: '#2196f3',
-		},
-		secondary: {
-			main: '#FDFEFE',
-		},
-	},
-});
+    palette: {
+      primary: {
+        main: '#FDFEFE',
+      },
+      secondary: {
+        main: '#2196f3',
+      }
+    },
+  });
   
 const styles = theme => ({
 	icon: {
 	  marginRight: theme.spacing(2),
 	},
+    titleFont: {
+        fontFamily: 'Teko',
+      },
 	btn: {
 		color: '#424949',
 		borderWidth: 8,
@@ -59,10 +66,36 @@ const styles = theme => ({
 	cardContent: {
 		flexGrow: 2,
 	},
+    paper: {
+        marginTop: theme.spacing(7),
+        textAlign: 'center'
+      },
+      container: {
+        maxWidth: '100%'
+      },
+      btnMain: {
+        marginTop: theme.spacing(3),
+        color: '#FFFFFF',
+        borderWidth: 2,
+        borderColor: '#e3f2fd',
+        fontSize: 16,
+        borderRadius: 25,
+        width: 150
+      },
+      btnSecond: {
+        marginTop: theme.spacing(3),
+        color: '#03A9F4',
+        borderWidth: 3,
+        borderColor: '#03A9F4',
+        fontSize: 16,
+        borderRadius: 25,
+        width: 150
+      },
 });
 
 class Collections extends Component {
-    
+    web3;
+    cards = [];
     // constructor(props) {
     //     super(props);
         
@@ -70,7 +103,8 @@ class Collections extends Component {
     state = {
         isLogin: false,
         user_address: null,
-        name: ''
+        name: '',
+        viewable: false
     };
     getAccount = async () => {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -83,17 +117,53 @@ class Collections extends Component {
          //setUser(account);
     }
 
+    loadNft = async (url,event) => {
+        if(!window.ethereum.isConnected()) {
+            alert("请先链接metamask");
+            return;
+        }
+        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        console.log(chainId);
+        if(chainId !== '0x1') {
+            alert("请切换至以太坊主网");
+            return;
+        }
+        this.web3 = new Web3(window.ethereum);
+        this.web3.eth.getBlockNumber().then(console.log);
+        this.cards = [];
+        console.log(url);
+        let data = await $.getJSON(url);
+        for(let i = 0; i < 4; i++) {
+            let element = {
+                id: i,
+                title: i,
+                description: data.description,
+            }
+            this.cards.push(element);
+        }
+        document.getElementById('viewButton').innerHTML = '玩得尽兴！';
+        
+        this.setState({viewable: true ,});
+    };
+
+    
+
 	render(){
         //const [user_address, setUser] = useState();
         const ethereumButton = document.querySelector('.enableEthereumButton');
         const showAccount = document.querySelector('.showAccount');
-        
+        //const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9,10,11];
         const { classes } = this.props
-		const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+		
         // 
 
         
-        
+        window.ethereum.on('chainChanged', handleChainChanged);
+
+        function handleChainChanged(_chainId) {
+        // We recommend reloading the page, unless you must do otherwise
+            window.location.reload();
+        }
 		
         const account_info =  () => {
             if(this.state.user_address !== null) {
@@ -108,20 +178,22 @@ class Collections extends Component {
                 );
             }
             return (<p>connect</p>);
-            
         }
 
-        const setAccount = async() => {
+        const setAccount = () => {
             if (typeof window.ethereum == 'undefined') {
                 alert('MetaMask is not installed!');
                 return;
             }
-            window.ethereum.request({ method: 'eth_requestAccounts' });
+            if(!window.ethereum.isConnected()) return
+            const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9,10,11];
+            return cards;
+            
         }
-
+        
         function showCard(card) {
             let res = (
-                <Grid item key={card} xs={12} sm={6} md={4}>
+                <Grid item key={card.id} xs={12} sm={6} md={4}>
                     <Card className={classes.card}>
                         <CardMedia
                             className={classes.cardMedia}
@@ -130,18 +202,20 @@ class Collections extends Component {
                         />
                         <CardContent className={classes.cardContent}>
                             <Typography gutterBottom variant="h5" component="h2">
-                                <b>Hot Wind</b>
+                                <b>{card.title}</b>
                             </Typography>
                             <Typography>
-                                This is the first collection of short essays/commentaries by Lu Xun.
+                                {card.description}
                                 {/* It contains 41 articles he published between 1918-1924.
-                            Sharp, poignant, varying vastly on their topic, length, and style, these articles redefined the genre of "essay" in Chinese literature,
-                            as well as played an important part in the new cultural movement. */}
+                                    Sharp, poignant, varying vastly on their topic, length, and style, these articles redefined the genre of "essay" in Chinese literature,
+                                    as well as played an important part in the new cultural movement. */}
                             </Typography>
                         </CardContent>
                         <CardActions>
-                            <Button size="small" color="primary" href='/#/NFT' target="_blank">
+                            <Button size="small" variant="contained"  color="primary" target="_blank">
+                                <Link to={{pathname: '/NFT' , state: {title: card.title , des: card.description}}}>
                                 <b>Details </b>
+                                </Link>
                             </Button>
                         </CardActions>
                     </Card>
@@ -190,32 +264,43 @@ class Collections extends Component {
 			
 				<ThemeProvider theme={theme}>
                     <TopBar />
+                    <Container component="main" className={classes.container}>
+            <div className={classes.paper}>
+              <Grid container justifyContent="center">
+                <Grid item xs={10}>
+                  <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 100, marginTop: 180}}>
+                    <b>My Collection</b>
+                  </Typography>
+                  <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 30}}>
+                    <b>A ERC721 Token Trying to Solve Existing Publishing Dilemma</b>
+                  </Typography>
+                  <Grid container justifyContent="center">
+                    <Grid item xs={3} >
+                      <Button size="large" variant="contained" color="secondary" id='viewButton' className={classes.btnMain} onClick={this.loadNft.bind(this,'https://gateway.pinata.cloud/ipfs/QmcE5MMSeknnT4FG1UGzZV1u52fBUYPTTqwx5KXqN2Zyxr')}>
+                        <b>查看我的收藏</b>
+                      </Button>
+                    </Grid>
+                    {/* <Grid item xs={3} >
+                      <Button size="large" variant="outlined" color="secondary" className={classes.btnSecond} href='/#/buy'>
+                        <b>去购买</b>
+                      </Button>
+                    </Grid> */}
+                  </Grid>
+                </Grid>
+              </Grid>
+            </div>
+          </Container>
 				</ThemeProvider>
 				<main>
-					<div className={classes.heroContent}>
-						<Container maxWidth="sm">
-							<Typography component="h1" variant="h1" align="center" color="textPrimary" gutterBottom>
-								My Collection
-							</Typography>
-							<Typography variant="h5" align="center" color="textSecondary" paragraph>
-								You can explore the marketplace and buy the NFT you like here. 
-								If you are interested in any NFT, please click 'Details' button for detail.
-							</Typography>
-						</Container>
-					</div>
-
-					<Container className={classes.cardGrid} maxWidth="md">
+					{this.state.viewable?<Container className={classes.cardGrid} maxWidth="md">
 						<Grid container spacing={4}>
 							{
-                               
-                               cards.map((card) => {
-                                
-                                return showCard(card);
-                                
-                               })
+                                   this.cards.map((card) => {
+                                        return showCard(card);
+                                    })
                             }
 						</Grid>
-					</Container>
+					</Container>:null}
 				</main>
 			</div>
 		);

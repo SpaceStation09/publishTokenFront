@@ -19,7 +19,8 @@ import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import AddIcon from '@material-ui/icons/Add';
 import Fab from '@material-ui/core/Fab';
 import 'antd/dist/antd.css';
-import TopBar from "./TopBar";
+import TopBar from './TopBar';
+
 
 const theme = createTheme({
   palette: {
@@ -231,14 +232,13 @@ class Publish extends Component {
 		const { classes } = this.props
 
 		return (
-			<React.Fragment>
+			<div>
 				<Helmet>
 					<title>Publish Token | Publish</title>
 				</Helmet>
 			
 				<ThemeProvider theme={theme}>
 					<TopBar />
-
 					<Container component="main" maxWidth="xs">
 						<div className={classes.paper}>
 							<Avatar className={classes.avatar}>
@@ -285,93 +285,6 @@ class Publish extends Component {
 											helperText="Please note that the sharing percentage should be between 0 - 100"
 										/>
 									</Grid>
-									<React.Fragment>
-										<Grid item xs={6}>
-											<TextField
-												variant="outlined"
-												type = "text"
-												required
-												fullWidth
-												label="Payment Token Address"
-												onChange = {this.handleGetAddress.bind(this, 0)}
-												value = {this.state.payments[0]["address"]}
-											/>
-										</Grid>
-										<Grid item xs={2}>
-											<TextField
-												variant="outlined"
-												type = "number"
-												required
-												fullWidth
-												label="Baseline"
-												onChange = {this.handleGetBaseline.bind(this, 0)}
-												value = {this.state.payments[0]["baseline"]}
-											/>
-										</Grid>
-										<Grid item xs={2}>
-											<TextField
-												variant="outlined"
-												type = "number"
-												required
-												fullWidth
-												label="Sell Price"
-												onChange = {this.handleGetSellPrice.bind(this, 0)}
-												value = {this.state.payments[0]["price"]}
-											/>
-										</Grid>
-										<Grid item xs={2}>
-											<Fab color="primary" aria-label="add" onClick={this.handleAdd} style={{ marginLeft: 30}}>
-												<AddIcon />
-											</Fab>
-										</Grid>
-
-										<div>
-											{
-												this.state.inputs.map((item, index) => {
-													return(
-														<Grid container spacing={2} key={index} style={{ marginLeft: "1px"}}>
-															<Grid item>
-																<TextField
-																	variant="outlined"
-																	type = "text"
-																	required
-																	fullWidth
-																	label="Payment Token Address"
-																	style={{width: "330px"}}
-																	onChange = {this.handleGetAddress.bind(this, index+1)}
-																	value = {this.state.payments[index+1]["address"]}
-																/>
-															</Grid>
-															<Grid item >
-																<TextField
-																	variant="outlined"
-																	type = "number"
-																	required
-																	fullWidth
-																	label="Baseline"
-																	style={{width: "95px"}}
-																	onChange = {this.handleGetBaseline.bind(this, index+1)}
-																	value = {this.state.payments[index+1]["baseline"]}
-																/>
-															</Grid>
-															<Grid item>
-																<TextField
-																	variant="outlined"
-																	type = "number"
-																	required
-																	fullWidth
-																	label="Sell Price"
-																	style={{width: "95px"}}
-																	onChange = {this.handleGetSellPrice.bind(this, index+1)}
-																	value = {this.state.payments[index+1]["price"]}
-																/>
-															</Grid>
-														</Grid>
-													)
-												})
-											}
-										</div>
-									</React.Fragment>
 								</Grid>
 							</form>
 							<Dragger style = {{marginTop: 50, width: 650, minHeight: 150}}>
@@ -396,7 +309,7 @@ class Publish extends Component {
 						</div>
 					</Container>
 				</ThemeProvider>
-			</React.Fragment>
+			</div>
 		);
 	}
 }

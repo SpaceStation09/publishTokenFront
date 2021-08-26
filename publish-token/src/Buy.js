@@ -9,10 +9,8 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Container from '@material-ui/core/Container';
 import { Helmet } from 'react-helmet';
-import Toolbar from '@material-ui/core/Toolbar';
+import TopBar from './TopBar';
 import Typography from '@material-ui/core/Typography';
-import GitHubIcon from '@material-ui/icons/GitHub'
-import TopBar from "./TopBar";
 const theme = createTheme({
 	palette: {
 		primary: {

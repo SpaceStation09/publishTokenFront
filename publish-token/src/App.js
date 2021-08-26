@@ -5,11 +5,10 @@ import React, { Component } from 'react';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import { createTheme, ThemeProvider, withStyles } from '@material-ui/core/styles';
-import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import GitHubIcon from '@material-ui/icons/GitHub';
 import Container from '@material-ui/core/Container';
-import TopBar from "./TopBar";
+import TopBar from './TopBar';
+
 const styles = theme => ({
   icon: {
     marginRight: theme.spacing(2),
@@ -28,19 +27,22 @@ const styles = theme => ({
     color: '#FFFFFF',
     borderWidth: 2,
     borderColor: '#e3f2fd',
-    fontSize: 14,
+    fontSize: 16,
     borderRadius: 25,
+    width: 150
   },
   btnSecond: {
     marginTop: theme.spacing(3),
     color: '#03A9F4',
     borderWidth: 3,
     borderColor: '#03A9F4',
-    fontSize: 14,
+    fontSize: 16,
     borderRadius: 25,
+    width: 150
   },
   paper: {
     marginTop: theme.spacing(7),
+    textAlign: 'center'
   },
   container: {
     maxWidth: '100%'
@@ -62,13 +64,12 @@ class App extends Component {
   render() {
     const { classes } = this.props
     return(
-      <div className="App">
+      <div>
         <Helmet>
           <title>Publish Token | HOME</title>
         </Helmet>
 
         <ThemeProvider theme={theme}>
-
           <TopBar />
           <Container component="main" className={classes.container}>
             <div className={classes.paper}>
@@ -86,12 +87,12 @@ class App extends Component {
                   <Grid container justifyContent="center">
                     <Grid item xs={3} >
                       <Button size="large" variant="contained" color="secondary" className={classes.btnMain} href='/#/publish'>
-                        <b>Go To Publish</b>
+                        <b>去发布</b>
                       </Button>
                     </Grid>
-                    <Grid item xs={2} >
+                    <Grid item xs={3} >
                       <Button size="large" variant="outlined" color="secondary" className={classes.btnSecond} href='/#/buy'>
-                        <b>Go To Buy</b>
+                        <b>去购买</b>
                       </Button>
                     </Grid>
                   </Grid>

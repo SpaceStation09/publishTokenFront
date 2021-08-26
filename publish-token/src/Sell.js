@@ -4,9 +4,7 @@ import Button from '@material-ui/core/Button';
 import { createTheme, ThemeProvider, withStyles } from '@material-ui/core/styles';
 import { blue} from '@material-ui/core/colors';
 import { Helmet } from 'react-helmet';
-import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import GitHubIcon from '@material-ui/icons/GitHub';
 import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
 import Avatar from '@material-ui/core/Avatar';
@@ -14,7 +12,8 @@ import Grid from '@material-ui/core/Grid';
 import MonetizationOnOutlinedIcon from '@material-ui/icons/MonetizationOnOutlined';
 import LocalAtmIcon from '@material-ui/icons/LocalAtm';
 import 'antd/dist/antd.css';
-import TopBar from "./TopBar";
+import TopBar from './TopBar';
+
 const theme = createTheme({
 	palette: {
 		primary: {
@@ -102,7 +101,7 @@ class Sell extends Component {
 	render(){
 		const { classes } = this.props
 		return (
-			<React.Fragment>
+			<div >
 				<Helmet>
 					<title>Publish Token | Sell</title>
 				</Helmet>
@@ -175,7 +174,7 @@ class Sell extends Component {
 						</div>
 					</Container>
 				</ThemeProvider>
-			</React.Fragment>
+			</div>
 		);
 	}
 }
