@@ -16,8 +16,8 @@ const BasicRoute = () => (
             <Route exact path="/buy" component={Buy}/>
             <Route exact path="/sell" component={Sell}/>
             <Route exact path="/collections" component={Collections}/>
-            <Route exact path="/NFT/:hash" component={NFTInfo} />
-            <Route exact path="/NFT/spark/:hash" component={Spark} />
+            <Route exact path="/NFT/:id" component={NFTInfo} />
+            <Route exact path="/NFT/spark/:id" component={Spark} />
         </Switch>
     </HashRouter>
 );

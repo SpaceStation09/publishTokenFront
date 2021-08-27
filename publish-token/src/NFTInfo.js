@@ -16,7 +16,9 @@ import GetAppIcon from '@material-ui/icons/GetApp';
 import WhatshotIcon from '@material-ui/icons/Whatshot';
 import Web3 from 'web3';
 import NFT from "./ShillNFT";
+import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 import BigNumber from 'bignumber.js';
+import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 var $;
 $ = require('jquery');
 
@@ -89,54 +91,12 @@ class NFTInfo extends Component{
       Name: '',
       Description: '',
       BonusFee: 0,
-      Cover: ''
+      Cover: '',
+      contract: null
   };
 
   showS = async () =>{
-    let web3 = new Web3('https://mainnet.infura.io/v3/198d54c6a8b1451c98f2a2702e784a61');
-    const account = '0x95f2e4096482ebaded815b3aacfa1524ef3e0568';
-    let abi = [{"inputs":[{"internalType":"string","name":"name_","type":"string"},{"internalType":"string","name":"symbol_","type":"string"},{"internalType":"address","name":"_payableErc20","type":"address"},{"internalType":"uint256","name":"_mintPrice","type":"uint256"},{"internalType":"uint256","name":"_maxSupply","type":"uint256"},{"internalType":"bytes32","name":"_provenance","type":"bytes32"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"baseMetadataURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"contractURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"mintAmount","type":"uint256"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"mintPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"mintStartAtBlockNum","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"payableErc20","outputs":[{"internalType":"contract ERC20Mintable","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"provenance","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"revealStartAtBlockNum","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"_baseMetadataURI","type":"string"}],"name":"setBaseMetadataURI","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"newContractURI","type":"string"}],"name":"setContractURI","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_mintStartAtBlockNum","type":"uint256"}],"name":"setMintStartAtBlockNum","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_revealStartAtBlockNum","type":"uint256"}],"name":"setRevealStartAtBlockNum","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_treasury","type":"address"}],"name":"setTreasury","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"startingIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"tokenIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"treasury","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"}];
-    let nft = new web3.eth.Contract(abi, '0x7645eeC8bB51862A5aa855c40971b2877dAe81AF');
-    let sendOption = {
-      filter: {from: account},
-      fromBlock: 0,
-    }
-    let receiveOption = {
-      filter: {to: account},
-      fromBlock: 0,
-    }
-    nft.methods.symbol().call().then(console.log);
-    let sendLog = await nft.getPastEvents("Transfer", sendOption);
-    let receiveLog = await nft.getPastEvents("Transfer", receiveOption );
-    console.log(sendLog);
-    console.log(receiveLog);
-    let showId = [];
-    let balanceMap = new Map();
-    sendLog.map( (log) => {
-      let id = log.returnValues.tokenId;
-      console.log(log.returnValues.tokenId);
-      showId.push(id);
-      balanceMap.set(id, balanceMap.get(id) + 1);
-    });
-    receiveLog.map( (log) => {
-      let id = log.returnValues.tokenId;
-      console.log(log.returnValues.tokenId);
-      showId.push(id);
-      balanceMap.set(id, balanceMap.get(id) - 1);
-    });
-    console.log(showId);
-    let viewMap = new Map();
-    let balance = [];
-    showId.map( (id) => {
-      if(viewMap.get(id) == false) {
-        if(balanceMap.get(id) > 0) {
-          balance.push(id);
-        }
-        viewMap.set(id, false);
-      }
-      
-    });
-    alert(balance);
+
   }
 
   constructor(props)  {
@@ -146,13 +106,6 @@ class NFTInfo extends Component{
       window.location.href = '/#';
       return;
     }
-    let url = this.gateway + this.props.match.params.hash;
-    $.getJSON(url).then(data => {
-      this.setState({Name: data.Name});
-      this.setState({Description: data.Description});
-      this.setState({BonusFee: data.BonusFee});
-      this.setState({Cover: data.Cover});
-    });
     if(!window.ethereum.isConnected()) {
       alert("请先链接metamask");
       window.location.href = '/#';
@@ -166,14 +119,29 @@ class NFTInfo extends Component{
         return;
       }
     })
-    // console.log(chainId);
+    let web3 = new Web3(window.ethereum);
+    let nft = new web3.eth.Contract(NFT.abi, NFT.address);
+    this.setState({contract: nft});
+    console.log(this.props.match.params.id);
+    nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
+      let hash = meta.split('/');
+      console.log(hash);
+      this.setState({hash: hash[hash.length-1]});
+      $.getJSON(meta).then(data => {
+        this.setState({Name: data.Name});
+        this.setState({Description: data.Description});
+        this.setState({BonusFee: data.BonusFee});
+        this.setState({Cover: data.Cover});
+      });
+    });
     
-    this.web3 = new Web3(window.ethereum);
-    this.web3.eth.getBlockNumber().then(console.log);
+    
   }
+
+
   spark = () => {
     let url = window.location.host;
-    let share = '复制分享链接：' + url + '/#/NFT/Spark/' + this.props.match.params.hash;
+    let share = '分享复制链接：' + url + '/#/NFT/Spark/' + this.props.match.params.id;
     alert(share);
   }
 
@@ -189,13 +157,40 @@ class NFTInfo extends Component{
           <TopBar />
         </ThemeProvider>
       <main>
+      
+      <Grid container direction="column" justifyContent="center" alignItems="center"  xs={12}>
         <Grid container direction="row" justifyContent="center" alignItems="center"  xs={12}>
-        <Grid xs={2}></Grid>
-      <Grid container direction="column" justifyContent="center" alignItems="center"  xs={8}>
+          <Grid xs={2}>
+            <Button
+                color="primary"
+                startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
+                href='/#/collections'
+                style={{ marginTop: 20, marginBottom: 10, fontSize: 20 }}
+              >
+                回到我的NFTs
+            </Button>
+          </Grid>
+          <Grid xs={5}></Grid>
+          <Grid>
+              <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<AttachMoneyIcon />} target="_blank" href={'/#/sellSingle/' +  this.state.hash}  >
+                <Typography variant="button" component="h2" gutterBottom >
+                  售卖
+                </Typography>
+              </Button>
+            </Grid>
+          
+        </Grid>
         
+        <Grid container direction="row" justifyContent="center" alignItems="center"  xs={12}>
+        <Grid xs={2}>
+          
+        </Grid>
+      <Grid container direction="column" justifyContent="center" alignItems="center"  xs={8}>
+
         <Grid container direction="row" justifyContent="center" alignItems="center" xs={12}>
-          <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 65}}>
-              NFT gallery
+          
+          <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 40}}>
+              我的NFT Gallery
           </Typography>
         </Grid>
         <Grid  container direction="row" justifyContent="center" alignItems="center">
@@ -210,10 +205,12 @@ class NFTInfo extends Component{
         </Grid>
         <Grid xs={1}></Grid>
         <Grid xs={4} container direction="column" justifyContent="flex-start" alignItems="center">
-            <Grid>
-            <Typography variant="h3" component="h2" gutterBottom>
-            {this.state.Name}
-            </Typography>
+            <Grid container direction="row" justifyContent="flex-start" alignItems="center">
+              <Grid>
+              <Typography variant="h3" component="h2" gutterBottom>
+                {this.state.Name}
+              </Typography>
+            </Grid>
             </Grid>
             
             <Grid>
@@ -225,15 +222,15 @@ class NFTInfo extends Component{
             <Grid container direction="row" justifyContent="flex-end" alignItems="center">
             <Grid>
                 
-                  <Typography style={{ fontFamily: 'Teko', fontSize: 25}}  >
-                  子叶数量: {this.state.BonusFee}
+                  <Typography style={{ fontFamily: 'Teko', fontSize: 18}}  >
+                  子叶数量: 未知
                   </Typography>
                 
               </Grid>
               <Grid xs ={2}></Grid>
               <Grid>
                 
-                  <Typography style={{ fontFamily: 'Teko', fontSize: 25}}  >
+                  <Typography style={{ fontFamily: 'Teko', fontSize: 18}}  >
                     分红比: {this.state.BonusFee} %
                   </Typography>
                 
@@ -244,21 +241,23 @@ class NFTInfo extends Component{
           <br /><br /><br />
           <Grid container direction="row" justifyContent="center" alignItems="center">
             <Grid>
-              <Typography variant="h5" component="h1" gutterBottom>
-                  NFT Address: {'0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'}
+              <Typography style={{  fontSize: 12}} >
+                  NFT Address: {NFT.address}
               </Typography>
             </Grid>
-            <Grid xs={2}>
+            <Grid xs={1}>
               
             </Grid>
             <Grid>
               <Button size="large" variant="contained"  color="primary" target="_blank" className={classes.btnMain} startIcon={<GetAppIcon />} onClick={this.showS} >
                 <Typography variant="button" component="h2" gutterBottom >
-                  下载 
+                  <font color='white'>
+                    下载
+                  </font>
                 </Typography>
               </Button>
             </Grid>
-             
+            <Grid xs ={1}></Grid>
             <Grid>
               <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<WhatshotIcon />} onClick={this.spark} >
                 <Typography variant="button" component="h2" gutterBottom >
@@ -271,6 +270,7 @@ class NFTInfo extends Component{
         
         </Grid>
         <Grid xs={2}></Grid>
+        </Grid>
         </Grid>
       </main>
       </div>

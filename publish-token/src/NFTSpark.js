@@ -14,6 +14,9 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { Paper } from '@material-ui/core';
+import NFT from "./ShillNFT";
+import BuildIcon from '@material-ui/icons/Build';
+import Web3 from 'web3';
 var $;
 $ = require('jquery');
 
@@ -78,6 +81,8 @@ const styles = theme => ({
   },
 });
 
+
+
 class NFTSpark extends Component{
 
   gateway = 'https://gateway.pinata.cloud/ipfs/';
@@ -86,19 +91,60 @@ class NFTSpark extends Component{
       Name: '',
       Description: '',
       BonusFee: 0,
-      Cover: ''
+      Cover: '',
+      contract: null,
+      price: '',
+      priceString: ''
   };
+
+  shill = async() => {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const account = accounts[0];
+    let web3 = new Web3(window.ethereum);
+    let nft = new web3.eth.Contract(NFT.abi, NFT.address);
+    nft.methods.accepetShill(this.props.match.params.id).send({
+        from: account,
+        value: this.state.price
+    }).then(function(receipt){
+        // receipt can also be a new contract instance, when coming from a "contract.deploy({...}).send()"
+        alert("交易已上链");
+    });
+
+  }
 
   constructor(props)  {
     super(props);
-    
+    let web3 = new Web3(window.ethereum);
+    let nft = new web3.eth.Contract(NFT.abi, NFT.address);
     let url = this.gateway + this.props.match.params.hash;
-    $.getJSON(url).then(data => {
-      this.setState({Name: data.Name});
-      this.setState({Description: data.Description});
-      this.setState({BonusFee: data.BonusFee});
-      this.setState({Cover: data.Cover});
-    });
+    nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
+        let hash = meta.split('/');
+  
+        this.setState({hash: hash[hash.length-1]});
+        $.getJSON(meta).then(data => {
+          this.setState({Name: data.Name});
+          this.setState({Description: data.Description});
+          this.setState({BonusFee: data.BonusFee});
+          this.setState({Cover: data.Cover});
+        });
+      });
+      nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
+        let hash = meta.split('/');
+  
+        this.setState({hash: hash[hash.length-1]});
+        $.getJSON(meta).then(data => {
+          this.setState({Name: data.Name});
+          this.setState({Description: data.Description});
+          this.setState({BonusFee: data.BonusFee});
+          this.setState({Cover: data.Cover});
+        });
+      });
+      nft.methods.getShillPriceByNFTId(this.props.match.params.id).call().then(price => {
+        this.setState({price: price});
+        let etherPrice = web3.utils.fromWei(price, 'ether');
+        etherPrice += ' ETH';
+        this.setState({priceString: etherPrice});
+      });
   }
 
   render() {
@@ -149,15 +195,15 @@ class NFTSpark extends Component{
             <Grid container direction="row" justifyContent="flex-end" alignItems="center">
             <Grid>
                 
-                  <Typography style={{ fontFamily: 'Teko', fontSize: 25}}  >
-                  子叶数量: {this.state.BonusFee}
+                  <Typography style={{ fontFamily: 'Teko', fontSize: 20}}  >
+                  子叶数量: 未知
                   </Typography>
                 
               </Grid>
               <Grid xs ={2}></Grid>
               <Grid>
                 
-                  <Typography style={{ fontFamily: 'Teko', fontSize: 25}}  >
+                  <Typography style={{ fontFamily: 'Teko', fontSize: 20}}  >
                     BonusFee: {this.state.BonusFee}
                   </Typography>
                 
@@ -168,17 +214,18 @@ class NFTSpark extends Component{
           <br /><br /><br />
           <Grid container direction="row" justifyContent="center" alignItems="center">
             <Grid>
-              <Typography variant="h5" component="h1" gutterBottom>
-                  NFT Address: {'0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'}
+            <Typography style={{  fontSize: 14}} >
+                  价格: {this.state.priceString}
               </Typography>
             </Grid>
             <Grid xs={2}>
               
             </Grid>
+            <Grid xs={3}></Grid>
             <Grid>
-              <Button size="large" variant="contained"  color="primary" target="_blank" startIcon={<GetAppIcon />} >
-                <Typography variant="button" component="h2" gutterBottom >
-                  MINT 
+              <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<BuildIcon />} onClick={this.shill}>
+                <Typography variant="button" component="h2" color='white' gutterBottom >
+                        铸造
                 </Typography>
               </Button>
             </Grid>

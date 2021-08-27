@@ -21,6 +21,7 @@ import { render } from '@testing-library/react';
 import TopBar from "./TopBar";
 import BigNumber from 'bignumber.js';
 import NFT from "./ShillNFT";
+import { data } from 'jquery';
 var $;
 $ = require('jquery');
 
@@ -131,19 +132,28 @@ class Collections extends Component {
             alert("请切换至rinkeby网络");
             return;
         }
+        document.getElementById('viewButton').innerHTML = '正在加载。。';
         this.web3 = new Web3(window.ethereum);
         this.web3.eth.getBlockNumber().then(console.log);
+        let nft = new this.web3.eth.Contract(NFT.abi, NFT.address);
         this.cards = [];
         let hash = 'QmPsymsaqMZsiwLHXepXtEpYMq3xtnBLLbPgTEyybz1idQ';
         let url = this.gateway + hash;
-        let data = await $.getJSON(url);
-        for(let i = 0; i < 4; i++) {
+        let ids = await this.getNft(nft);
+
+        if(ids.length == 0) {
+          alert("暂无可展示NFTs");
+          document.getElementById('viewButton').innerHTML = '查看我的收藏';
+          return;
+        }
+        let data = await this.getMetadata(nft, ids);
+        for(let i = 0; i < ids.length; i++) {
             let element = {
-                id: i,
-                title: data.Name,
-                description: data.description,
-                bonusFee: data.BonusFee,
-                image: data.Cover,
+                id: ids[i],
+                title: data[i].Name,
+                description: data[i].description,
+                bonusFee: data[i].BonusFee,
+                image: data[i].Cover,
                 hash: hash
             }
             this.cards.push(element);
@@ -153,52 +163,78 @@ class Collections extends Component {
         this.setState({viewable: true ,});
     };
 
-    getNft = async() => {
+
+    getMetadata = async (nft, id) => {
+      let metaDatas = [];
+      for(let i = 0; i < id.length; i++) {
+        let meta = await nft.methods.tokenURI(id[i]).call();
+
+        let data = await $.getJSON(meta);
+        metaDatas.push(data);
+      }
+      return metaDatas;
+    }
+
+    getNft = async(nft) => {
       var number = new BigNumber(10);
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const account = accounts[0];
       let options = {
         filter: {_from: account},
-        fromblock: "9180396",
+        fromblock: "9186438",
       }
-      let nft = new this.web3.eth.Contrac(NFT.abi, '');
+      
       let sendOption = {
-        filter: {_from: account},
-        fromblock: "9180396",
+        filter: {from: account},
+        fromBlock: "9186438",
       }
       let receiveOption = {
-        filter: {_to: account},
-        fromblock: "9180396",
+        filter: {to: account},
+        fromBlock: "9186438",
       }
       let sendLog = await nft.getPastEvents("Transfer", sendOption);
       let receiveLog = await nft.getPastEvents("Transfer", receiveOption);
-      this.web3.getPastLogs();
       let showId = [];
       let balanceMap = new Map();
       sendLog.map( (log) => {
-        let id = new BigNumber(log.returnValues.id);
+        let id = log.returnValues.tokenId;
+        console.log(log.returnValues.tokenId);
         showId.push(id);
-        balanceMap.set(id, balanceMap.get(id) + 1);
-      });
-      sendLog.map( (log) => {
-        let id = new BigNumber(log.returnValues.id);
-        showId.push(id);
+        if(typeof(balanceMap.get(id)) == 'undefined') {
+          balanceMap.set(id, -1);
+        }
         balanceMap.set(id, balanceMap.get(id) - 1);
       });
+      receiveLog.map( (log) => {
+        let id = log.returnValues.tokenId;
+        //console.log(log.returnValues.tokenId);
+        showId.push(id);
+        if(typeof(balanceMap.get(id)) == 'undefined') {
+          balanceMap.set(id, 1);
+        }
+        balanceMap.set(id, balanceMap.get(id) + 1);
+      });
+      
       let viewMap = new Map();
-      let balance = [];
+      let balanceId = [];
       showId.map( (id) => {
-        if(viewMap.get(id) == false) {
+        //console.log(typeof(viewMap.get(id)) == 'undefined');
+        if(typeof(viewMap.get(id)) == 'undefined' || viewMap.get(id) == false ) {
+          console.log(balanceMap.get(id));
           if(balanceMap.get(id) > 0) {
-            balance.push(id);
+            balanceId.push(id);
           }
           viewMap.set(id, false);
         }
-        
-      });
-      return balance;
-    }
+      
+    });
+    console.log(balanceId.length);
+      return balanceId;
+    };
 
+    
+    
+   
     
 
 	render(){
@@ -266,10 +302,9 @@ class Collections extends Component {
                             </Typography>
                         </CardContent>
                         <CardActions>
-                            <Button size="small" variant="contained"  color="primary" target="_blank">
-                                <Link to={{pathname: '/NFT/' +  card.hash }}>
+                            <Button size="small" variant="contained"  color="primary" target="_blank" href={'/#/NFT/' +  card.id} >
+
                                 <b>查看 </b>
-                                </Link>
                             </Button>
                         </CardActions>
                     </Card>
@@ -291,8 +326,8 @@ class Collections extends Component {
             <div className={classes.paper}>
               <Grid container justifyContent="center">
                 <Grid item xs={10}>
-                  <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 100, marginTop: 180}}>
-                    <b>My Collection</b>
+                  <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 70, marginTop: 70}}>
+                    <b>我的收藏馆</b>
                   </Typography>
                   <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 30}}>
                     <b>A ERC721 Token Trying to Solve Existing Publishing Dilemma</b>
