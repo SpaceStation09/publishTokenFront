@@ -84,15 +84,25 @@ class SellSingle extends Component {
     ipfsHashMeta: '',
     shareTimes: 0,
     open: false,
-    address: ''
+    address: '',
+    NFTId: '',
+    onSale: false,
   };
 
+  constructor(props){
+    super(props);
+  }
+
   async componentWillMount() {
+    this.setState({
+      NFTId: this.props.match.params.NFTId
+    })
     var url = "https://ipfs.io/ipfs/" + metadata_json
     let name
     let descrip
     let cover
     let bonusFee
+    console.log(url)
     await axios.get(url)
       .then(function (response) {
         var content = response.data
@@ -111,7 +121,6 @@ class SellSingle extends Component {
     this.setState({
       coverURL: cover_url
     })
-    console.log(this.state.coverURL)
   }
 
   handleClickOpen = (e) => {
@@ -142,11 +151,23 @@ class SellSingle extends Component {
     // TODO: call smart contract to transfer nft
     this.setState({
       open: false,
+      onSale: true,
     })
   }
 
   render() {
     const { classes } = this.props
+    const sell_info = () => {
+      if (this.state.onSale) {
+        return (
+          <Typography color="inherit" align="center" noWrap style={{ fontFamily: 'Teko', fontSize: 20, marginTop: '5%' }}>
+            请将下方链接分享给买方，买方会进入此链接来购买这个NFT <br />
+            {'http://localhost:3000/#/buySingle/'+this.state.NFTId}
+          </Typography>
+        );
+      }
+
+    }
 
     return (
       <div>
@@ -158,7 +179,6 @@ class SellSingle extends Component {
           <TopBar />
           <Container component="main" className={classes.container}>
             <Button
-              color="primary"
               startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
               href='/#/publish'
               style={{ marginTop: 50, marginBottom: 100, fontSize: 22 }}
@@ -173,6 +193,9 @@ class SellSingle extends Component {
                   </Paper>
                 </Grid>
                 <Grid item xs style={{ marginLeft: '5%'}}>
+                  <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
+                    #{this.state.NFTId}
+                  </Typography>
                   <Typography color="inherit" align="left" noWrap style={{ fontFamily: 'Teko', fontSize: 34, marginTop: '2%'}}>
                     <b>{this.state.name}</b>
                   </Typography>
@@ -228,6 +251,9 @@ class SellSingle extends Component {
                   </Dialog>
                 </Grid>
               </Grid>
+            </div>
+            <div style={{marginTop: 50}}>
+              {sell_info()}
             </div>
           </Container>
         </ThemeProvider>
