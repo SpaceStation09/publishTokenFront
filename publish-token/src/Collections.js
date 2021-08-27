@@ -137,8 +137,7 @@ class Collections extends Component {
         this.web3.eth.getBlockNumber().then(console.log);
         let nft = new this.web3.eth.Contract(NFT.abi, NFT.address);
         this.cards = [];
-        let hash = 'QmPsymsaqMZsiwLHXepXtEpYMq3xtnBLLbPgTEyybz1idQ';
-        let url = this.gateway + hash;
+
         let ids = await this.getNft(nft);
 
         if(ids.length == 0) {
@@ -179,10 +178,6 @@ class Collections extends Component {
       var number = new BigNumber(10);
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const account = accounts[0];
-      let options = {
-        filter: {_from: account},
-        fromblock: "9186438",
-      }
       
       let sendOption = {
         filter: {from: account},
@@ -198,12 +193,12 @@ class Collections extends Component {
       let balanceMap = new Map();
       sendLog.map( (log) => {
         let id = log.returnValues.tokenId;
-        console.log(log.returnValues.tokenId);
         showId.push(id);
         if(typeof(balanceMap.get(id)) == 'undefined') {
           balanceMap.set(id, -1);
+        }else {
+          balanceMap.set(id, balanceMap.get(id) - 1);
         }
-        balanceMap.set(id, balanceMap.get(id) - 1);
       });
       receiveLog.map( (log) => {
         let id = log.returnValues.tokenId;
@@ -211,8 +206,9 @@ class Collections extends Component {
         showId.push(id);
         if(typeof(balanceMap.get(id)) == 'undefined') {
           balanceMap.set(id, 1);
+        } else{
+          balanceMap.set(id, balanceMap.get(id) + 1);
         }
-        balanceMap.set(id, balanceMap.get(id) + 1);
       });
       
       let viewMap = new Map();
@@ -220,17 +216,16 @@ class Collections extends Component {
       showId.map( (id) => {
         //console.log(typeof(viewMap.get(id)) == 'undefined');
         if(typeof(viewMap.get(id)) == 'undefined' || viewMap.get(id) == false ) {
-          console.log(balanceMap.get(id));
           if(balanceMap.get(id) > 0) {
             balanceId.push(id);
           }
           viewMap.set(id, false);
         }
-      
-    });
+        
+      });
     console.log(balanceId.length);
       return balanceId;
-    };
+  };
 
     
     
