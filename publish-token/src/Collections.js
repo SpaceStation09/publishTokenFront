@@ -153,7 +153,6 @@ class Collections extends Component {
                 description: data[i].description,
                 bonusFee: data[i].BonusFee,
                 image: data[i].Cover,
-                hash: hash
             }
             this.cards.push(element);
         }
