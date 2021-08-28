@@ -7,7 +7,7 @@ import { Helmet } from 'react-helmet';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
-import { Upload, message, Alert } from 'antd';
+import {message} from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import Dragger from 'antd/lib/upload/Dragger';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
@@ -15,7 +15,8 @@ import { Input, InputNumber } from 'antd';
 import 'antd/dist/antd.css';
 import TopBar from './TopBar';
 import axios from 'axios';
-
+import contract from './contract';
+import web3 from './web3';
 
 const {
 	pinata_api_key,
@@ -142,6 +143,10 @@ class Publish extends Component {
 	}
 
 	submit = async (event) => {
+		/*TODO: call smart contract publish() and wait for publish success event
+		 * then call backend to get a secret key. Then encrypt the pdf file and upload it to IPFS
+		 * Finally, form a new metadata json file and send its ipfs hash to backend and publish it
+		*/
 	}
 
 
@@ -193,10 +198,6 @@ class Publish extends Component {
 						obj.setState({
 							ipfsHashCover: info.file.response.IpfsHash
 						})
-					}else{
-						obj.setState({
-							ipfsHashPub: info.file.response.IpfsHash
-						})
 					}
 					if(obj.state.ipfsHashCover !== ''){
 						var JSONBody = {
@@ -214,9 +215,12 @@ class Publish extends Component {
 								},
 							})
 							.then(function (response) {
-								console.log(response.data.IpfsHash)
+								obj.setState({
+									ipfsHashMeta: response.data.IpfsHash
+								})
 							})
 					}
+					// TODO: call backend to publish on IPFS.
 					
 					message.success(`${info.file.name} file uploaded successfully.`);
 				} else if (status === 'error') {
@@ -317,6 +321,7 @@ class Publish extends Component {
 								className={classes.button}
 								startIcon={<CloudUploadIcon />}
 								style = {{marginTop: 50, width: 200, height: 50, marginBottom: 50}}
+								onClick={this.submit}
 							>
 								发布作品
 							</Button>

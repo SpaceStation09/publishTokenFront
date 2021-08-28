@@ -1,22 +1,17 @@
 import React, { Component } from 'react';
 import './App.css';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
+import {Button, Grid } from '@material-ui/core';
 import { createTheme, ThemeProvider, withStyles } from '@material-ui/core/styles';
 import { Helmet } from 'react-helmet';
 import TopBar from './TopBar';
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Typography from '@material-ui/core/Typography';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle} from "@material-ui/core";
+import { Typography, Paper, Container }from '@material-ui/core';
 import axios from 'axios';
-import Paper from '@material-ui/core/Paper';
-import Container from '@material-ui/core/Container';
 import MonetizationOnOutlinedIcon from '@material-ui/icons/MonetizationOnOutlined';
 import { Input, InputNumber } from 'antd';
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
+import contract from './contract';
+import web3 from './web3';
 
 const metadata_json = 'QmPsymsaqMZsiwLHXepXtEpYMq3xtnBLLbPgTEyybz1idQ'
 // const metadata = { 
@@ -148,7 +143,7 @@ class SellSingle extends Component {
   }
 
   sell = (e) => {
-    // TODO: call smart contract to transfer nft
+    // TODO: call smart contract to approve nft 
     this.setState({
       open: false,
       onSale: true,
@@ -244,7 +239,7 @@ class SellSingle extends Component {
                       <Button onClick={this.handleClose} color="primary">
                         取消
                       </Button>
-                      <Button variant="contained" onClick={this.sell} color="primary">
+                      <Button variant="contained" onClick={this.sell} color="primary" >
                         卖出
                       </Button>
                     </DialogActions>

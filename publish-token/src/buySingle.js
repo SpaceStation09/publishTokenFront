@@ -5,11 +5,6 @@ import Grid from '@material-ui/core/Grid';
 import { createTheme, ThemeProvider, withStyles } from '@material-ui/core/styles';
 import { Helmet } from 'react-helmet';
 import TopBar from './TopBar';
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
 import Typography from '@material-ui/core/Typography';
 import axios from 'axios';
 import Paper from '@material-ui/core/Paper';
@@ -115,7 +110,7 @@ class BuySingle extends Component {
   }
 
   handleBuy = (e) => {
-    //TODO: call smart contract
+    //TODO: call smart contract to pay fee and get NFT
   }
 
   handleGetPrice = (value) => {
