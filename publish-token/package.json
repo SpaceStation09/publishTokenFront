@@ -12,7 +12,8 @@
     "axios": "^0.21.1",
     "bootstrap": "^3.4.1",
     "ipfs-core": "^0.10.3",
-    "ipns": "^0.13.4",
+    "jquery": "^3.6.0",
+    "jsdom": "^17.0.0",
     "react": "^17.0.2",
     "react-bootstrap": "^1.6.1",
     "react-dom": "^17.0.2",
@@ -46,5 +47,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "react-hot-loader": "^4.13.0"
   }
 }
