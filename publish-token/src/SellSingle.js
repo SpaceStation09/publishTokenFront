@@ -4,12 +4,14 @@ import {Button, Grid } from '@material-ui/core';
 import { createTheme, ThemeProvider, withStyles } from '@material-ui/core/styles';
 import { Helmet } from 'react-helmet';
 import TopBar from './TopBar';
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle} from "@material-ui/core";
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton} from "@material-ui/core";
 import { Typography, Paper, Container }from '@material-ui/core';
 import axios from 'axios';
 import MonetizationOnOutlinedIcon from '@material-ui/icons/MonetizationOnOutlined';
 import { Input, InputNumber } from 'antd';
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 import contract from './contract';
 import web3 from './web3';
 
@@ -79,9 +81,10 @@ class SellSingle extends Component {
     ipfsHashMeta: '',
     shareTimes: 0,
     open: false,
-    address: '',
+    toAddress: '',
     NFTId: '',
     onSale: false,
+    copied: false
   };
 
   constructor(props){
@@ -112,7 +115,7 @@ class SellSingle extends Component {
       ipfsHashCover: cover,
       bonusFee: bonusFee
     })
-    var cover_url = "https://ipfs.io/ipfs/" + this.state.ipfsHashCover
+    var cover_url = "https://gateway.pinata.cloud/ipfs/" + this.state.ipfsHashCover
     this.setState({
       coverURL: cover_url
     })
@@ -153,15 +156,27 @@ class SellSingle extends Component {
   render() {
     const { classes } = this.props
     const sell_info = () => {
-      if (this.state.onSale) {
+      // this.state.onSale
+      if (true) {
         return (
-          <Typography color="inherit" align="center" noWrap style={{ fontFamily: 'Teko', fontSize: 20, marginTop: '5%' }}>
-            请将下方链接分享给买方，买方会进入此链接来购买这个NFT <br />
-            {'http://localhost:3000/#/buySingle/'+this.state.NFTId}
-          </Typography>
+          <Grid container >
+            <Grid item xs>
+            <Typography color="inherit" align="center" noWrap style={{ fontFamily: 'Teko', fontSize: 20, marginTop: '5%', marginLeft: 300}}>
+              请将下方链接分享给买方，买方会进入此链接来购买这个NFT <br />
+              {'http://localhost:3000/#/buySingle/' + this.state.NFTId}
+            </Typography>
+            </Grid>
+            <Grid item xs style={{ marginTop: 70 }}>
+              <CopyToClipboard text={'http://localhost:3000/#/buySingle/' + this.state.NFTId}
+                onCopy={() => this.setState({ copied: true })}>
+                <IconButton color="primary" aria-label="upload picture" component="span">
+                  <FileCopyOutlinedIcon style={{ fontSize: 18 }} />
+                </IconButton>
+              </CopyToClipboard>
+            </Grid>
+          </Grid>
         );
       }
-
     }
 
     return (
