@@ -311,7 +311,7 @@ class Collections extends Component {
 		return (
 			<div>
 				<Helmet>
-					<title>Publish Token | Marketplace</title>
+					<title>Publish Token | Collections</title>
 				</Helmet>
 			
 				<ThemeProvider theme={theme}>

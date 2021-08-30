@@ -92,7 +92,8 @@ class NFTInfo extends Component{
       Description: '',
       BonusFee: 0,
       Cover: '',
-      contract: null
+      contract: null,
+      Leaf:0
   };
 
   showS = async () =>{
@@ -122,10 +123,9 @@ class NFTInfo extends Component{
     let web3 = new Web3(window.ethereum);
     let nft = new web3.eth.Contract(NFT.abi, NFT.address);
     this.setState({contract: nft});
-    console.log(this.props.match.params.id);
     nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
       let hash = meta.split('/');
-      console.log(hash);
+
       this.setState({hash: hash[hash.length-1]});
       $.getJSON(meta).then(data => {
         this.setState({Name: data.Name});
@@ -134,7 +134,11 @@ class NFTInfo extends Component{
         this.setState({Cover: data.Cover});
       });
     });
-    
+    let leafUrl = "" + "/api/v1/tree/children?" + this.props.match.params.id;
+    $.getJSON(leafUrl).then(data => {
+      this.setState({Leaf: data.children.length});
+      
+    });
     
   }
 
@@ -172,7 +176,7 @@ class NFTInfo extends Component{
           </Grid>
           <Grid xs={5}></Grid>
           <Grid>
-              <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<AttachMoneyIcon />} target="_blank" href={'/#/sellSingle/' +  this.state.hash}  >
+              <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<AttachMoneyIcon />} target="_blank" href={'/#/sellSingle/' +  this.props.match.params.id}  >
                 <Typography variant="button" component="h2" gutterBottom >
                   售卖
                 </Typography>
@@ -223,7 +227,7 @@ class NFTInfo extends Component{
             <Grid>
                 
                   <Typography style={{ fontFamily: 'Teko', fontSize: 18}}  >
-                  子叶数量: 未知
+                  子叶数量: {this.state.Leaf}
                   </Typography>
                 
               </Grid>

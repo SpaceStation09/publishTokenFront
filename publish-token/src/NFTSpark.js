@@ -153,7 +153,7 @@ class NFTSpark extends Component{
     return (
        <div>
         <Helmet>
-          <title>Publish Token | NFT</title>
+          <title>Publish Token | Sprrk</title>
         </Helmet>
         <ThemeProvider theme={theme}>
           <TopBar />
@@ -165,7 +165,7 @@ class NFTSpark extends Component{
         
         <Grid container direction="row" justifyContent="center" alignItems="center" xs={12}>
           <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 65}}>
-              NFT gallery
+             🔥 NFT 🔥
           </Typography>
         </Grid>
         <Grid  container direction="row" justifyContent="center" alignItems="center">
@@ -215,7 +215,7 @@ class NFTSpark extends Component{
           <Grid container direction="row" justifyContent="center" alignItems="center">
             <Grid>
             <Typography style={{  fontSize: 14}} >
-                  价格: {this.state.priceString}
+                  点火价格: {this.state.priceString}
               </Typography>
             </Grid>
             <Grid xs={2}>
@@ -223,9 +223,10 @@ class NFTSpark extends Component{
             </Grid>
             <Grid xs={3}></Grid>
             <Grid>
-              <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<BuildIcon />} onClick={this.shill}>
+              <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond}  onClick={this.shill}>
+              
                 <Typography variant="button" component="h2" color='white' gutterBottom >
-                        铸造
+                    <font size="4">🔥   </font>&nbsp;   铸造 
                 </Typography>
               </Button>
             </Grid>
