@@ -13,12 +13,10 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import GetAppIcon from '@material-ui/icons/GetApp';
-import WhatshotIcon from '@material-ui/icons/Whatshot';
-import Web3 from 'web3';
+import { Paper } from '@material-ui/core';
 import NFT from "./ShillNFT";
-import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
-import BigNumber from 'bignumber.js';
-import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
+import BuildIcon from '@material-ui/icons/Build';
+import Web3 from 'web3';
 var $;
 $ = require('jquery');
 
@@ -83,7 +81,9 @@ const styles = theme => ({
   },
 });
 
-class NFTInfo extends Component{
+
+
+class NFTSpark extends Component{
 
   gateway = 'https://gateway.pinata.cloud/ipfs/';
 
@@ -93,60 +93,58 @@ class NFTInfo extends Component{
       BonusFee: 0,
       Cover: '',
       contract: null,
-      Leaf:0
+      price: '',
+      priceString: ''
   };
 
-  showS = async () =>{
+  shill = async() => {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const account = accounts[0];
+    let web3 = new Web3(window.ethereum);
+    let nft = new web3.eth.Contract(NFT.abi, NFT.address);
+    nft.methods.accepetShill(this.props.match.params.id).send({
+        from: account,
+        value: this.state.price
+    }).then(function(receipt){
+        // receipt can also be a new contract instance, when coming from a "contract.deploy({...}).send()"
+        alert("交易已上链");
+    });
 
   }
 
   constructor(props)  {
     super(props);
-    if(!window.ethereum) {
-      alert("请先安装metamask");
-      window.location.href = '/#';
-      return;
-    }
-    if(!window.ethereum.isConnected()) {
-      alert("请先链接metamask");
-      window.location.href = '/#';
-      return;
-    }
-    // const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-    window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
-      if(chainId !== '0x4') {
-        alert("请切换至rinkeby network");
-        window.location.href = '/#';
-        return;
-      }
-    })
     let web3 = new Web3(window.ethereum);
     let nft = new web3.eth.Contract(NFT.abi, NFT.address);
-    this.setState({contract: nft});
+    let url = this.gateway + this.props.match.params.hash;
     nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
-      let hash = meta.split('/');
-
-      this.setState({hash: hash[hash.length-1]});
-      $.getJSON(meta).then(data => {
-        this.setState({Name: data.Name});
-        this.setState({Description: data.Description});
-        this.setState({BonusFee: data.BonusFee});
-        this.setState({Cover: data.Cover});
+        let hash = meta.split('/');
+  
+        this.setState({hash: hash[hash.length-1]});
+        $.getJSON(meta).then(data => {
+          this.setState({Name: data.Name});
+          this.setState({Description: data.Description});
+          this.setState({BonusFee: data.BonusFee});
+          this.setState({Cover: data.Cover});
+        });
       });
-    });
-    let leafUrl = "" + "/api/v1/tree/children?" + this.props.match.params.id;
-    $.getJSON(leafUrl).then(data => {
-      this.setState({Leaf: data.children.length});
-      
-    });
-    
-  }
-
-
-  spark = () => {
-    let url = window.location.host;
-    let share = '分享复制链接：' + url + '/#/NFT/Spark/' + this.props.match.params.id;
-    alert(share);
+      nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
+        let hash = meta.split('/');
+  
+        this.setState({hash: hash[hash.length-1]});
+        $.getJSON(meta).then(data => {
+          this.setState({Name: data.Name});
+          this.setState({Description: data.Description});
+          this.setState({BonusFee: data.BonusFee});
+          this.setState({Cover: data.Cover});
+        });
+      });
+      nft.methods.getShillPriceByNFTId(this.props.match.params.id).call().then(price => {
+        this.setState({price: price});
+        let etherPrice = web3.utils.fromWei(price, 'ether');
+        etherPrice += ' ETH';
+        this.setState({priceString: etherPrice});
+      });
   }
 
   render() {
@@ -155,46 +153,19 @@ class NFTInfo extends Component{
     return (
        <div>
         <Helmet>
-          <title>Publish Token | NFT</title>
+          <title>Publish Token | Sprrk</title>
         </Helmet>
         <ThemeProvider theme={theme}>
           <TopBar />
         </ThemeProvider>
       <main>
-      
-      <Grid container direction="column" justifyContent="center" alignItems="center"  xs={12}>
         <Grid container direction="row" justifyContent="center" alignItems="center"  xs={12}>
-          <Grid xs={2}>
-            <Button
-                color="primary"
-                startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
-                href='/#/collections'
-                style={{ marginTop: 20, marginBottom: 10, fontSize: 20 }}
-              >
-                回到我的NFTs
-            </Button>
-          </Grid>
-          <Grid xs={5}></Grid>
-          <Grid>
-              <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<AttachMoneyIcon />} target="_blank" href={'/#/sellSingle/' +  this.props.match.params.id}  >
-                <Typography variant="button" component="h2" gutterBottom >
-                  售卖
-                </Typography>
-              </Button>
-            </Grid>
-          
-        </Grid>
-        
-        <Grid container direction="row" justifyContent="center" alignItems="center"  xs={12}>
-        <Grid xs={2}>
-          
-        </Grid>
+        <Grid xs={2}></Grid>
       <Grid container direction="column" justifyContent="center" alignItems="center"  xs={8}>
-
+        
         <Grid container direction="row" justifyContent="center" alignItems="center" xs={12}>
-          
-          <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 40}}>
-              我的NFT Gallery
+          <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 65}}>
+             🔥 NFT 🔥
           </Typography>
         </Grid>
         <Grid  container direction="row" justifyContent="center" alignItems="center">
@@ -209,12 +180,10 @@ class NFTInfo extends Component{
         </Grid>
         <Grid xs={1}></Grid>
         <Grid xs={4} container direction="column" justifyContent="flex-start" alignItems="center">
-            <Grid container direction="row" justifyContent="flex-start" alignItems="center">
-              <Grid>
-              <Typography variant="h3" component="h2" gutterBottom>
-                {this.state.Name}
-              </Typography>
-            </Grid>
+            <Grid>
+            <Typography variant="h3" component="h2" gutterBottom>
+            {this.state.Name}
+            </Typography>
             </Grid>
             
             <Grid>
@@ -226,16 +195,16 @@ class NFTInfo extends Component{
             <Grid container direction="row" justifyContent="flex-end" alignItems="center">
             <Grid>
                 
-                  <Typography style={{ fontFamily: 'Teko', fontSize: 18}}  >
-                  子叶数量: {this.state.Leaf}
+                  <Typography style={{ fontFamily: 'Teko', fontSize: 20}}  >
+                  子叶数量: 未知
                   </Typography>
                 
               </Grid>
               <Grid xs ={2}></Grid>
               <Grid>
                 
-                  <Typography style={{ fontFamily: 'Teko', fontSize: 18}}  >
-                    分红比: {this.state.BonusFee} %
+                  <Typography style={{ fontFamily: 'Teko', fontSize: 20}}  >
+                    BonusFee: {this.state.BonusFee}
                   </Typography>
                 
               </Grid>
@@ -245,27 +214,19 @@ class NFTInfo extends Component{
           <br /><br /><br />
           <Grid container direction="row" justifyContent="center" alignItems="center">
             <Grid>
-              <Typography style={{  fontSize: 12}} >
-                  NFT Address: {NFT.address}
+            <Typography style={{  fontSize: 14}} >
+                  点火价格: {this.state.priceString}
               </Typography>
             </Grid>
-            <Grid xs={1}>
+            <Grid xs={2}>
               
             </Grid>
+            <Grid xs={3}></Grid>
             <Grid>
-              <Button size="large" variant="contained"  color="primary" target="_blank" className={classes.btnMain} startIcon={<GetAppIcon />} onClick={this.showS} >
-                <Typography variant="button" component="h2" gutterBottom >
-                  <font color='white'>
-                    下载
-                  </font>
-                </Typography>
-              </Button>
-            </Grid>
-            <Grid xs ={1}></Grid>
-            <Grid>
-              <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<WhatshotIcon />} onClick={this.spark} >
-                <Typography variant="button" component="h2" gutterBottom >
-                  点火
+              <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond}  onClick={this.shill}>
+              
+                <Typography variant="button" component="h2" color='white' gutterBottom >
+                    <font size="4">🔥   </font>&nbsp;   铸造 
                 </Typography>
               </Button>
             </Grid>
@@ -275,11 +236,10 @@ class NFTInfo extends Component{
         </Grid>
         <Grid xs={2}></Grid>
         </Grid>
-        </Grid>
       </main>
       </div>
     );
   }
 }
 
-export default withStyles(styles, { withTheme: true })(NFTInfo);
+export default withStyles(styles, { withTheme: true })(NFTSpark);

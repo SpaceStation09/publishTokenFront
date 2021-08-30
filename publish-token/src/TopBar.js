@@ -64,6 +64,7 @@ class TopBar extends Component {
     });
     this.setState({ isConnected: true, });
     this.setState({ user_address: account, });
+    
   }
 
   render() {

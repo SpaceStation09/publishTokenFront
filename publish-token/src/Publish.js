@@ -126,8 +126,8 @@ class Publish extends Component {
 		var edition_num = 0
 		if(event.target.value >= 0) edition_num = event.target.value
 		this.setState({
-      total_edition_num : edition_num,
-    })
+      		total_edition_num : edition_num,
+    	})
 	}
 
 	handleGetSharingPercent = (event) => {
