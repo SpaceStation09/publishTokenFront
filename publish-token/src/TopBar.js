@@ -1,4 +1,4 @@
-import React, { Component, useState, setState } from 'react';
+import React, { Component} from 'react';
 import './App.css';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -7,7 +7,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
-import Avatar from '@material-ui/core/Avatar';
+
 
 const theme = createTheme({
   palette: {

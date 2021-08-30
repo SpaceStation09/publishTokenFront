@@ -103,7 +103,7 @@ class Sell extends Component {
 		return (
 			<div >
 				<Helmet>
-					<title>Publish Token | Sell</title>
+					<title>SparkNFT | Sell</title>
 				</Helmet>
 			
 				<ThemeProvider theme={theme}>

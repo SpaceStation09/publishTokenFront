@@ -63,7 +63,7 @@ class Buy extends Component {
 		return (
 			<div>
 				<Helmet>
-					<title>Publish Token | Marketplace</title>
+					<title>SparkNFT | Sell</title>
 				</Helmet>
 			
 				<ThemeProvider theme={theme}>

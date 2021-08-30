@@ -4,22 +4,25 @@ import Button from '@material-ui/core/Button';
 import { createTheme, ThemeProvider, withStyles } from '@material-ui/core/styles';
 import { blue} from '@material-ui/core/colors';
 import { Helmet } from 'react-helmet';
-import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import GitHubIcon from '@material-ui/icons/GitHub';
-import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
-import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import { Upload, message } from 'antd';
+import {message} from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import Dragger from 'antd/lib/upload/Dragger';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import AddIcon from '@material-ui/icons/Add';
-import Fab from '@material-ui/core/Fab';
+import { Input, InputNumber } from 'antd';
 import 'antd/dist/antd.css';
 import TopBar from './TopBar';
+import axios from 'axios';
+import contract from './contract';
+import web3 from './web3';
+
+const {
+	pinata_api_key,
+	pinata_secret_api_key,
+} = require('./project.secret');
+const FormData = require('form-data');
 
 
 const theme = createTheme({
@@ -77,44 +80,37 @@ const styles = theme => ({
 		color: '#FFFFFF',
 		backgroundColor: '#2196f3'
   },
+	input: {
+		height: 40,
+		borderRadius: 5,
+	},
+	inputNum: {
+		height: 40,
+		borderRadius: 5,
+		width: 675,
+		fontSize: 20,
+	}
 });
 
-const props = {
-  name: 'file',
-  multiple: true,
-  // action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-  onChange(info) {
-    const { status } = info.file;
-    if (status !== 'uploading') {
-      console.log(info.file, info.fileList);
-    }
-    if (status === 'done') {
-      message.success(`${info.file.name} file uploaded successfully.`);
-    } else if (status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
-    }
-  },
-  onDrop(e) {
-    console.log('Dropped files', e.dataTransfer.files);
-  },
-};
 
 
 // function Publish() {
 class Publish extends Component {
 	state = {
     name: '',
-		total_edition_num: 0,
-		sharing_percentage: 0,
-		inputs: [],
-		payments: {
-			0: {
-				"address": '',
-				"baseline": 0,
-				"price": 0
-			}
-		},
+		bonusFee: 0,
+		price: 0,
+		buffer: null,
+		fileList: [],
+		ipfsHashPub: '',
+		ipfsHashCover: '',
+		ipfsHashMeta: '',
+		description: '',
+		shareTimes: 0,
   };
+
+	async componentDidMount() {
+	}
 
 	handleGetPubName = (event) => {
 		this.setState({
@@ -122,190 +118,216 @@ class Publish extends Component {
     })
 	}
 
-	handleGetTotalEditionNum = (event) => {
-		var edition_num = 0
-		if(event.target.value >= 0) edition_num = event.target.value
+	handleGetBonusFee = (value) => {
 		this.setState({
-      		total_edition_num : edition_num,
-    	})
-	}
-
-	handleGetSharingPercent = (event) => {
-		var sharing_percentage = event.target.value
-		if(event.target.value < 0) sharing_percentage = 0
-		if(event.target.value > 100) sharing_percentage = 100
-		this.setState({
-      sharing_percentage : sharing_percentage,
+			bonusFee : value,
     })
 	}
 
-	handleAdd = (event) => {
-		var inputs = this.state.inputs
-		inputs.push(this.state.inputs.length + 1)
+	handleGetPrice = (value) => {
 		this.setState({
-      inputs : inputs,
-    })
-		var pay = {
-			"address": '',
-			"baseline": 0,
-			"price": 0
-		}
-		var len = Object.keys(this.state.payments).length
-		var pays = this.state.payments
-		pays[len] = pay
+			price: value,
+		})
+	}
+
+	handleGetShareTimes = (value) => {
 		this.setState({
-      payments : pays,
-    })
+			shareTimes: value,
+		})
 	}
 
-	handleGetAddress = (index, event) => {
-		if (this.state.payments[index] == undefined){
-			var pay = {}
-			pay["address"] = event.target.value
-			var pays = {}
-			pays[index] = pay
-			this.setState({
-				payments : pays,
-			})
-		}else {
-			var pay = this.state.payments[index]
-			pay["address"] = event.target.value
-			var pays = this.state.payments
-			pays[index] = pay
-			this.setState({
-				payments : pays,
-			})
-		}
+	handleGetDescription = (e) => {
+		this.setState({
+			description: e.target.value,
+		})
 	}
 
-	handleGetBaseline = (index, event) => {
-		if (this.state.payments[index] == undefined){
-			var pay = {}
-			pay["baseline"] = event.target.value
-			var pays = {}
-			pays[index] = pay
-			this.setState({
-				payments : pays,
-			})
-		}else {
-			var pay = this.state.payments[index]
-			pay["baseline"] = event.target.value
-			var pays = this.state.payments
-			pays[index] = pay
-			this.setState({
-				payments : pays,
-			})
-		}
+	submit = async (event) => {
+		/*TODO: call smart contract publish() and wait for publish success event
+		 * then call backend to get a secret key. Then encrypt the pdf file and upload it to IPFS
+		 * Finally, form a new metadata json file and send its ipfs hash to backend and publish it
+		*/
 	}
 
-	handleGetSellPrice = (index, event) => {
-		if (this.state.payments[index] == undefined){
-			var pay = {}
-			pay["price"] = event.target.value
-			var pays = {}
-			pays[index] = pay
-			this.setState({
-				payments : pays,
-			})
-		}else {
-			var pay = this.state.payments[index]
-			pay["price"] = event.target.value
-			var pays = this.state.payments
-			pays[index] = pay
-			this.setState({
-				payments : pays,
-			})
-		}
-		console.log(this.state.payments[index]["address"])
-	}
-
-	submit = (event) => {
-		event.preventDefault();
-		let formData = new FormData(event.target)
-		fetch('http://127.0.0.1:3001/file/upload', {
-			method: 'POST',
-			body: formData
-		}).then(response => console.log(response))
-	}
 
 	render(){
 		const { classes } = this.props
+		let obj = this
+		const { TextArea } = Input;
+		const prop = {
+			name: 'file',
+			multiple: true,
+			action: `https://api.pinata.cloud/pinning/pinFileToIPFS`,
+			headers: {
+				pinata_api_key: pinata_api_key,
+				pinata_secret_api_key: pinata_secret_api_key
+			},
+			data: this.state.buffer,
+			beforeUpload: file => {
+				return new Promise((resolve, reject) => {
+					try{
+						const reader = new FileReader()
+						reader.readAsArrayBuffer(file)
+						reader.onload = (e) => {
+							var b = e.target.result
+							let params = new FormData()
+							params.append('file', b)
+							this.setState({
+								buffer: params
+							})
+						}
+						resolve()
+					} catch (e){
+						message.error('Read file error')
+						reject()
+					}
+				})
+			},
+			onChange(info) {
+				const imgType = ['png', 'jpg', 'jpeg', 'svg']
+				const { status } = info.file;
+				// if (status !== 'uploading') {
+					
+				// }
+				if (status === 'done') {
+					var fileName = info.file.name
+					var index = fileName.lastIndexOf('.')
+					var ext = fileName.substr(index + 1)
+					var isImg = (imgType.indexOf(ext.toLowerCase()) != -1)
+					if(isImg){
+						obj.setState({
+							ipfsHashCover: info.file.response.IpfsHash
+						})
+					}
+					if(obj.state.ipfsHashCover !== ''){
+						var JSONBody = {
+							"Name": obj.state.name,
+							"Description": obj.state.description,
+							"BonusFee": obj.state.bonusFee,
+							"Cover": obj.state.ipfsHashCover,
+						}
+						const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`
+						axios
+							.post(url, JSONBody, {
+								headers: {
+									pinata_api_key: pinata_api_key,
+									pinata_secret_api_key: pinata_secret_api_key
+								},
+							})
+							.then(function (response) {
+								obj.setState({
+									ipfsHashMeta: response.data.IpfsHash
+								})
+							})
+					}
+					// TODO: call backend to publish on IPFS.
+					
+					message.success(`${info.file.name} file uploaded successfully.`);
+				} else if (status === 'error') {
+					message.error(`${info.file.name} file upload failed.`);
+				}
+			},
+			onDrop(e) {
+				console.log('Dropped files', e.dataTransfer.files);
+			},
+		};
 
 		return (
 			<div>
 				<Helmet>
-					<title>Publish Token | Publish</title>
+					<title>SparkNFT | Sell</title>
 				</Helmet>
 			
 				<ThemeProvider theme={theme}>
 					<TopBar />
 					<Container component="main" maxWidth="xs">
 						<div className={classes.paper}>
-							<Avatar className={classes.avatar}>
-								<InfoOutlinedIcon style={{ fontSize: 30 }}/>
-							</Avatar>
 							<Typography component="h1" variant="h2" style={{ marginTop: "3%", fontFamily: 'Ubuntu'}}>
-								<b>Publication Information</b>
+								<b>发布作品信息</b>
 							</Typography>
 							<form className={classes.form} noValidate>
 								<Grid container spacing={2}>
 									<Grid item xs={12} >
-										<TextField
-											variant="outlined"
-											required
-											fullWidth
-											id="firstName"
-											label="Publication Name"
-											autoFocus
-											onChange = {this.handleGetPubName}
-											value = {this.state.name}
+										<label for="pubName" style= {{fontSize: 18, marginBottom: 10}}>作品名字 *</label>
+										<Input 
+											placeholder="作品名称" 
+											allowClear 
+											id="pubName"
+											onChange={this.handleGetPubName}
+											value={this.state.name}
+											className={classes.input}
 										/>
 									</Grid>
 									<Grid item xs={12}>
-										<TextField
-											variant="outlined"
-											type = "number"
-											required
-											fullWidth
-											label="Total Edition Amount"
-											onChange = {this.handleGetTotalEditionNum}
-											helperText="Please note that the total edition amount should be larger than 0"
-											value = {this.state.total_edition_num}
+										<label for="bonusFee" style={{ fontSize: 18,  marginTop: 20 }}>收益比例 *</label>
+										<p style={{ fontSize: 12}}>当您的作品被成功分享时，您希望从分享价格中获得多少比例的收益</p>
+										<InputNumber
+											id="bonusFee"
+											defaultValue={0}
+											min={0}
+											max={100}
+											formatter={value => `${value}%`}
+											parser={value => value.replace('%', '')}
+											onChange={this.handleGetBonusFee}
+											className={classes.inputNum}
 										/>
 									</Grid>
 									<Grid item xs={12}>
-										<TextField
-											variant="outlined"
-											type = "number"
-											required
-											fullWidth
-											label="Sharing Percentage"
-											onChange = {this.handleGetSharingPercent}
-											value = {this.state.total_edition_num}
-											helperText="Please note that the sharing percentage should be between 0 - 100"
+										<label for="price" style={{ fontSize: 18, marginTop: 20 }}>售卖价格 *</label>
+										<InputNumber
+											id="price"
+											defaultValue={0}
+											min={0}
+											onChange={this.handleGetPrice}
+											className={classes.inputNum}
+										/>
+									</Grid>
+									<Grid item xs={12}>
+										<label for="shareTimes" style={{ fontSize: 18, marginTop: 20 }}>最高分享次数 *</label>
+										<p style={{ fontSize: 12 }}>您希望每一个帮助您传播的用户最多能够分享多少次？</p>
+										<InputNumber
+											id="shareTimes"
+											defaultValue={0}
+											min={0}
+											onChange={this.handleGetShareTimes}
+											className={classes.inputNum}
+										/>
+									</Grid>
+									<Grid item xs={12}>
+										<label for="Description" style={{ fontSize: 18, marginTop: 20 }}>作品描述 *</label>
+										<p style={{ fontSize: 12 }}>请用简单的话语对您的作品进行描述，精准有效的描述能帮助其他用户更准确得了解您的作品</p>
+										<TextArea 
+											rows={4} 
+											id="Description"
+											onChange={this.handleGetDescription}
 										/>
 									</Grid>
 								</Grid>
+								<label style={{ fontSize: 18, marginTop: 50 }}>作品文件及其封面 *</label>
+								<p style={{ fontSize: 12 }}>请在下方区域上传您的作品文件以及封面文件 <br />
+									封面文件支持这些格式：PNG, JPG, SVG； 作品文件支持这些格式：TXT， PDF</p>
+								<Dragger {...prop} style = {{width: 680, minHeight: 200}} id= "Uploader">
+									<p className="ant-upload-drag-icon">
+										<InboxOutlined />
+									</p>
+									<p className="ant-upload-text">上传文件请点击或者拖拽文件到此处</p>
+									<p className="ant-upload-hint">
+										支持单个文件的上传和多个文件的上传，支持多种类型文件的上传
+									</p>
+								</Dragger>
 							</form>
-							<Dragger style = {{marginTop: 50, width: 650, minHeight: 150}}>
-								<p className="ant-upload-drag-icon">
-									<InboxOutlined />
-								</p>
-								<p className="ant-upload-text">Click or drag file to this area to upload</p>
-								<p className="ant-upload-hint">
-									Support for a single or bulk upload. Strictly prohibit from uploading company data or other
-									band files
-								</p>
-							</Dragger>
 							<Button
 								variant="contained"
 								className={classes.button}
 								startIcon={<CloudUploadIcon />}
 								style = {{marginTop: 50, width: 200, height: 50, marginBottom: 50}}
+								onClick={this.submit}
 							>
-								Publish
+								发布作品
 							</Button>
-
+							<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sellSingle/0xf1372aa438bd72497e48747f627452b31aad456e2dc0093ae01badc94a10f28d'>
+								<b>售卖</b>
+							</Button>
 						</div>
 					</Container>
 				</ThemeProvider>
