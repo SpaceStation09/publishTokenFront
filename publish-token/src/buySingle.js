@@ -11,6 +11,7 @@ import Paper from '@material-ui/core/Paper';
 import Container from '@material-ui/core/Container';
 import MonetizationOnOutlinedIcon from '@material-ui/icons/MonetizationOnOutlined';
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
+import contract from './contract';
 
 const metadata_json = 'QmPsymsaqMZsiwLHXepXtEpYMq3xtnBLLbPgTEyybz1idQ'
 
@@ -83,30 +84,32 @@ class BuySingle extends Component {
     this.setState({
       NFTId: this.props.match.params.NFTId
     })
-    var url = "https://ipfs.io/ipfs/" + metadata_json
-    let name
-    let descrip
-    let cover
-    let bonusFee
-    await axios.get(url)
-      .then(function (response) {
-        var content = response.data
-        name = content.Name
-        descrip = content.Description
-        cover = content.Cover
-        bonusFee = content.BonusFee
+    await contract.methods.tokenURI(this.props.match.params.NFTId).call().then(metadata => {
+      let hash = metadata.split('/')
+      this.setState({ ipfsHashMeta: hash[hash.length - 1] })
+      var url = "https://gateway.pinata.cloud/ipfs/" + this.state.ipfsHashMeta
+      var obj = this
+      axios.get(url)
+        .then(function (response) {
+          var content = response.data
+          obj.setState({
+            name: content.Name,
+            description: content.Description,
+            bonusFee: content.BonusFee,
+            ipfsHashCover: content.Cover
+          })
+          var cover_url = "https://gateway.pinata.cloud/ipfs/" + obj.state.ipfsHashCover
+          obj.setState({
+            coverURL: cover_url
+          })
+        })
+    })
+
+    await contract.methods.getTransferPriceByNFTId(this.props.match.params.NFTId).call().then(price => {
+      this.setState({
+        price: price/1000000000000000000
       })
-    this.setState({
-      name: name,
-      description: descrip,
-      ipfsHashCover: cover,
-      bonusFee: bonusFee
     })
-    var cover_url = "https://ipfs.io/ipfs/" + this.state.ipfsHashCover
-    this.setState({
-      coverURL: cover_url
-    })
-    console.log(this.state.coverURL)
   }
 
   handleBuy = (e) => {
@@ -124,6 +127,7 @@ class BuySingle extends Component {
       address: e.target.value,
     })
   }
+
 
 
   render() {
@@ -164,6 +168,9 @@ class BuySingle extends Component {
                   </Typography>
                   <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '65%', fontSize: 24 }}>
                     创作者分红比例: {this.state.bonusFee} %
+                  </Typography>
+                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize:18 }}>
+                    售价: {this.state.price} ETH
                   </Typography>
                   <Button
                     variant="outlined"

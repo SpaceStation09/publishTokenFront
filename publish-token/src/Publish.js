@@ -325,7 +325,7 @@ class Publish extends Component {
 							>
 								发布作品
 							</Button>
-							<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sellSingle/0xf1372aa438bd72497e48747f627452b31aad456e2dc0093ae01badc94a10f28d'>
+							<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sellSingle/6805647338418769269267492148635364229121'>
 								<b>售卖</b>
 							</Button>
 						</div>

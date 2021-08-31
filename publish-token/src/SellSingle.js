@@ -13,16 +13,6 @@ import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 import contract from './contract';
-import web3 from './web3';
-
-const metadata_json = 'QmPsymsaqMZsiwLHXepXtEpYMq3xtnBLLbPgTEyybz1idQ'
-// const metadata = { 
-//   "Name": "热风", 
-//   "Description": "《热风》收作者1918年至1924年所作杂文四十一篇。1925年11月由北京北新书局初版。作者生前共印行十版次。鲁迅在《新青年》的《随感录》中做些短评，还在这前一年，因为所评论的多是小问题，所以无可道，原因也大都忘却了。但就现在的文字看起来，除几条泛沦之外，有的是对于扶乩，静坐，打拳而发的；有的是对于所谓“保存国粹”而发的；有的是对于那时旧官僚的以经验自豪而发的；有的是对于上海《时报》的讽刺画而发的。记得当时的《新青年》是正在四面受敌之中，鲁迅所对付的不过一小部分。", 
-//   "BonusFee": 7, 
-//   "Cover": "QmSnPggQ9K4QV7dJkjLP2GMZVCEsL81kSsouRoAAzEb8K2" 
-// }
-// 《热风》收作者1918年至1924年所作杂文四十一篇。1925年11月由北京北新书局初版。作者生前共印行十版次。鲁迅在《新青年》的《随感录》中做些短评，还在这前一年，因为所评论的多是小问题，所以无可道，原因也大都忘却了。但就现在的文字看起来，除几条泛沦之外，有的是对于扶乩，静坐，打拳而发的；有的是对于所谓“保存国粹”而发的；有的是对于那时旧官僚的以经验自豪而发的；有的是对于上海《时报》的讽刺画而发的。记得当时的《新青年》是正在四面受敌之中，鲁迅所对付的不过一小部分。
 
 
 const theme = createTheme({
@@ -87,37 +77,44 @@ class SellSingle extends Component {
     copied: false
   };
 
+  // https://gateway.pinata.cloud/ipfs/QmPsymsaqMZsiwLHXepXtEpYMq3xtnBLLbPgTEyybz1idQ
   constructor(props){
     super(props);
+    window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
+      if (chainId !== '0x4') {
+        alert("请切换至rinkeby network");
+        window.location.href = '/#';
+        return;
+      }
+    })
   }
 
   async componentWillMount() {
     this.setState({
       NFTId: this.props.match.params.NFTId
     })
-    var url = "https://ipfs.io/ipfs/" + metadata_json
-    let name
-    let descrip
-    let cover
-    let bonusFee
-    console.log(url)
-    await axios.get(url)
-      .then(function (response) {
-        var content = response.data
-        name = content.Name
-        descrip = content.Description
-        cover = content.Cover
-        bonusFee = content.BonusFee
-      })
-    this.setState({
-      name: name,
-      description: descrip,
-      ipfsHashCover: cover,
-      bonusFee: bonusFee
-    })
-    var cover_url = "https://gateway.pinata.cloud/ipfs/" + this.state.ipfsHashCover
-    this.setState({
-      coverURL: cover_url
+    await contract.methods.tokenURI(this.props.match.params.NFTId).call().then(metadata => {
+      let hash = metadata.split('/')
+      this.setState({ ipfsHashMeta: hash[hash.length - 1] })
+      // console.log(this.state.ipfsHashMeta)
+      var url = "https://gateway.pinata.cloud/ipfs/" + this.state.ipfsHashMeta
+      var obj = this
+      axios.get(url)
+        .then(function (response) {
+          var content = response.data
+          obj.setState({
+            name: content.Name,
+            description: content.Description,
+            bonusFee: content.BonusFee,
+            ipfsHashCover: content.Cover
+          })
+          var cover_url = "https://gateway.pinata.cloud/ipfs/" + obj.state.ipfsHashCover
+          obj.setState({
+            coverURL: cover_url
+          })
+        })
+      
+
     })
   }
 
@@ -156,8 +153,7 @@ class SellSingle extends Component {
   render() {
     const { classes } = this.props
     const sell_info = () => {
-      // this.state.onSale
-      if (true) {
+      if (this.state.onSale) {
         return (
           <Grid container >
             <Grid item xs>
