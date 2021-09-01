@@ -199,13 +199,24 @@ class Publish extends Component {
 							ipfsHashCover: info.file.response.IpfsHash
 						})
 					}
+					var img_url = 'https://gateway.pinata.cloud/ipfs/' + obj.state.ipfsHashCover
 					if(obj.state.ipfsHashCover !== ''){
 						var JSONBody = {
-							"Name": obj.state.name,
-							"Description": obj.state.description,
-							"BonusFee": obj.state.bonusFee,
-							"Cover": obj.state.ipfsHashCover,
+							"name": obj.state.name,
+							"description": obj.state.description,
+							"image": img_url,
+							"attributes": [
+								{
+									"trait_type": "bonusFee",
+									"value": obj.state.bonusFee
+								},
+								// {
+								// 	"trait_type": "file",
+								// 	"value": obj.state.bonusFee
+								// }
+							]
 						}
+						// QmWnEDHHRftH1bix5kX8uBW1Wg58kSVAr3Pi2Xgdnjdvod
 						const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`
 						axios
 							.post(url, JSONBody, {
@@ -218,11 +229,13 @@ class Publish extends Component {
 								obj.setState({
 									ipfsHashMeta: response.data.IpfsHash
 								})
+								console.log(response.data.IpfsHash)
+								message.success(`${info.file.name} file uploaded successfully.`);
 							})
 					}
 					// TODO: call backend to publish on IPFS.
 					
-					message.success(`${info.file.name} file uploaded successfully.`);
+					
 				} else if (status === 'error') {
 					message.error(`${info.file.name} file upload failed.`);
 				}
