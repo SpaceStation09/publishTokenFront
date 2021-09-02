@@ -114,14 +114,32 @@ class NFTInfo extends Component{
   };
 
   downloadIPFS = async () =>{
-    axios.get('https://gateway.pinata.cloud/ipfs/QmVUnbW5CQbR9E4kaCvGNkfn9MKWaxjrB6SFdcEZ2xmviX').then(response => {
-      console.log(response)
+    // axios.get('https://gateway.pinata.cloud/ipfs/QmVUnbW5CQbR9E4kaCvGNkfn9MKWaxjrB6SFdcEZ2xmviX').then(response => {
+    //   console.log(response)
 
-        let blob = new Blob([response.data], { type: 'application/pdf' }),
-        url = window.URL.createObjectURL(blob)
+    //     let blob = new Blob([response.data], { type: 'application/pdf' }),
+    //     url = window.URL.createObjectURL(blob)
 
-         window.open(url) // Mostly the same, I was just experimenting with different approaches, tried link.click, iframe and other solutions
-    })
+    //      window.open(url) // Mostly the same, I was just experimenting with different approaches, tried link.click, iframe and other solutions
+    // })
+    const method = 'GET';
+
+    const url = 'https://gateway.pinata.cloud/ipfs/QmVUnbW5CQbR9E4kaCvGNkfn9MKWaxjrB6SFdcEZ2xmviX';
+    axios.request({
+        url,
+        method,
+        responseType: 'blob', //important
+      })
+      .then(({data}) => {
+        console.log(data);
+        const downloadUrl = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.setAttribute('download', 'file.pdf'); //any other extension
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      });
   }
 
   constructor(props)  {
