@@ -13,6 +13,7 @@ import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 import contract from './contract';
+import web3 from './web3';
 
 
 const theme = createTheme({
@@ -103,18 +104,12 @@ class SellSingle extends Component {
         .then(function (response) {
           var content = response.data
           obj.setState({
-            name: content.Name,
-            description: content.Description,
-            bonusFee: content.BonusFee,
-            ipfsHashCover: content.Cover
-          })
-          var cover_url = "https://gateway.pinata.cloud/ipfs/" + obj.state.ipfsHashCover
-          obj.setState({
-            coverURL: cover_url
+            name: content.name,
+            description: content.description,
+            bonusFee: content.attributes[0].value,
+            coverURL: content.image
           })
         })
-      
-
     })
   }
 
@@ -138,16 +133,29 @@ class SellSingle extends Component {
 
   handleGetAddr = (e) => {
     this.setState({
-      address: e.target.value,
+      toAddress: e.target.value,
     })
   }
 
-  sell = (e) => {
+  sell = async (e) => {
     // TODO: call smart contract to approve nft 
-    this.setState({
-      open: false,
-      onSale: true,
-    })
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const account = accounts[0];
+    // 0xF8c9cd2b6c4261618ef1fC2Ef46E42CaF1640Aa2
+    var price_eth = web3.utils.toWei(this.state.price.toString())
+    var obj = this
+    console.log(Number(price_eth))
+    contract.methods.determinePriceAndApprove(this.state.NFTId, price_eth, this.state.toAddress).send({
+      from: account
+    }).then(function (receipt) {
+      // receipt can also be a new contract instance, when coming from a "contract.deploy({...}).send()"
+      obj.setState({
+        open: false,
+        onSale: true,
+      })
+      alert("已经成功授权买方");
+    });
+    
   }
 
   render() {
