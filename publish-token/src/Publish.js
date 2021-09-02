@@ -23,6 +23,7 @@ const {
 	pinata_secret_api_key,
 } = require('./project.secret');
 const FormData = require('form-data');
+const bs58 = require('bs58');
 
 
 const theme = createTheme({
@@ -91,7 +92,7 @@ const styles = theme => ({
 		fontSize: 20,
 	}
 });
-
+// 64EC88CA00B268E5BA1A35678A1B5316D212F4F366B2477232534A8AECA37F3C
 
 
 // function Publish() {
@@ -200,10 +201,11 @@ class Publish extends Component {
 						})
 					}
 					var img_url = 'https://gateway.pinata.cloud/ipfs/' + obj.state.ipfsHashCover
+					var trimmed_des = obj.state.description.replace(/(\r\n\t|\n|\r\t)/gm, " ");
 					if(obj.state.ipfsHashCover !== ''){
 						var JSONBody = {
 							"name": obj.state.name,
-							"description": obj.state.description,
+							"description": trimmed_des,
 							"image": img_url,
 							"attributes": [
 								{
@@ -216,7 +218,6 @@ class Publish extends Component {
 								// }
 							]
 						}
-						// QmWnEDHHRftH1bix5kX8uBW1Wg58kSVAr3Pi2Xgdnjdvod
 						const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`
 						axios
 							.post(url, JSONBody, {
@@ -229,6 +230,9 @@ class Publish extends Component {
 								obj.setState({
 									ipfsHashMeta: response.data.IpfsHash
 								})
+								const bytes = bs58.decode(response.data.IpfsHash)
+								const bytesToContract = bytes.toString('hex').substring(4,);
+								console.log(bytesToContract)
 								console.log(response.data.IpfsHash)
 								message.success(`${info.file.name} file uploaded successfully.`);
 							})
@@ -338,7 +342,7 @@ class Publish extends Component {
 							>
 								发布作品
 							</Button>
-							<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sellSingle/6805647338418769269267492148635364229121'>
+							<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sellSingle/4294967297'>
 								<b>售卖</b>
 							</Button>
 						</div>

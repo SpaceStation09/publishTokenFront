@@ -93,14 +93,10 @@ class BuySingle extends Component {
         .then(function (response) {
           var content = response.data
           obj.setState({
-            name: content.Name,
-            description: content.Description,
-            bonusFee: content.BonusFee,
-            ipfsHashCover: content.Cover
-          })
-          var cover_url = "https://gateway.pinata.cloud/ipfs/" + obj.state.ipfsHashCover
-          obj.setState({
-            coverURL: cover_url
+            name: content.name,
+            description: content.description,
+            bonusFee: content.attributes[0].value,
+            coverURL: content.image
           })
         })
     })
