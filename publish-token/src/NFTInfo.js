@@ -9,6 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import GitHubIcon from '@material-ui/icons/GitHub'
 import TopBar from "./TopBar";
 import Card from '@material-ui/core/Card';
+import Paper from '@material-ui/core/Paper';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -19,8 +20,22 @@ import NFT from "./ShillNFT";
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 import BigNumber from 'bignumber.js';
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
-var $;
-$ = require('jquery');
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
+import {IconButton} from "@material-ui/core";
+import axios from 'axios';
+
+
+const jsons = {"name":"热风",
+  "description":"《热风》收作者1918年至1924年所作杂文四十一篇。1925年11月由北京北新书局初版。作者生前共印行十版次。鲁迅在《新青年》的《随感录》中做些短评，还在这前一年，因为所评论的多是小问题，所以无可道，原因也大都忘却了。但就现在的文字看起来，除几条泛沦之外，有的是对于扶乩，静坐，打拳而发的；有的是对于所谓“保存国粹”而发的；有的是对于那时旧官僚的以经验自豪而发的；有的是对于上海《时报》的讽刺画而发的。记得当时的《新青年》是正在四面受敌之中，鲁迅所对付的不过一小部分。",
+  "image":"https://gateway.pinata.cloud/ipfs/QmSnPggQ9K4QV7dJkjLP2GMZVCEsL81kSsouRoAAzEb8K2",
+  "attributes":[
+    {
+      "trait_type":"bonusFee",
+      "value":7
+    }
+  ]
+}
 
 const theme = createTheme({
   palette: {
@@ -93,11 +108,20 @@ class NFTInfo extends Component{
       BonusFee: 0,
       Cover: '',
       contract: null,
-      Leaf:0
+      Leaf: 0,
+      spark: false,
+      dataUrl: null
   };
 
-  showS = async () =>{
+  downloadIPFS = async () =>{
+    axios.get('https://gateway.pinata.cloud/ipfs/QmVUnbW5CQbR9E4kaCvGNkfn9MKWaxjrB6SFdcEZ2xmviX').then(response => {
+      console.log(response)
 
+        let blob = new Blob([response.data], { type: 'application/pdf' }),
+        url = window.URL.createObjectURL(blob)
+
+         window.open(url) // Mostly the same, I was just experimenting with different approaches, tried link.click, iframe and other solutions
+    })
   }
 
   constructor(props)  {
@@ -123,19 +147,39 @@ class NFTInfo extends Component{
     let web3 = new Web3(window.ethereum);
     let nft = new web3.eth.Contract(NFT.abi, NFT.address);
     this.setState({contract: nft});
+    nft.methods.ownerOf(this.props.match.params.id).call().then(owner => {
+      window.ethereum.request({ method: 'eth_requestAccounts' }).then( accounts => {
+        const account = accounts[0];
+        if(web3.utils.toChecksumAddress(account) !== owner) {
+
+          alert("这枚nft不属于你");
+          window.location.href = '/#';
+        }
+      })
+        
+    })
     nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
       let hash = meta.split('/');
-
       this.setState({hash: hash[hash.length-1]});
-      $.getJSON(meta).then(data => {
-        this.setState({Name: data.Name});
-        this.setState({Description: data.Description});
-        this.setState({BonusFee: data.BonusFee});
-        this.setState({Cover: data.Cover});
+      axios.get(meta).then(res => {
+        let data = res.data;
+        console.log(data);
+        let bouns = 0;
+        for(let i = 0; i < data.attributes.length; i++) {
+          if(data.attributes[i].trait_type === 'bonusFee') {
+            bouns = data.attributes[i].value;
+          }
+        }
+        
+        this.setState({Name: data.name});
+        this.setState({Description: data.description});
+        this.setState({BonusFee: bouns});
+        this.setState({Cover: data.image});
+        this.setState({dataUrl: data.data});
       });
     });
     let leafUrl = "" + "/api/v1/tree/children?" + this.props.match.params.id;
-    $.getJSON(leafUrl).then(data => {
+    axios.get(leafUrl).then(data => {
       this.setState({Leaf: data.children.length});
       
     });
@@ -144,9 +188,39 @@ class NFTInfo extends Component{
 
 
   spark = () => {
+    
+    if(this.state.spark) {
+      document.getElementById('isSpark').innerHTML = '点火';
+    } else {
+      document.getElementById('isSpark').innerHTML = '隐藏';
+    }
+    this.setState({spark: !this.state.spark});
+  }
+  sell_info = () => {
     let url = window.location.host;
-    let share = '分享复制链接：' + url + '/#/NFT/Spark/' + this.props.match.params.id;
-    alert(share);
+    let toUrl = url + '/#/NFT/Spark/' + this.props.match.params.id;
+    let share = '分享复制链接：' + toUrl;
+    // this.state.onSale
+    if (this.state.spark) {
+      return (
+        <Grid container >
+          <Grid item xs>
+          <Typography color="inherit" align="center" noWrap style={{ fontFamily: 'Teko', fontSize: 20, marginTop: '5%', marginLeft: 300}}>
+            请将下方链接分享给买方，买方会进入此链接来购买这个NFT <br />
+            {toUrl}
+          </Typography>
+          </Grid>
+          <Grid item xs style={{ marginTop: 70 }}>
+            <CopyToClipboard text={toUrl}
+              onCopy={() => this.setState({ copied: true })}>
+              <IconButton color="primary" aria-label="upload picture" component="span">
+                <FileCopyOutlinedIcon style={{ fontSize: 18 }} />
+              </IconButton>
+            </CopyToClipboard>
+          </Grid>
+        </Grid>
+      );
+    }
   }
 
   render() {
@@ -198,15 +272,20 @@ class NFTInfo extends Component{
           </Typography>
         </Grid>
         <Grid  container direction="row" justifyContent="center" alignItems="center">
+        
           <Grid xs={3} >
+          
               <Card className={classes.card} >
+              < Paper elevation={3} >
                   <CardMedia
                       className={classes.cardMedia}
-                      image={gateway + this.state.Cover}
+                      image={this.state.Cover}
                       title="Image title" 
                   />        
+                  </Paper>
               </Card>
         </Grid>
+        
         <Grid xs={1}></Grid>
         <Grid xs={4} container direction="column" justifyContent="flex-start" alignItems="center">
             <Grid container direction="row" justifyContent="flex-start" alignItems="center">
@@ -227,7 +306,7 @@ class NFTInfo extends Component{
             <Grid>
                 
                   <Typography style={{ fontFamily: 'Teko', fontSize: 18}}  >
-                  子叶数量: {this.state.Leaf}
+                    子叶数量: {this.state.Leaf}
                   </Typography>
                 
               </Grid>
@@ -253,7 +332,7 @@ class NFTInfo extends Component{
               
             </Grid>
             <Grid>
-              <Button size="large" variant="contained"  color="primary" target="_blank" className={classes.btnMain} startIcon={<GetAppIcon />} onClick={this.showS} >
+              <Button size="large" variant="contained"  color="primary" target="_blank" className={classes.btnMain} startIcon={<GetAppIcon />} onClick={this.downloadIPFS} >
                 <Typography variant="button" component="h2" gutterBottom >
                   <font color='white'>
                     下载
@@ -263,8 +342,8 @@ class NFTInfo extends Component{
             </Grid>
             <Grid xs ={1}></Grid>
             <Grid>
-              <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<WhatshotIcon />} onClick={this.spark} >
-                <Typography variant="button" component="h2" gutterBottom >
+              <Button size="large"  variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<WhatshotIcon />} onClick={this.spark} >
+                <Typography id="isSpark" variant="button" component="h2" gutterBottom >
                   点火
                 </Typography>
               </Button>
@@ -275,6 +354,13 @@ class NFTInfo extends Component{
         </Grid>
         <Grid xs={2}></Grid>
         </Grid>
+        </Grid>
+        <Grid container direction="row" justifyContent="center" alignItems="center">
+          <Grid xs={8}>
+            <div style={{marginTop: 50}}>
+                {this.sell_info()}
+            </div>
+          </Grid>
         </Grid>
       </main>
       </div>

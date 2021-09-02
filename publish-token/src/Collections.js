@@ -22,6 +22,7 @@ import TopBar from "./TopBar";
 import BigNumber from 'bignumber.js';
 import NFT from "./ShillNFT";
 import { data } from 'jquery';
+import axios from 'axios';
 var $;
 $ = require('jquery');
 
@@ -149,10 +150,10 @@ class Collections extends Component {
         for(let i = 0; i < ids.length; i++) {
             let element = {
                 id: ids[i],
-                title: data[i].Name,
+                title: data[i].name,
                 description: data[i].description,
-                bonusFee: data[i].BonusFee,
-                image: data[i].Cover,
+                bonusFee: data[i].attributes.value,
+                image: data[i].image,
             }
             this.cards.push(element);
         }
@@ -166,15 +167,14 @@ class Collections extends Component {
       let metaDatas = [];
       for(let i = 0; i < id.length; i++) {
         let meta = await nft.methods.tokenURI(id[i]).call();
-
-        let data = await $.getJSON(meta);
-        metaDatas.push(data);
+        let data = await axios.get(meta);
+        console.log(data.data);
+        metaDatas.push(data.data);
       }
       return metaDatas;
     }
 
     getNft = async(nft) => {
-      var number = new BigNumber(10);
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const account = accounts[0];
       
@@ -281,7 +281,7 @@ class Collections extends Component {
                     <Card className={classes.card}>
                         <CardMedia
                             className={classes.cardMedia}
-                            image={gateway + card.image}
+                            image={card.image}
                             title="Image title" 
                         />
                         <CardContent className={classes.cardContent}>

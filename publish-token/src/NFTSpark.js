@@ -17,8 +17,7 @@ import { Paper } from '@material-ui/core';
 import NFT from "./ShillNFT";
 import BuildIcon from '@material-ui/icons/Build';
 import Web3 from 'web3';
-var $;
-$ = require('jquery');
+import axios from 'axios';
 
 const theme = createTheme({
   palette: {
@@ -94,7 +93,8 @@ class NFTSpark extends Component{
       Cover: '',
       contract: null,
       price: '',
-      priceString: ''
+      priceString: '',
+      Leaf:0
   };
 
   shill = async() => {
@@ -102,7 +102,7 @@ class NFTSpark extends Component{
     const account = accounts[0];
     let web3 = new Web3(window.ethereum);
     let nft = new web3.eth.Contract(NFT.abi, NFT.address);
-    nft.methods.accepetShill(this.props.match.params.id).send({
+    nft.methods.acceptShill(this.props.match.params.id).send({
         from: account,
         value: this.state.price
     }).then(function(receipt){
@@ -121,22 +121,12 @@ class NFTSpark extends Component{
         let hash = meta.split('/');
   
         this.setState({hash: hash[hash.length-1]});
-        $.getJSON(meta).then(data => {
-          this.setState({Name: data.Name});
-          this.setState({Description: data.Description});
+        axios.get(meta).then(res => {
+          let data = res.data;
+          this.setState({Name: data.name});
+          this.setState({Description: data.description});
           this.setState({BonusFee: data.BonusFee});
-          this.setState({Cover: data.Cover});
-        });
-      });
-      nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
-        let hash = meta.split('/');
-  
-        this.setState({hash: hash[hash.length-1]});
-        $.getJSON(meta).then(data => {
-          this.setState({Name: data.Name});
-          this.setState({Description: data.Description});
-          this.setState({BonusFee: data.BonusFee});
-          this.setState({Cover: data.Cover});
+          this.setState({Cover: data.image});
         });
       });
       nft.methods.getShillPriceByNFTId(this.props.match.params.id).call().then(price => {
@@ -144,6 +134,11 @@ class NFTSpark extends Component{
         let etherPrice = web3.utils.fromWei(price, 'ether');
         etherPrice += ' ETH';
         this.setState({priceString: etherPrice});
+      });
+      let leafUrl = "" + "/api/v1/tree/children?" + this.props.match.params.id;
+        axios.get(leafUrl).then(data => {
+        this.setState({Leaf: data.children.length});
+      
       });
   }
 
@@ -173,7 +168,7 @@ class NFTSpark extends Component{
               <Card className={classes.card} >
                   <CardMedia
                       className={classes.cardMedia}
-                      image={gateway + this.state.Cover}
+                      image={this.state.Cover}
                       title="Image title" 
                   />        
               </Card>
@@ -196,7 +191,7 @@ class NFTSpark extends Component{
             <Grid>
                 
                   <Typography style={{ fontFamily: 'Teko', fontSize: 20}}  >
-                  子叶数量: 未知
+                  子叶数量: {this.state.Leaf}
                   </Typography>
                 
               </Grid>

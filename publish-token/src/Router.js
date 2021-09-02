@@ -8,7 +8,7 @@ import Sell from './Sell';
 import NFTInfo from './NFTInfo';
 
 import SellSingle from './SellSingle';
-import BuySingle from './BuySingle';
+import BuySingle from './buySingle';
 import Collections from './Collections';
 import Spark from './NFTSpark';
 const BasicRoute = () => (
