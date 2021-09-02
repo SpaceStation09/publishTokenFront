@@ -217,8 +217,9 @@ class Collections extends Component {
         if(typeof(viewMap.get(id)) == 'undefined' || viewMap.get(id) == false ) {
           if(balanceMap.get(id) > 0) {
             balanceId.push(id);
+            console.log(id);
           }
-          viewMap.set(id, false);
+          viewMap.set(id, true);
         }
         
       });
