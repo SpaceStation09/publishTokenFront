@@ -105,12 +105,6 @@ class TopBar extends Component {
               <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/publish'>
                 <b>发布</b>
               </Button>
-              <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sell'>
-                <b>售卖</b>
-              </Button>
-              <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/buy'>
-                <b>购买</b>
-              </Button>
 
 
               <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/collections'>
