@@ -109,7 +109,8 @@ class Collections extends Component {
         isLogin: false,
         user_address: null,
         name: '',
-        viewable: false
+        viewable: false,
+        cards: []
     };
     getAccount = async () => {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -137,7 +138,7 @@ class Collections extends Component {
         this.web3 = new Web3(window.ethereum);
         this.web3.eth.getBlockNumber().then(console.log);
         let nft = new this.web3.eth.Contract(NFT.abi, NFT.address);
-        this.cards = [];
+        let cards = [];
 
         let ids = await this.getNft(nft);
 
@@ -147,6 +148,7 @@ class Collections extends Component {
           return;
         }
         let data = await this.getMetadata(nft, ids);
+
         for(let i = 0; i < ids.length; i++) {
             let element = {
                 id: ids[i],
@@ -155,11 +157,12 @@ class Collections extends Component {
                 bonusFee: data[i].attributes.value,
                 image: data[i].image,
             }
-            this.cards.push(element);
+            cards.push(element);
         }
         document.getElementById('viewButton').innerHTML = '玩得尽兴！';
         
         this.setState({viewable: true ,});
+        this.setState({cards: cards ,});
     };
 
 
@@ -347,7 +350,7 @@ class Collections extends Component {
 					{this.state.viewable?<Container className={classes.cardGrid} maxWidth="md">
 						<Grid container spacing={4}>
 							{
-                                   this.cards.map((card) => {
+                                   this.state.cards.map((card) => {
                                         return showCard(card);
                                     })
                             }

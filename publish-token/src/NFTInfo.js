@@ -24,7 +24,10 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 import {IconButton} from "@material-ui/core";
 import axios from 'axios';
-
+import web3 from './web3';
+var CryptoJS = require("crypto-js");
+const sigUtil = require('ethereumjs-util');
+const ethUtil = require('ethereumjs-util');
 
 const jsons = {"name":"热风",
   "description":"《热风》收作者1918年至1924年所作杂文四十一篇。1925年11月由北京北新书局初版。作者生前共印行十版次。鲁迅在《新青年》的《随感录》中做些短评，还在这前一年，因为所评论的多是小问题，所以无可道，原因也大都忘却了。但就现在的文字看起来，除几条泛沦之外，有的是对于扶乩，静坐，打拳而发的；有的是对于所谓“保存国粹”而发的；有的是对于那时旧官僚的以经验自豪而发的；有的是对于上海《时报》的讽刺画而发的。记得当时的《新青年》是正在四面受敌之中，鲁迅所对付的不过一小部分。",
@@ -110,7 +113,8 @@ class NFTInfo extends Component{
       contract: null,
       Leaf: 0,
       spark: false,
-      dataUrl: null
+      dataUrl: null,
+      account: null
   };
 
   downloadIPFS = async () =>{
@@ -130,9 +134,11 @@ class NFTInfo extends Component{
         method,
         responseType: 'blob', //important
       })
-      .then(({data}) => {
-        console.log(data);
+      .then(({ciphertext}) => {
+        let obj = this;
+        var data  = this.decryptCipherTextToBlob(ciphertext, '123');
         const downloadUrl = window.URL.createObjectURL(new Blob([data]));
+        
         const link = document.createElement('a');
         link.href = downloadUrl;
         link.setAttribute('download', 'file.pdf'); //any other extension
@@ -141,6 +147,51 @@ class NFTInfo extends Component{
         link.remove();
       });
   }
+
+  
+
+  decryptCipherTextToBlob = (ciphertext,secretKey) => {
+    var bytes  = CryptoJS.AES.decrypt(ciphertext, secretKey);
+    var originalText = bytes.toString(CryptoJS.enc.Utf8); 
+    return this.dataURItoBlob(originalText);
+  }
+
+  encryptBlob = (blobData,secretKey) => {
+    var ciphertext;
+    this.blobToDataURI(blobData,function(res) {
+      ciphertext = CryptoJS.TripleDES.encrypt(res, secretKey).toString();
+    })
+    return ciphertext;
+  }
+
+  /**
+   * 
+   * blob二进制 to base64
+   **/
+   blobToDataURI = (blob, callback) => {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        callback(e.target.result);
+    }
+    reader.readAsDataURL(blob);
+}
+
+   /**
+     * base64  to blob二进制
+     */
+    dataURItoBlob = (dataURI)  => {
+      var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]; // mime类型
+      var byteString = atob(dataURI.split(',')[1]); //base64 解码
+      var arrayBuffer = new ArrayBuffer(byteString.length); //创建缓冲数组
+      var intArray = new Uint8Array(arrayBuffer); //创建视图
+
+      for (var i = 0; i < byteString.length; i++) {
+          intArray[i] = byteString.charCodeAt(i);
+      }
+      return new Blob([intArray], {type: mimeString});
+  }
+
+  
 
   constructor(props)  {
     super(props);
@@ -165,9 +216,11 @@ class NFTInfo extends Component{
     let web3 = new Web3(window.ethereum);
     let nft = new web3.eth.Contract(NFT.abi, NFT.address);
     this.setState({contract: nft});
+    let obj = this;
     nft.methods.ownerOf(this.props.match.params.id).call().then(owner => {
       window.ethereum.request({ method: 'eth_requestAccounts' }).then( accounts => {
         const account = accounts[0];
+        obj.setState({account: account});
         if(web3.utils.toChecksumAddress(account) !== owner) {
 
           alert("这枚nft不属于你");
@@ -268,7 +321,7 @@ class NFTInfo extends Component{
           </Grid>
           <Grid xs={5}></Grid>
           <Grid>
-              <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<AttachMoneyIcon />} target="_blank" href={'/#/sellSingle/' +  this.props.match.params.id}  >
+              <Button size="large" variant="outlined" color="secondary"  className={classes.btnSecond} startIcon={<AttachMoneyIcon />}  href={'/#/sellSingle/' +  this.props.match.params.id}  >
                 <Typography variant="button" component="h2" gutterBottom >
                   售卖
                 </Typography>
@@ -328,13 +381,11 @@ class NFTInfo extends Component{
                   </Typography>
                 
               </Grid>
-              <Grid xs ={2}></Grid>
+            <Grid xs ={2}></Grid>
               <Grid>
-                
                   <Typography style={{ fontFamily: 'Teko', fontSize: 18}}  >
                     分红比: {this.state.BonusFee} %
                   </Typography>
-                
               </Grid>
             </Grid>
           </Grid>

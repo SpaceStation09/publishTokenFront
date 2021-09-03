@@ -17,7 +17,7 @@ import TopBar from './TopBar';
 import axios from 'axios';
 import contract from './contract';
 import web3 from './web3';
-
+var CryptoJS = require("crypto-js");
 const {
 	pinata_api_key,
 	pinata_secret_api_key,
@@ -149,7 +149,56 @@ class Publish extends Component {
 		 * Finally, form a new metadata json file and send its ipfs hash to backend and publish it
 		*/
 	}
+	encryptArrayBuffer = (arbuffer,secretKey) => {
+		var ciphertext;
+		let res = this.transformArrayBufferToBase64(arbuffer);
+		ciphertext = CryptoJS.TripleDES.encrypt(res, secretKey).toString();
+		return ciphertext;
+	  }
+	
+	  /**
+	   * 
+	   * blob二进制 to base64
+	   **/
+	   blobToDataURI = (blob, callback) => {
+		var reader = new FileReader();
+		reader.onload = function (e) {
+			callback(e.target.result);
+		}
+		reader.readAsDataURL(blob);
+	}
+	transformArrayBufferToBase64 = (buffer) => {
+		var binary = '';
+		var bytes = new Uint8Array(buffer);
+		for (var len = bytes.byteLength, i = 0; i < len; i++) {
+			binary += String.fromCharCode(bytes[i]);
+		}
+		return window.btoa(binary);
+	}
+	encryptBlob = (blobData,secretKey) => {
+		let ciphertext;
+		
+		this.blobToDataURI(blobData).then(res => {
+			ciphertext = CryptoJS.TripleDES.encrypt(res, secretKey).toString();
+		});
+		console.log(ciphertext);
 
+		return ciphertext;
+	  }
+	
+	stringToArrayBuffer = ( string, encoding, callback ) => {
+		var blob = new Blob([string],{type:'text/plain;charset='+encoding});
+		var reader = new FileReader();
+		reader.onload = function(evt){callback(evt.target.result);};
+		reader.readAsArrayBuffer(blob);
+	}
+	encodebs64 = (str) => {
+		// 对字符串进行编码
+		var encode = encodeURI(str);
+		// 对编码的字符串转化base64
+		var base64 = btoa(encode);
+		return base64;
+		}
 
 	render(){
 		const { classes } = this.props
@@ -165,14 +214,22 @@ class Publish extends Component {
 			},
 			data: this.state.buffer,
 			beforeUpload: file => {
+				console.log(file);
+				var edata = this.encodebs64(this.encryptBlob(file,'123'));
+				console.log(this.encryptBlob(file,'123'));
 				return new Promise((resolve, reject) => {
 					try{
 						const reader = new FileReader()
-						reader.readAsArrayBuffer(file)
+						
+						//reader.readAsArrayBuffer(this.stringToArrayBuffer(edata))
+						reader.readAsArrayBuffer(edata);
+
 						reader.onload = (e) => {
 							var b = e.target.result
+							//var up = this.encryptArrayBuffer(b);
 							let params = new FormData()
 							params.append('file', b)
+							console.log(b);
 							this.setState({
 								buffer: params
 							})
@@ -190,6 +247,7 @@ class Publish extends Component {
 				// if (status !== 'uploading') {
 					
 				// }
+				console.log(info.file)
 				if (status === 'done') {
 					var fileName = info.file.name
 					var index = fileName.lastIndexOf('.')
