@@ -13,6 +13,8 @@ import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 import contract from './contract';
+import web3 from './web3';
+import ReactLoading from 'react-loading';
 
 
 const theme = createTheme({
@@ -56,25 +58,28 @@ const styles = theme => ({
     height: 40,
     borderRadius: 5,
   },
+  loader: {
+    textAlign: 'center'
+  }
 });
 
 class SellSingle extends Component {
   state = {
     name: '',
     bonusFee: 0,
-    cover: '',
     coverURL: '',
     description: '',
     price: 0,
-    ipfsHashPub: '',
-    ipfsHashCover: '',
     ipfsHashMeta: '',
     shareTimes: 0,
     open: false,
     toAddress: '',
     NFTId: '',
     onSale: false,
-    copied: false
+    copied: false,
+    onLoading: false,
+    owner: '',
+    currentAcc: ''
   };
 
   // https://gateway.pinata.cloud/ipfs/QmPsymsaqMZsiwLHXepXtEpYMq3xtnBLLbPgTEyybz1idQ
@@ -90,6 +95,11 @@ class SellSingle extends Component {
   }
 
   async componentWillMount() {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const account = accounts[0];
+    this.setState({
+      currentAcc: account
+    })
     this.setState({
       NFTId: this.props.match.params.NFTId
     })
@@ -103,18 +113,18 @@ class SellSingle extends Component {
         .then(function (response) {
           var content = response.data
           obj.setState({
-            name: content.Name,
-            description: content.Description,
-            bonusFee: content.BonusFee,
-            ipfsHashCover: content.Cover
-          })
-          var cover_url = "https://gateway.pinata.cloud/ipfs/" + obj.state.ipfsHashCover
-          obj.setState({
-            coverURL: cover_url
+            name: content.name,
+            description: content.description,
+            bonusFee: content.attributes[0].value,
+            coverURL: content.image
           })
         })
-      
+    })
 
+    await contract.methods.ownerOf(this.props.match.params.NFTId).call().then(owner => {
+      this.setState({
+        owner: owner.toLowerCase()
+      })
     })
   }
 
@@ -138,16 +148,35 @@ class SellSingle extends Component {
 
   handleGetAddr = (e) => {
     this.setState({
-      address: e.target.value,
+      toAddress: e.target.value,
     })
   }
 
-  sell = (e) => {
+  sell = async (e) => {
     // TODO: call smart contract to approve nft 
     this.setState({
       open: false,
-      onSale: true,
     })
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const account = accounts[0];
+    // 0xF8c9cd2b6c4261618ef1fC2Ef46E42CaF1640Aa2
+    var price_eth = web3.utils.toWei(this.state.price.toString())
+    var obj = this
+    this.setState({
+      onLoading: true
+    })
+    // 0xbB137C332CEcbc8844A009F5ede4493085F81846
+    contract.methods.determinePriceAndApprove(this.state.NFTId, price_eth, this.state.toAddress).send({
+      from: account
+    }).then(function (receipt) {
+      // receipt can also be a new contract instance, when coming from a "contract.deploy({...}).send()"
+      obj.setState({
+        onSale: true,
+        onLoading: false
+      })
+      alert("已经成功授权买方");
+    });
+    
   }
 
   render() {
@@ -171,6 +200,43 @@ class SellSingle extends Component {
               </CopyToClipboard>
             </Grid>
           </Grid>
+        );
+      }
+    }
+
+    const showSellBtn = () => {
+      if(this.state.currentAcc == this.state.owner){
+        return(
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<MonetizationOnOutlinedIcon style={{ fontSize: 22 }} />}
+            className={classes.btnSell}
+            onClick={this.handleClickOpen}
+          >
+            售卖
+          </Button>
+        );
+      }else{
+        return (
+          <Button
+            variant="outlined"
+            startIcon={<MonetizationOnOutlinedIcon style={{ fontSize: 22 }} />}
+            className={classes.btnSell}
+            disabled
+          >
+            售卖
+          </Button>
+        );
+      }
+    }
+
+    const showLoading = () => {
+      if (this.state.onLoading) {
+        return (
+          <div>
+            <ReactLoading type={'bars'} color={'#2196f3'} height={200} width={200} />
+          </div>
         );
       }
     }
@@ -211,15 +277,8 @@ class SellSingle extends Component {
                   <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '65%', fontSize: 24 }}>
                     创作者分红比例: {this.state.bonusFee} %
                   </Typography>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    startIcon={<MonetizationOnOutlinedIcon style={{fontSize: 22}}/>}
-                    className={classes.btnSell}
-                    onClick = {this.handleClickOpen}
-                  >
-                    售卖
-                  </Button>
+                  {showSellBtn()}
+                  {showLoading()}
                   <Dialog
                     open={this.state.open}
                     onClose={this.handleClose}

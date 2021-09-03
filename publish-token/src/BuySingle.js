@@ -12,8 +12,9 @@ import Container from '@material-ui/core/Container';
 import MonetizationOnOutlinedIcon from '@material-ui/icons/MonetizationOnOutlined';
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 import contract from './contract';
+import web3 from './web3';
+import ReactLoading from 'react-loading';
 
-const metadata_json = 'QmPsymsaqMZsiwLHXepXtEpYMq3xtnBLLbPgTEyybz1idQ'
 
 const theme = createTheme({
   palette: {
@@ -46,6 +47,16 @@ const styles = theme => ({
     marginLeft: '10%',
     width: 100
   },
+  btnDisable: {
+    margin: theme.spacing(1),
+    fontSize: 16,
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: '#909497',
+    color: '#909497',
+    marginLeft: '10%',
+    width: 100
+  },
   inputNum: {
     height: 40,
     borderRadius: 5,
@@ -62,18 +73,18 @@ class BuySingle extends Component {
   state = {
     name: '',
     bonusFee: 0,
-    cover: '',
     coverURL: '',
     description: '',
     price: 0,
-    ipfsHashPub: '',
-    ipfsHashCover: '',
     ipfsHashMeta: '',
-    shareTimes: 0,
     open: false,
     address: '',
     NFTId: '',
     onSale: false,
+    owner: '',
+    approvedAddr: '',
+    currentAcc: '',
+    onLoading: false,
   };
 
   constructor(props) {
@@ -81,6 +92,11 @@ class BuySingle extends Component {
   }
 
   async componentWillMount() {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const account = accounts[0];
+    this.setState({
+      currentAcc: account
+    })
     this.setState({
       NFTId: this.props.match.params.NFTId
     })
@@ -93,14 +109,10 @@ class BuySingle extends Component {
         .then(function (response) {
           var content = response.data
           obj.setState({
-            name: content.Name,
-            description: content.Description,
-            bonusFee: content.BonusFee,
-            ipfsHashCover: content.Cover
-          })
-          var cover_url = "https://gateway.pinata.cloud/ipfs/" + obj.state.ipfsHashCover
-          obj.setState({
-            coverURL: cover_url
+            name: content.name,
+            description: content.description,
+            bonusFee: content.attributes[0].value,
+            coverURL: content.image
           })
         })
     })
@@ -110,10 +122,39 @@ class BuySingle extends Component {
         price: price/1000000000000000000
       })
     })
+    await contract.methods.ownerOf(this.props.match.params.NFTId).call().then(owner => {
+      this.setState({
+        owner: owner
+      })
+    })
+
+    await contract.methods.getApproved(this.props.match.params.NFTId).call().then(approved => {
+      this.setState({
+        approvedAddr: approved.toLowerCase()
+      })
+    })
   }
 
-  handleBuy = (e) => {
+  handleBuy = async (e) => {
     //TODO: call smart contract to pay fee and get NFT
+
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const account = accounts[0];
+
+    var price_eth = web3.utils.toWei(this.state.price.toString())
+    var obj = this
+    this.setState({
+      onLoading: true
+    })
+    contract.methods.safeTransferFrom(this.state.owner, account, this.state.NFTId).send({
+      from: account,
+      value: price_eth
+    }).then(function (receipt) {
+      obj.setState({
+        onLoading: false
+      })
+      alert("交易已经上链");
+    });
   }
 
   handleGetPrice = (value) => {
@@ -132,6 +173,42 @@ class BuySingle extends Component {
 
   render() {
     const { classes } = this.props
+    const buyButton = () => {
+      if (this.state.approvedAddr == this.state.currentAcc) {
+        return (
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<MonetizationOnOutlinedIcon style={{ fontSize: 22 }} />}
+            className={classes.btnSell}
+            onClick={this.handleBuy}
+          >
+            购买
+          </Button>
+        );
+      }else {
+        return (
+          <Button
+            variant="outlined"
+            startIcon={<MonetizationOnOutlinedIcon style={{ fontSize: 22 }} />}
+            className={classes.btnDisable}
+            disabled
+          >
+            购买
+          </Button>
+        );
+      }
+    }
+
+    const showLoading = () => {
+      if (this.state.onLoading) {
+        return (
+          <div>
+            <ReactLoading type={'bars'} color={'#2196f3'} height={200} width={200} />
+          </div>
+        );
+      }
+    }
 
     return (
       <div>
@@ -166,23 +243,21 @@ class BuySingle extends Component {
                   <Typography align="left" color="textSecondary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 16 }}>
                     {this.state.description}
                   </Typography>
-                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '65%', fontSize: 24 }}>
+                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 24 }}>
                     创作者分红比例: {this.state.bonusFee} %
                   </Typography>
                   <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize:18 }}>
                     售价: {this.state.price} ETH
                   </Typography>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    startIcon={<MonetizationOnOutlinedIcon style={{ fontSize: 22 }} />}
-                    className={classes.btnSell}
-                    onClick={this.handleBuy}
-                  >
-                    购买
-                  </Button>
+                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 12 }}>
+                    当前拥有者: {this.state.owner}
+                  </Typography>
+                  {buyButton()}
                 </Grid>
               </Grid>
+              <div style={{ marginLeft: '40%' }}>
+                {showLoading()}
+              </div>
             </div>
           </Container>
         </ThemeProvider>
