@@ -159,17 +159,15 @@ class SellSingle extends Component {
     })
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     const account = accounts[0];
-    // 0xF8c9cd2b6c4261618ef1fC2Ef46E42CaF1640Aa2
+
     var price_eth = web3.utils.toWei(this.state.price.toString())
     var obj = this
     this.setState({
       onLoading: true
     })
-    // 0xbB137C332CEcbc8844A009F5ede4493085F81846
     contract.methods.determinePriceAndApprove(this.state.NFTId, price_eth, this.state.toAddress).send({
       from: account
     }).then(function (receipt) {
-      // receipt can also be a new contract instance, when coming from a "contract.deploy({...}).send()"
       obj.setState({
         onSale: true,
         onLoading: false
