@@ -119,13 +119,20 @@ class Publish extends Component {
 	async componentDidMount() {
 		var url = "http://127.0.0.1:5001/api/v0/key/gen?arg=myKey"
 		let obj = this
+
+		var JSONBody = {
+			"name": "placehold",
+		}
+		const ipfs = await IPFS.create()
+		const { cid } = await ipfs.add(JSON.stringify(JSONBody))
+		const res = await ipfs.name.publish(cid)
+		console.log(res.name)
+		console.log(cid.toString())
+		// 12D3KooWEAfeHfVD1vXdZCNDi4UGFUva5RDoPzDNtqVBNMf7R8Eb
 		// axios.post(url)
 		// 	.then(function (response) {
 		// 		console.log(response.data)
 		// 	})
-		// var JSONBody = {
-		// 	"name": "placeholder",
-		// }
 		// let ipfs_placeholder
 		// await axios.post('https://api.pinata.cloud/pinning/pinJSONToIPFS', JSONBody, {
 		// 		headers: {
@@ -137,30 +144,21 @@ class Publish extends Component {
 		// 		ipfs_placeholder = response.data.IpfsHash
 		// 	})
 		// console.log("placeholder: " + ipfs_placeholder)
-		var ipfs_placeholder = 'QmRTBQ45crscU7pehhDXivdLn4EwFWQYahVn7GspBn2mrg'
-		this.setState({
-			onLoading: true
-		})
-		var url_publish = 'http://127.0.0.1:5001/api/v0/name/publish?arg=' + ipfs_placeholder + '&key=myKey'
-		console.log('url_publish: ' + url_publish)
-		axios.post(url_publish)
-			.then(function (response) {
-				console.log(response.data.Value)
-				obj.setState({
-					ipns: response.data.Value,
-					onLoading: true
-				})
-			})
-		
-		
-		// var url_rm = 'http://127.0.0.1:5001/api/v0/key/rm'
-		// var param_rm = {
-		// 	arg: 'myKey'
-		// }
-		// axios.post(url_rm, param_rm)
+		// var ipfs_placeholder = 'QmRTBQ45crscU7pehhDXivdLn4EwFWQYahVn7GspBn2mrg'
+		// this.setState({
+		// 	onLoading: true
+		// })
+		// var url_publish = 'http://127.0.0.1:5001/api/v0/name/publish?arg=' + ipfs_placeholder + '&key=myKey'
+		// console.log('url_publish: ' + url_publish)
+		// axios.post(url_publish)
 		// 	.then(function (response) {
-		// 		console.log(response.data)
+		// 		console.log(response.data.Value)
+		// 		obj.setState({
+		// 			ipns: response.data.Value,
+		// 			onLoading: true
+		// 		})
 		// 	})
+		
 	}
 
 	handleGetPubName = (event) => {
@@ -227,10 +225,6 @@ class Publish extends Component {
 		// 	type: 'rsa',
 		// 	size: 2048
 		// })
-
-		// const pem = await ipfs.key.export('myKey', 'password')
-		// const lists = await ipfs.key.list()
-		// console.log(lists)
 	}
 	encryptArrayBuffer = (arbuffer,secretKey) => {
 		var ciphertext;
