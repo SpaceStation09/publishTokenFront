@@ -254,7 +254,6 @@ class Publish extends Component {
 		const { classes } = this.props
 		let obj = this
 		const { TextArea } = Input;
-
 		const prop = {
 			name: 'file',
 			multiple: true,
