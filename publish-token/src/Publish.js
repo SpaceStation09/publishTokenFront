@@ -196,6 +196,10 @@ class Publish extends Component {
 		this.setState({
 			allowSubmitPDF: false
 		})
+
+		var url_rm_key = "http://18.162.56.46:5001/api/v0/key/rm?arg=myKey"
+		axios.post(url_rm_key)
+			.then(function (response) {})
 	}
 
 
