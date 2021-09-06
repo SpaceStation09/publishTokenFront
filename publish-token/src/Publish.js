@@ -17,13 +17,16 @@ import TopBar from './TopBar';
 import axios from 'axios';
 import contract from './contract';
 import web3 from './web3';
-var CryptoJS = require("crypto-js");
+import ReactLoading from 'react-loading';
+
+
 const {
 	pinata_api_key,
 	pinata_secret_api_key,
 } = require('./project.secret');
 const FormData = require('form-data');
 const bs58 = require('bs58');
+var CryptoJS = require("crypto-js");
 
 
 const theme = createTheme({
@@ -92,25 +95,30 @@ const styles = theme => ({
 		fontSize: 20,
 	}
 });
-// 64EC88CA00B268E5BA1A35678A1B5316D212F4F366B2477232534A8AECA37F3C
 
 
-// function Publish() {
 class Publish extends Component {
 	state = {
     name: '',
 		bonusFee: 0,
 		price: 0,
 		buffer: null,
-		fileList: [],
-		ipfsHashPub: '',
+		file: null,
 		ipfsHashCover: '',
-		ipfsHashMeta: '',
+		ipfsMeta: '',
+		ipns: '',
+		fileIpfs: '',
 		description: '',
 		shareTimes: 0,
+		onLoading: false,
+		rootNFTId: '',
+		issueId: '',
+		allowSubmitPDF: false,
+		currentAcc: ''
   };
 
 	async componentDidMount() {
+		
 	}
 
 	handleGetPubName = (event) => {
@@ -148,57 +156,64 @@ class Publish extends Component {
 		 * then call backend to get a secret key. Then encrypt the pdf file and upload it to IPFS
 		 * Finally, form a new metadata json file and send its ipfs hash to backend and publish it
 		*/
-	}
-	encryptArrayBuffer = (arbuffer,secretKey) => {
-		var ciphertext;
-		let res = this.transformArrayBufferToBase64(arbuffer);
-		ciphertext = CryptoJS.TripleDES.encrypt(res, secretKey).toString();
-		return ciphertext;
-	  }
-	
-	  /**
-	   * 
-	   * blob二进制 to base64
-	   **/
-	   blobToDataURI = (blob, callback) => {
-		var reader = new FileReader();
-		reader.onload = function (e) {
-			callback(e.target.result);
-		}
-		reader.readAsDataURL(blob);
-	}
-	transformArrayBufferToBase64 = (buffer) => {
-		var binary = '';
-		var bytes = new Uint8Array(buffer);
-		for (var len = bytes.byteLength, i = 0; i < len; i++) {
-			binary += String.fromCharCode(bytes[i]);
-		}
-		return window.btoa(binary);
-	}
-	encryptBlob = (blobData,secretKey) => {
-		let ciphertext;
-		
-		this.blobToDataURI(blobData).then(res => {
-			ciphertext = CryptoJS.TripleDES.encrypt(res, secretKey).toString();
-		});
-		console.log(ciphertext);
+		if (this.state.price === 0 || this.state.bonusFee === 0 || this.state.shareTimes === 0 || this.state.ipfsMeta === ''){
+			alert("你有信息尚未填写")
+		}else {
+			const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+			const account = accounts[0];
 
-		return ciphertext;
-	  }
-	
-	stringToArrayBuffer = ( string, encoding, callback ) => {
-		var blob = new Blob([string],{type:'text/plain;charset='+encoding});
-		var reader = new FileReader();
-		reader.onload = function(evt){callback(evt.target.result);};
-		reader.readAsArrayBuffer(blob);
-	}
-	encodebs64 = (str) => {
-		// 对字符串进行编码
-		var encode = encodeURI(str);
-		// 对编码的字符串转化base64
-		var base64 = btoa(encode);
-		return base64;
+			var price_eth = web3.utils.toWei(this.state.price.toString())
+			this.setState({
+				onLoading: true
+			})
+			var obj = this
+			var ipfsToContract = '0x' + this.state.ipfsMeta
+			contract.methods.publish(price_eth, this.state.bonusFee, this.state.shareTimes, ipfsToContract).send({
+				from: account
+			}).then(function (receipt) {
+				//55834574849
+				var publish_event = receipt.events.Publish
+				var returned_values = publish_event.returnValues
+				var root_nft_id = returned_values.rootNFTId
+				var issue_id = returned_values.issue_id
+				obj.setState({
+					onLoading: false,
+					rootNFTId: root_nft_id,
+					issueId: issue_id
+				})
+				alert("已经成功发布作品");
+			});
 		}
+
+		this.setState({
+			allowSubmitPDF: true
+		})	
+	}
+
+	submitWork = async () => {
+		const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+		const account = accounts[0];
+		const publish_url = 'http://18.162.56.46:5001/api/v0/name/publish?arg=' + this.state.fileIpfs + '&key=' + account
+		this.setState({
+			onLoading: true
+		})
+		alert("作品文件发布所需的时间较长，请耐心等待，此过程大约需要3分钟")
+		let obj = this
+		axios.post(publish_url)
+			.then((response)=> {
+				obj.setState({
+					onLoading: false
+				})
+				alert("作品文件发布成功")
+			})
+		const rm_key_url = 'http://18.162.56.46:5001/api/v0/key/rm?arg=' + account
+		axios.post(rm_key_url)
+			.then((response) => {
+				obj.setState({
+					allowSubmitPDF: false
+				})
+			})
+	}
 
 	render(){
 		const { classes } = this.props
@@ -214,40 +229,31 @@ class Publish extends Component {
 			},
 			data: this.state.buffer,
 			beforeUpload: file => {
-				console.log(file);
-				var edata = this.encodebs64(this.encryptBlob(file,'123'));
-				console.log(this.encryptBlob(file,'123'));
 				return new Promise((resolve, reject) => {
-					try{
+					try {
 						const reader = new FileReader()
-						
-						//reader.readAsArrayBuffer(this.stringToArrayBuffer(edata))
-						reader.readAsArrayBuffer(edata);
-
+						reader.readAsArrayBuffer(file)
 						reader.onload = (e) => {
 							var b = e.target.result
-							//var up = this.encryptArrayBuffer(b);
 							let params = new FormData()
 							params.append('file', b)
-							console.log(b);
 							this.setState({
 								buffer: params
 							})
 						}
 						resolve()
-					} catch (e){
+					} catch (e) {
 						message.error('Read file error')
 						reject()
 					}
 				})
 			},
-			onChange(info) {
+			async onChange(info) {
 				const imgType = ['png', 'jpg', 'jpeg', 'svg']
 				const { status } = info.file;
 				// if (status !== 'uploading') {
 					
 				// }
-				console.log(info.file)
 				if (status === 'done') {
 					var fileName = info.file.name
 					var index = fileName.lastIndexOf('.')
@@ -260,42 +266,50 @@ class Publish extends Component {
 					}
 					var img_url = 'https://gateway.pinata.cloud/ipfs/' + obj.state.ipfsHashCover
 					var trimmed_des = obj.state.description.replace(/(\r\n\t|\n|\r\t)/gm, " ");
+					const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+					const account = accounts[0];
+					var url_gen_key = "http://18.162.56.46:5001/api/v0/key/gen?arg=" + account //8sh5t
 					if(obj.state.ipfsHashCover !== ''){
-						var JSONBody = {
-							"name": obj.state.name,
-							"description": trimmed_des,
-							"image": img_url,
-							"attributes": [
-								{
-									"trait_type": "bonusFee",
-									"value": obj.state.bonusFee
-								},
-								// {
-								// 	"trait_type": "file",
-								// 	"value": obj.state.bonusFee
-								// }
-							]
-						}
-						const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`
-						axios
-							.post(url, JSONBody, {
-								headers: {
-									pinata_api_key: pinata_api_key,
-									pinata_secret_api_key: pinata_secret_api_key
-								},
-							})
+						axios.post(url_gen_key)
 							.then(function (response) {
-								obj.setState({
-									ipfsHashMeta: response.data.IpfsHash
-								})
-								const bytes = bs58.decode(response.data.IpfsHash)
-								const bytesToContract = bytes.toString('hex').substring(4,);
-								console.log(bytesToContract)
-								console.log(response.data.IpfsHash)
-								message.success(`${info.file.name} file uploaded successfully.`);
+								console.log(response.data)
+								var JSONBody = {
+									"name": obj.state.name,
+									"description": trimmed_des,
+									"image": img_url,
+									"attributes": [
+										{
+											"trait_type": "bonusPercentage",
+											"value": obj.state.bonusFee
+										},
+										{
+											"trait_type": "fileAddress",
+											"value": response.data.Id
+										}
+									]
+								}
+
+								const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`
+								axios
+									.post(url, JSONBody, {
+										headers: {
+											pinata_api_key: pinata_api_key,
+											pinata_secret_api_key: pinata_secret_api_key
+										},
+									})
+									.then(function (response) {
+										const bytes = bs58.decode(response.data.IpfsHash)
+										const bytesToContract = bytes.toString('hex').substring(4,);
+										console.log(bytesToContract)
+										console.log(response.data.IpfsHash)
+										obj.setState({
+											ipfsMeta: bytesToContract
+										})
+										message.success(`${info.file.name} file uploaded successfully.`);
+									})
 							})
+						
 					}
-					// TODO: call backend to publish on IPFS.
 					
 					
 				} else if (status === 'error') {
@@ -307,107 +321,234 @@ class Publish extends Component {
 			},
 		};
 
-		return (
-			<div>
-				<Helmet>
-					<title>SparkNFT | Sell</title>
-				</Helmet>
-			
-				<ThemeProvider theme={theme}>
-					<TopBar />
-					<Container component="main" maxWidth="xs">
-						<div className={classes.paper}>
-							<Typography component="h1" variant="h2" style={{ marginTop: "3%", fontFamily: 'Ubuntu'}}>
-								<b>发布作品信息</b>
-							</Typography>
-							<form className={classes.form} noValidate>
-								<Grid container spacing={2}>
-									<Grid item xs={12} >
-										<label for="pubName" style= {{fontSize: 18, marginBottom: 10}}>作品名字 *</label>
-										<Input 
-											placeholder="作品名称" 
-											allowClear 
-											id="pubName"
-											onChange={this.handleGetPubName}
-											value={this.state.name}
-											className={classes.input}
-										/>
+		const propPDF = {
+			name: 'file',
+			multiple: true,
+			action: `https://api.pinata.cloud/pinning/pinFileToIPFS`,
+			headers: {
+				pinata_api_key: pinata_api_key,
+				pinata_secret_api_key: pinata_secret_api_key
+			},
+			// data: this.state.bufferPDF,
+			beforeUpload: file => {
+				return new Promise(async (resolve, reject) => {
+					try {
+						const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+						const account = accounts[0];
+						var JSONBody = {
+							"account": account,
+							"root_nft_id": obj.state.rootNFTId
+						}
+						var json_str = JSON.stringify(JSONBody)
+						let sig
+						web3.eth.personal.sign(json_str, account).then((response) => {
+							console.log("sig: " + response)
+							sig = response
+						})
+						var payload = {
+							"account": account,
+							"root_nft_id": obj.state.rootNFTId,
+							"signature": sig
+						}
+						var payload_str = JSON.stringify(payload)
+						var req_key_url = 'http://example.com/api/v1/key/claim'
+						const res = await axios.post(req_key_url, payload_str, {
+							headers: {
+								'Content-Type': 'application/json'
+							}
+						})
+						if(res.status == 200) {
+							var secret_key = res.data.key
+							const reader = new FileReader()
+							reader.readAsArrayBuffer(file)
+							reader.onload = (e) => {
+								var b = e.target.result
+								var wordArray = CryptoJS.lib.WordArray.create(b);
+								const str = CryptoJS.enc.Hex.stringify(wordArray);
+								var cipher_text = CryptoJS.AES.encrypt(str, secret_key).toString();
+								var myblob = new Blob([cipher_text], {
+									type: 'text/plain'
+								});
+								resolve(myblob)
+							}
+						} else {
+							var error_msg = res.data.message
+							alert("获取密钥失败" + error_msg)
+							reject()
+						}
+						
+					} catch (e) {
+						message.error('Read file error')
+						reject()
+					}
+				})
+			},
+			onChange(info) {
+				const { status } = info.file;
+				if (status === 'done') {
+					obj.setState({
+						fileIpfs: info.file.response.IpfsHash
+					})
+					message.success(`${info.file.name} file uploaded successfully.`);
+				}
+				
+			},
+			onDrop(e) {
+				console.log('Dropped files', e.dataTransfer.files);
+			},
+		};
+
+		if(this.state.onLoading){
+			return(
+				<div>
+					<Helmet>
+						<title>SparkNFT | Publish</title>
+					</Helmet>
+
+					<div style={{ width: '300px', height: '300px', position: 'relative', left: '43%', marginTop: '20%' }}>
+						<ReactLoading type={'bars'} color={'#2196f3'} height={300} width={300} />
+					</div>
+				</div>
+			);
+		} else if (this.state.allowSubmitPDF){
+			return(
+				<div>
+					<Helmet>
+						<title>SparkNFT | Publish</title>
+					</Helmet>
+
+					<div style={{ width: '300px', height: '300px', position: 'relative', left: '30%', marginTop: '10%'}}>
+						<Typography component="h1" variant="h2" style={{ marginTop: "3%", fontFamily: 'Ubuntu' }}>
+							<b>上传作品文件</b>
+						</Typography>
+						<label style={{ fontSize: 18, marginTop: 50 }}>作品文件 *</label>
+						<p style={{ fontSize: 12 }}>请在下方区域上传您的作品文件 <br />
+							作品文件支持这些格式：TXT， PDF</p>
+						<Dragger {...propPDF} style={{ width: 680, minHeight: 200 }} id="Uploader2">
+							<p className="ant-upload-drag-icon">
+								<InboxOutlined />
+							</p>
+							<p className="ant-upload-text">上传文件请点击或者拖拽文件到此处</p>
+							<p className="ant-upload-hint">
+								支持单个文件的上传和多个文件的上传，支持多种类型文件的上传
+							</p>
+						</Dragger>
+						<Button
+							variant="contained"
+							className={classes.button}
+							startIcon={<CloudUploadIcon />}
+							style={{ marginTop: 50, width: 200, height: 50, marginBottom: 50, marginLeft: 250 }}
+							onClick={this.submitWork}
+						>
+							发布作品
+						</Button>
+					</div>
+				</div>
+			);
+
+		} else{
+			return (
+				<div>
+					<Helmet>
+						<title>SparkNFT | Publish</title>
+					</Helmet>
+
+					<ThemeProvider theme={theme}>
+						<TopBar />
+						<Container component="main" maxWidth="xs">
+							<div className={classes.paper}>
+								{/* {showLoading()} */}
+								<Typography component="h1" variant="h2" style={{ marginTop: "3%", fontFamily: 'Ubuntu' }}>
+									<b>发布作品信息</b>
+								</Typography>
+								<form className={classes.form} noValidate>
+									<Grid container spacing={2}>
+										<Grid item xs={12} >
+											<label style={{ fontSize: 18, marginBottom: 10 }}>作品名字 *</label>
+											<Input
+												placeholder="作品名称"
+												allowClear
+												id="pubName"
+												onChange={this.handleGetPubName}
+												value={this.state.name}
+												className={classes.input}
+											/>
+										</Grid>
+										<Grid item xs={12}>
+											<label style={{ fontSize: 18, marginTop: 20 }}>收益比例 *</label>
+											<p style={{ fontSize: 12 }}>当您的作品被成功分享时，您希望从分享价格中获得多少比例的收益</p>
+											<InputNumber
+												id="bonusFee"
+												defaultValue={0}
+												min={0}
+												max={100}
+												formatter={value => `${value}%`}
+												parser={value => value.replace('%', '')}
+												onChange={this.handleGetBonusFee}
+												className={classes.inputNum}
+											/>
+										</Grid>
+										<Grid item xs={12}>
+											<label style={{ fontSize: 18, marginTop: 20 }}>售卖价格 *</label>
+											<InputNumber
+												id="price"
+												defaultValue={0}
+												min={0}
+												onChange={this.handleGetPrice}
+												className={classes.inputNum}
+											/>
+										</Grid>
+										<Grid item xs={12}>
+											<label style={{ fontSize: 18, marginTop: 20 }}>最高分享次数 *</label>
+											<p style={{ fontSize: 12 }}>您希望每一个帮助您传播的用户最多能够分享多少次？</p>
+											<InputNumber
+												id="shareTimes"
+												defaultValue={0}
+												min={0}
+												onChange={this.handleGetShareTimes}
+												className={classes.inputNum}
+											/>
+										</Grid>
+										<Grid item xs={12}>
+											<label style={{ fontSize: 18, marginTop: 20 }}>作品描述 *</label>
+											<p style={{ fontSize: 12 }}>请用简单的话语对您的作品进行描述，精准有效的描述能帮助其他用户更准确得了解您的作品</p>
+											<TextArea
+												rows={4}
+												id="Description"
+												onChange={this.handleGetDescription}
+											/>
+										</Grid>
 									</Grid>
-									<Grid item xs={12}>
-										<label for="bonusFee" style={{ fontSize: 18,  marginTop: 20 }}>收益比例 *</label>
-										<p style={{ fontSize: 12}}>当您的作品被成功分享时，您希望从分享价格中获得多少比例的收益</p>
-										<InputNumber
-											id="bonusFee"
-											defaultValue={0}
-											min={0}
-											max={100}
-											formatter={value => `${value}%`}
-											parser={value => value.replace('%', '')}
-											onChange={this.handleGetBonusFee}
-											className={classes.inputNum}
-										/>
-									</Grid>
-									<Grid item xs={12}>
-										<label for="price" style={{ fontSize: 18, marginTop: 20 }}>售卖价格 *</label>
-										<InputNumber
-											id="price"
-											defaultValue={0}
-											min={0}
-											onChange={this.handleGetPrice}
-											className={classes.inputNum}
-										/>
-									</Grid>
-									<Grid item xs={12}>
-										<label for="shareTimes" style={{ fontSize: 18, marginTop: 20 }}>最高分享次数 *</label>
-										<p style={{ fontSize: 12 }}>您希望每一个帮助您传播的用户最多能够分享多少次？</p>
-										<InputNumber
-											id="shareTimes"
-											defaultValue={0}
-											min={0}
-											onChange={this.handleGetShareTimes}
-											className={classes.inputNum}
-										/>
-									</Grid>
-									<Grid item xs={12}>
-										<label for="Description" style={{ fontSize: 18, marginTop: 20 }}>作品描述 *</label>
-										<p style={{ fontSize: 12 }}>请用简单的话语对您的作品进行描述，精准有效的描述能帮助其他用户更准确得了解您的作品</p>
-										<TextArea 
-											rows={4} 
-											id="Description"
-											onChange={this.handleGetDescription}
-										/>
-									</Grid>
-								</Grid>
-								<label style={{ fontSize: 18, marginTop: 50 }}>作品文件及其封面 *</label>
-								<p style={{ fontSize: 12 }}>请在下方区域上传您的作品文件以及封面文件 <br />
-									封面文件支持这些格式：PNG, JPG, SVG； 作品文件支持这些格式：TXT， PDF</p>
-								<Dragger {...prop} style = {{width: 680, minHeight: 200}} id= "Uploader">
-									<p className="ant-upload-drag-icon">
-										<InboxOutlined />
-									</p>
-									<p className="ant-upload-text">上传文件请点击或者拖拽文件到此处</p>
-									<p className="ant-upload-hint">
-										支持单个文件的上传和多个文件的上传，支持多种类型文件的上传
-									</p>
-								</Dragger>
-							</form>
-							<Button
-								variant="contained"
-								className={classes.button}
-								startIcon={<CloudUploadIcon />}
-								style = {{marginTop: 50, width: 200, height: 50, marginBottom: 50}}
-								onClick={this.submit}
-							>
-								发布作品
-							</Button>
-							<Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/sellSingle/4294967297'>
-								<b>售卖</b>
-							</Button>
-						</div>
-					</Container>
-				</ThemeProvider>
-			</div>
-		);
+									<label style={{ fontSize: 18, marginTop: 50 }}>封面图片 *</label>
+									<p style={{ fontSize: 12 }}>请在下方区域上传您的封面图片 <br />
+										封面文件支持这些格式：PNG, JPG, SVG</p>
+									<Dragger {...prop} style={{ width: 680, minHeight: 200 }} id="Uploader">
+										<p className="ant-upload-drag-icon">
+											<InboxOutlined />
+										</p>
+										<p className="ant-upload-text">上传文件请点击或者拖拽文件到此处</p>
+										<p className="ant-upload-hint">
+											支持单个文件的上传和多个文件的上传，支持多种类型文件的上传
+										</p>
+									</Dragger>
+								</form>
+								<Button
+									variant="contained"
+									className={classes.button}
+									startIcon={<CloudUploadIcon />}
+									style={{ marginTop: 50, width: 200, height: 50, marginBottom: 50 }}
+									onClick={this.submit}
+								>
+									提交信息
+								</Button>
+							</div>
+						</Container>
+					</ThemeProvider>
+				</div>
+			);
+		}
+
+		
 	}
 }
 
