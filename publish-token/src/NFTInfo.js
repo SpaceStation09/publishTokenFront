@@ -25,6 +25,7 @@ import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 import {IconButton} from "@material-ui/core";
 import axios from 'axios';
 import web3 from './web3';
+const FileSaver = require('file-saver');
 var CryptoJS = require("crypto-js");
 const sigUtil = require('ethereumjs-util');
 const ethUtil = require('ethereumjs-util');
@@ -104,7 +105,7 @@ const styles = theme => ({
 class NFTInfo extends Component{
 
   gateway = 'https://gateway.pinata.cloud/ipfs/';
-
+  backend = '';
   state = {
       Name: '',
       Description: '',
@@ -127,69 +128,90 @@ class NFTInfo extends Component{
     //      window.open(url) // Mostly the same, I was just experimenting with different approaches, tried link.click, iframe and other solutions
     // })
     const method = 'GET';
-
-    const url = 'https://gateway.pinata.cloud/ipfs/QmVUnbW5CQbR9E4kaCvGNkfn9MKWaxjrB6SFdcEZ2xmviX';
+    let obj = this;
+    const url = 'https://gateway.pinata.cloud/ipfs/QmaefpFuLZNwuRU8Q7pF6A2juQbi3XcPcV5TLGwBmVEUx9';
     axios.request({
         url,
         method,
-        responseType: 'blob', //important
+        //responseType: 'blob', //important
       })
-      .then(({ciphertext}) => {
-        let obj = this;
-        var data  = this.decryptCipherTextToBlob(ciphertext, '123');
-        const downloadUrl = window.URL.createObjectURL(new Blob([data]));
+      .then(async (response) => {
         
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.setAttribute('download', 'file.pdf'); //any other extension
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+        let ciphertext = response.data;
+        //console.log(ciphertext);
+        // var data  = this.decryptCipherTextToBlob(ciphertext, "secret key 123");
+        let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        let account = accounts[0];
+        console.log(account);
+        let signJson = {
+          account: account,
+          root_nft_id: this.props.match.params.id
+        }
+        signJson = JSON.stringify(signJson);
+        let signedMessage = await web3.eth.personal.sign(web3.utils.utf8ToHex(signJson), account);
+        let requestMessage = {
+          account: account,
+          root_nft_id: this.props.match.params.id,
+          signature: signedMessage
+        }
+        axios.post(backend + "/api/v1/key/claim",JSON.stringify(requestMessage)).then(function(res) {
+          let key = res.key;
+          let data = CryptoJS.AES.decrypt(ciphertext, key);
+          let plainText = data.toString(CryptoJS.enc.Utf8);
+          const wordArray = CryptoJS.enc.Hex.parse(plainText);
+          let BaText = this.wordArrayToByteArray(wordArray, wordArray.length);
+          var arrayBufferView = new Uint8Array(BaText);
+          var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
+          FileSaver.saveAs(blob,this.state.Name);
+        })
+        // let data = CryptoJS.AES.decrypt(ciphertext, "secret key 123");
+        // let plainText = data.toString(CryptoJS.enc.Utf8);
+        // const wordArray = CryptoJS.enc.Hex.parse(plainText);
+        // let BaText = this.wordArrayToByteArray(wordArray, wordArray.length);
+        // var arrayBufferView = new Uint8Array(BaText);
+        // var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
+        // FileSaver.saveAs(blob,this.state.Name);
+        // const downloadUrl = window.URL.createObjectURL(new Blob([data]));
+        
+        // const link = document.createElement('a');
+        // link.href = downloadUrl;
+        // link.setAttribute('download', 'file.pdf'); //any other extension
+        // document.body.appendChild(link);
+        // link.click();
+        // link.remove();
       });
   }
+  wordToByteArray = (word, length) => {
+    var ba = [],i,xFF = 0xFF;
+    if (length > 0)
+     ba.push(word >>> 24);
+    if (length > 1)
+     ba.push((word >>> 16) & xFF);
+    if (length > 2)
+     ba.push((word >>> 8) & xFF);
+    if (length > 3)
+     ba.push(word & xFF);
+    return ba;
+   }
 
-  
-
-  decryptCipherTextToBlob = (ciphertext,secretKey) => {
-    var bytes  = CryptoJS.AES.decrypt(ciphertext, secretKey);
-    var originalText = bytes.toString(CryptoJS.enc.Utf8); 
-    return this.dataURItoBlob(originalText);
-  }
-
-  encryptBlob = (blobData,secretKey) => {
-    var ciphertext;
-    this.blobToDataURI(blobData,function(res) {
-      ciphertext = CryptoJS.TripleDES.encrypt(res, secretKey).toString();
-    })
-    return ciphertext;
-  }
-
-  /**
-   * 
-   * blob二进制 to base64
-   **/
-   blobToDataURI = (blob, callback) => {
-    var reader = new FileReader();
-    reader.onload = function (e) {
-        callback(e.target.result);
+   wordArrayToByteArray = (wordArray, length) => {
+    if (wordArray.hasOwnProperty("sigBytes") && wordArray.hasOwnProperty("words")) {
+      length = wordArray.sigBytes;
+      wordArray = wordArray.words;
     }
-    reader.readAsDataURL(blob);
-}
-
-   /**
-     * base64  to blob二进制
-     */
-    dataURItoBlob = (dataURI)  => {
-      var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]; // mime类型
-      var byteString = atob(dataURI.split(',')[1]); //base64 解码
-      var arrayBuffer = new ArrayBuffer(byteString.length); //创建缓冲数组
-      var intArray = new Uint8Array(arrayBuffer); //创建视图
-
-      for (var i = 0; i < byteString.length; i++) {
-          intArray[i] = byteString.charCodeAt(i);
-      }
-      return new Blob([intArray], {type: mimeString});
+  
+    var result = [],
+      bytes,
+      i = 0;
+    while (length > 0) {
+      bytes = this.wordToByteArray(wordArray[i], Math.min(4, length));
+      length -= bytes.length;
+      result.push(bytes);
+      i++;
+    }
+    return [].concat.apply([], result);
   }
+
 
   
 
@@ -249,7 +271,7 @@ class NFTInfo extends Component{
         this.setState({dataUrl: data.data});
       });
     });
-    let leafUrl = "" + "/api/v1/tree/children?" + this.props.match.params.id;
+    let leafUrl = backend + "/api/v1/tree/children?" + this.props.match.params.id;
     axios.get(leafUrl).then(data => {
       this.setState({Leaf: data.children.length});
       
