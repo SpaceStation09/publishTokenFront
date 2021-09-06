@@ -26,8 +26,6 @@ const {
 } = require('./project.secret');
 const FormData = require('form-data');
 const bs58 = require('bs58');
-const IPFS = require('ipfs-core')
-const CID = require('cids')
 var CryptoJS = require("crypto-js");
 
 
@@ -97,26 +95,26 @@ const styles = theme => ({
 		fontSize: 20,
 	}
 });
-// 64EC88CA00B268E5BA1A35678A1B5316D212F4F366B2477232534A8AECA37F3C
 
 
-// function Publish() {
 class Publish extends Component {
 	state = {
     name: '',
 		bonusFee: 0,
 		price: 0,
 		buffer: null,
-		fileList: [],
+		file: null,
 		ipfsHashCover: '',
 		ipfsMeta: '',
 		ipns: '',
+		fileIpfs: '',
 		description: '',
 		shareTimes: 0,
 		onLoading: false,
 		rootNFTId: '',
 		issueId: '',
-		allowSubmitPDF: false
+		allowSubmitPDF: false,
+		currentAcc: ''
   };
 
 	async componentDidMount() {
@@ -192,67 +190,30 @@ class Publish extends Component {
 		})	
 	}
 
-	submitWork = async (e) => {
+	submitWork = async () => {
+		const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+		const account = accounts[0];
+		const publish_url = 'http://18.162.56.46:5001/api/v0/name/publish?arg=' + this.state.fileIpfs + '&key=' + account
 		this.setState({
-			allowSubmitPDF: false
+			onLoading: true
 		})
-
-		var url_rm_key = "http://18.162.56.46:5001/api/v0/key/rm?arg=myKey"
-		axios.post(url_rm_key)
-			.then(function (response) {})
+		alert("作品文件发布所需的时间较长，请耐心等待，此过程大约需要3分钟")
+		let obj = this
+		axios.post(publish_url)
+			.then((response)=> {
+				obj.setState({
+					onLoading: false
+				})
+				alert("作品文件发布成功")
+			})
+		const rm_key_url = 'http://18.162.56.46:5001/api/v0/key/rm?arg=' + account
+		axios.post(rm_key_url)
+			.then((response) => {
+				obj.setState({
+					allowSubmitPDF: false
+				})
+			})
 	}
-
-
-	encryptArrayBuffer = (arbuffer,secretKey) => {
-		var ciphertext;
-		let res = this.transformArrayBufferToBase64(arbuffer);
-		ciphertext = CryptoJS.TripleDES.encrypt(res, secretKey).toString();
-		return ciphertext;
-	  }
-	
-	  /**
-	   * 
-	   * blob二进制 to base64
-	   **/
-	   blobToDataURI = (blob, callback) => {
-		var reader = new FileReader();
-		reader.onload = function (e) {
-			callback(e.target.result);
-		}
-		reader.readAsDataURL(blob);
-	}
-	transformArrayBufferToBase64 = (buffer) => {
-		var binary = '';
-		var bytes = new Uint8Array(buffer);
-		for (var len = bytes.byteLength, i = 0; i < len; i++) {
-			binary += String.fromCharCode(bytes[i]);
-		}
-		return window.btoa(binary);
-	}
-	encryptBlob = (blobData,secretKey) => {
-		let ciphertext;
-		
-		this.blobToDataURI(blobData).then(res => {
-			ciphertext = CryptoJS.TripleDES.encrypt(res, secretKey).toString();
-		});
-		console.log(ciphertext);
-
-		return ciphertext;
-	  }
-	
-	stringToArrayBuffer = ( string, encoding, callback ) => {
-		var blob = new Blob([string],{type:'text/plain;charset='+encoding});
-		var reader = new FileReader();
-		reader.onload = function(evt){callback(evt.target.result);};
-		reader.readAsArrayBuffer(blob);
-	}
-	encodebs64 = (str) => {
-		// 对字符串进行编码
-		var encode = encodeURI(str);
-		// 对编码的字符串转化base64
-		var base64 = btoa(encode);
-		return base64;
-		}
 
 	render(){
 		const { classes } = this.props
@@ -287,7 +248,7 @@ class Publish extends Component {
 					}
 				})
 			},
-			onChange(info) {
+			async onChange(info) {
 				const imgType = ['png', 'jpg', 'jpeg', 'svg']
 				const { status } = info.file;
 				// if (status !== 'uploading') {
@@ -305,8 +266,9 @@ class Publish extends Component {
 					}
 					var img_url = 'https://gateway.pinata.cloud/ipfs/' + obj.state.ipfsHashCover
 					var trimmed_des = obj.state.description.replace(/(\r\n\t|\n|\r\t)/gm, " ");
-					var url_gen_key = "http://18.162.56.46:5001/api/v0/key/gen?arg=myKey" //8sh5t
-
+					const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+					const account = accounts[0];
+					var url_gen_key = "http://18.162.56.46:5001/api/v0/key/gen?arg=" + account //8sh5t
 					if(obj.state.ipfsHashCover !== ''){
 						axios.post(url_gen_key)
 							.then(function (response) {
@@ -367,22 +329,54 @@ class Publish extends Component {
 				pinata_api_key: pinata_api_key,
 				pinata_secret_api_key: pinata_secret_api_key
 			},
-			data: this.state.buffer,
+			// data: this.state.bufferPDF,
 			beforeUpload: file => {
-				return new Promise((resolve, reject) => {
+				return new Promise(async (resolve, reject) => {
 					try {
-						const reader = new FileReader()
-						reader.readAsArrayBuffer(file)
-						reader.onload = (e) => {
-							var content = e.target.result
-							let params = new FormData()
-							params.append('file', content)
-							//TODO: request for sk and encrypt file
-							this.setState({
-								buffer: params
-							})
+						const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+						const account = accounts[0];
+						var JSONBody = {
+							"account": account,
+							"root_nft_id": obj.state.rootNFTId
 						}
-						resolve()
+						var json_str = JSON.stringify(JSONBody)
+						let sig
+						web3.eth.personal.sign(json_str, account).then((response) => {
+							console.log("sig: " + response)
+							sig = response
+						})
+						var payload = {
+							"account": account,
+							"root_nft_id": obj.state.rootNFTId,
+							"signature": sig
+						}
+						var payload_str = JSON.stringify(payload)
+						var req_key_url = 'http://example.com/api/v1/key/claim'
+						const res = await axios.post(req_key_url, payload_str, {
+							headers: {
+								'Content-Type': 'application/json'
+							}
+						})
+						if(res.status == 200) {
+							var secret_key = res.data.key
+							const reader = new FileReader()
+							reader.readAsArrayBuffer(file)
+							reader.onload = (e) => {
+								var b = e.target.result
+								var wordArray = CryptoJS.lib.WordArray.create(b);
+								const str = CryptoJS.enc.Hex.stringify(wordArray);
+								var cipher_text = CryptoJS.AES.encrypt(str, secret_key).toString();
+								var myblob = new Blob([cipher_text], {
+									type: 'text/plain'
+								});
+								resolve(myblob)
+							}
+						} else {
+							var error_msg = res.data.message
+							alert("获取密钥失败" + error_msg)
+							reject()
+						}
+						
 					} catch (e) {
 						message.error('Read file error')
 						reject()
@@ -390,22 +384,14 @@ class Publish extends Component {
 				})
 			},
 			onChange(info) {
-				const imgType = ['png', 'jpg', 'jpeg', 'svg']
 				const { status } = info.file;
-				// if (status !== 'uploading') {
-
-				// }
 				if (status === 'done') {
-					var fileName = info.file.name
-					var index = fileName.lastIndexOf('.')
-					var ext = fileName.substr(index + 1)
-					var isImg = (imgType.indexOf(ext.toLowerCase()) != -1)
-					if (isImg) {
-					}
-
-				} else if (status === 'error') {
-					message.error(`${info.file.name} file upload failed.`);
+					obj.setState({
+						fileIpfs: info.file.response.IpfsHash
+					})
+					message.success(`${info.file.name} file uploaded successfully.`);
 				}
+				
 			},
 			onDrop(e) {
 				console.log('Dropped files', e.dataTransfer.files);
@@ -431,14 +417,14 @@ class Publish extends Component {
 						<title>SparkNFT | Publish</title>
 					</Helmet>
 
-					<div style={{position: 'relative', left: '30%', marginTop: '10%'}}>
+					<div style={{ width: '300px', height: '300px', position: 'relative', left: '30%', marginTop: '10%'}}>
 						<Typography component="h1" variant="h2" style={{ marginTop: "3%", fontFamily: 'Ubuntu' }}>
 							<b>上传作品文件</b>
 						</Typography>
 						<label style={{ fontSize: 18, marginTop: 50 }}>作品文件 *</label>
 						<p style={{ fontSize: 12 }}>请在下方区域上传您的作品文件 <br />
 							作品文件支持这些格式：TXT， PDF</p>
-						<Dragger {...propPDF} style={{ width: 680, minHeight: 200 }} id="Uploader">
+						<Dragger {...propPDF} style={{ width: 680, minHeight: 200 }} id="Uploader2">
 							<p className="ant-upload-drag-icon">
 								<InboxOutlined />
 							</p>
