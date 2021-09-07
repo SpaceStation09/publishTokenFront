@@ -85,6 +85,7 @@ class BuySingle extends Component {
     approvedAddr: '',
     currentAcc: '',
     onLoading: false,
+    childrenNum: 0
   };
 
   constructor(props) {
@@ -133,6 +134,19 @@ class BuySingle extends Component {
         approvedAddr: approved.toLowerCase()
       })
     })
+
+    const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id='+this.state.NFTId
+    const res = await axios.get(url)
+    if(res.status==200){
+      var children = res.data.children
+      var children_num = children.length()
+      this.setState({
+        childrenNum: children_num
+      })
+      console.log(children_num)
+    }else{
+      alert('获取nft子节点情况页面失败')
+    }
   }
 
   handleBuy = async (e) => {

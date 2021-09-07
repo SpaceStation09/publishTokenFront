@@ -1,6 +1,6 @@
 import web3 from './web3';
 
-const address = '0xe9c60FDa46227952950c626b74a823cA2c1DC1e6'; // rinkeby
+const address = '0x62a680d7616346EB890B5a7Ff1D151dBE2EbCAfD'; // rinkeby
 
 const abi = [
   {
@@ -308,6 +308,44 @@ const abi = [
         "type": "uint64"
       }
     ],
+    "name": "getDepthByNFTId",
+    "outputs": [
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint64",
+        "name": "_NFT_id",
+        "type": "uint64"
+      }
+    ],
+    "name": "getEditionIdByNFTId",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint64",
+        "name": "_NFT_id",
+        "type": "uint64"
+      }
+    ],
     "name": "getFatherByNFTId",
     "outputs": [
       {
@@ -349,6 +387,25 @@ const abi = [
       }
     ],
     "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint64",
+        "name": "_NFT_id",
+        "type": "uint64"
+      }
+    ],
+    "name": "getProfitByNFTId",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
