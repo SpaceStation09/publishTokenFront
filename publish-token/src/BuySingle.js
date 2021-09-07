@@ -139,11 +139,10 @@ class BuySingle extends Component {
     const res = await axios.get(url)
     if(res.status==200){
       var children = res.data.children
-      var children_num = children.length()
+      var children_num = children.length
       this.setState({
         childrenNum: children_num
       })
-      console.log(children_num)
     }else{
       alert('获取nft子节点情况页面失败')
     }
@@ -243,8 +242,8 @@ class BuySingle extends Component {
             <div className={classes.paper}>
               <Grid container justifyContent="space-evenly" spacing={5}>
                 <Grid item xs={4} style={{ maxWidth: 600 }}>
-                  <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: '40%' }}>
-                    <img style={{ width: 300, marginTop: 20 }} src={this.state.coverURL}></img>
+                  <Paper style={{ backgroundColor: '#EFEBE9', width: 350, marginLeft: '40%' }}>
+                    <img style={{ width: 300, marginTop: 20, marginBottom: 50 }} src={this.state.coverURL}></img>
                   </Paper>
                 </Grid>
                 <Grid item xs style={{ marginLeft: '5%' }}>
@@ -263,8 +262,11 @@ class BuySingle extends Component {
                   <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize:18 }}>
                     售价: {this.state.price} ETH
                   </Typography>
-                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 12 }}>
+                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '1%', maxWidth: '65%', fontSize: 12 }}>
                     当前拥有者: {this.state.owner}
+                  </Typography>
+                  <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
+                    当前拥有的子节点数量: {this.state.childrenNum}
                   </Typography>
                   {buyButton()}
                 </Grid>

@@ -79,7 +79,8 @@ class SellSingle extends Component {
     copied: false,
     onLoading: false,
     owner: '',
-    currentAcc: ''
+    currentAcc: '',
+    childrenNum: 0
   };
 
   // https://gateway.pinata.cloud/ipfs/QmPsymsaqMZsiwLHXepXtEpYMq3xtnBLLbPgTEyybz1idQ
@@ -126,6 +127,18 @@ class SellSingle extends Component {
         owner: owner.toLowerCase()
       })
     })
+
+    const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id=' + this.state.NFTId
+    const res = await axios.get(url)
+    if (res.status == 200) {
+      var children = res.data.children
+      var children_num = children.length
+      this.setState({
+        childrenNum: children_num
+      })
+    } else {
+      alert('获取nft子节点情况页面失败')
+    }
   }
 
   handleClickOpen = (e) => {
@@ -258,8 +271,8 @@ class SellSingle extends Component {
             <div className={classes.paper}>
               <Grid container justifyContent="space-evenly" spacing= {5}>
                 <Grid item xs={4} style={{ maxWidth: 600}}>
-                  <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: '40%'}}>
-                    <img style={{ width: 300, marginTop: 20}} src={this.state.coverURL}></img>  
+                  <Paper style={{ backgroundColor: '#EFEBE9', width: 350, marginLeft: '40%'}}>
+                    <img style={{ width: 300, marginTop: 20, marginBottom: 50}} src={this.state.coverURL}></img>  
                   </Paper>
                 </Grid>
                 <Grid item xs style={{ marginLeft: '5%'}}>
@@ -274,6 +287,9 @@ class SellSingle extends Component {
                   </Typography>
                   <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '65%', fontSize: 24 }}>
                     创作者分红比例: {this.state.bonusFee} %
+                  </Typography>
+                  <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
+                    当前拥有的子节点数量: {this.state.childrenNum}
                   </Typography>
                   {showSellBtn()}
                   {showLoading()}

@@ -338,86 +338,44 @@ class Publish extends Component {
 					try {
 						const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
 						const signer = accounts[0];
+						var rootNftId = parseInt(obj.state.rootNFTId);
+						var message = {
+							account: signer,
+							root_nft_id: 47244640258
+						};
+						const sig = await web3.eth.personal.sign(JSON.stringify(message), signer)
 
-						// const domainData = {
-						// 	chainId: 4,
-						// 	name: 'SparkNFT',
-						// 	verifyingContract: "0xe9c60FDa46227952950c626b74a823cA2c1DC1e6",
-						// 	version: '1',
-						// }
-
-						// const domain = [
-						// 	{ name: "name", type: "string" },
-						// 	{ name: "version", type: "string" },
-						// 	{ name: "chainId", type: "uint256" },
-						// 	{ name: "verifyingContract", type: "address" },
-						// ];
-
-						// const rootNFTId = [
-						// 	{ name: "root_nft_id", type: "string" },
-						// ];
-						// var message = {
-						// 	"root_nft_id": "47244640258"
-						// };
-						// const msgParams = JSON.stringify({
-						// 	types: {
-						// 		EIP712Domain: domain,
-						// 		RootNFTId: rootNFTId
-						// 	}, 
-						// 	domain: domainData,
-						// 	primaryType: "RootNFTId",
-						// 	message: message
-						// });
-						// web3.currentProvider.send({
-						// 	method: "eth_signTypedData_v3",
-						// 	params: [signer, msgParams],
-						// 	from: signer
-						// }, function (err, result) {
-						// 	if (err) {
-						// 		return console.error(err);
-						// 	}
-
-						// 	const signature = result.result.substring(2);
-						// 	obj.setState({
-						// 		sig: signature
-						// 	})
-						// 	console.log(signature)
-						// })
-						// web3.eth.accounts.sign(json_str).then((response) => {
-						// 	console.log("sig: " + response)
-						// 	sig = response
-						// })
-						// var payload = {
-						// 	"account": account,
-						// 	"root_nft_id": obj.state.rootNFTId,
-						// 	"signature": sig
-						// }
-						// var payload_str = JSON.stringify(payload)
-						// var req_key_url = 'http://example.com/api/v1/key/claim'
-						// const res = await axios.post(req_key_url, payload_str, {
-						// 	headers: {
-						// 		'Content-Type': 'application/json'
-						// 	}
-						// })
-						// if(res.status == 200) {
-						// 	var secret_key = res.data.key
-						// 	const reader = new FileReader()
-						// 	reader.readAsArrayBuffer(file)
-						// 	reader.onload = (e) => {
-						// 		var b = e.target.result
-						// 		var wordArray = CryptoJS.lib.WordArray.create(b);
-						// 		const str = CryptoJS.enc.Hex.stringify(wordArray);
-						// 		var cipher_text = CryptoJS.AES.encrypt(str, secret_key).toString();
-						// 		var myblob = new Blob([cipher_text], {
-						// 			type: 'text/plain'
-						// 		});
-						// 		resolve(myblob)
-						// 	}
-						// } else {
-						// 	var error_msg = res.data.message
-						// 	alert("获取密钥失败" + error_msg)
-						// 	reject()
-						// }
+						var payload = {
+							"account": signer,
+							"root_nft_id": obj.state.rootNFTId,
+							"signature": sig
+						}
+						var payload_str = JSON.stringify(payload)
+						var req_key_url = 'http://192.168.0.64:3000/api/v1/key/claim'
+						const res = await axios.post(req_key_url, payload_str, {
+							headers: {
+								'Content-Type': 'application/json'
+							}
+						})
+						if(res.status == 200) {
+							var secret_key = res.data.key
+							const reader = new FileReader()
+							reader.readAsArrayBuffer(file)
+							reader.onload = (e) => {
+								var b = e.target.result
+								var wordArray = CryptoJS.lib.WordArray.create(b);
+								const str = CryptoJS.enc.Hex.stringify(wordArray);
+								var cipher_text = CryptoJS.AES.encrypt(str, secret_key).toString();
+								var myblob = new Blob([cipher_text], {
+									type: 'text/plain'
+								});
+								resolve(myblob)
+							}
+						} else {
+							var error_msg = res.data.message
+							alert("获取密钥失败" + error_msg)
+							reject()
+						}
 						
 					} catch (e) {
 						console.log(e)
