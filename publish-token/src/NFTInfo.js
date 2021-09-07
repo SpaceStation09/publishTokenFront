@@ -22,7 +22,9 @@ import BigNumber from 'bignumber.js';
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
-import {IconButton} from "@material-ui/core";
+import {IconButton, Container} from "@material-ui/core";
+import contract from './contract';
+// import { Typography, Paper, Container }from '@material-ui/core';
 import axios from 'axios';
 import web3 from './web3';
 const FileSaver = require('file-saver');
@@ -53,6 +55,10 @@ const theme = createTheme({
 });
 
 const styles = theme => ({
+  container: {
+    maxWidth: 1500,
+    // backgroundColor: '#2196f3'
+  },
   icon: {
     marginRight: theme.spacing(2),
   },
@@ -148,22 +154,23 @@ class NFTInfo extends Component{
           root_nft_id: this.props.match.params.id
         }
         signJson = JSON.stringify(signJson);
-        let signedMessage = await web3.eth.personal.sign(web3.utils.utf8ToHex(signJson), account);
-        let requestMessage = {
-          account: account,
-          root_nft_id: this.props.match.params.id,
-          signature: signedMessage
-        }
-        axios.post(backend + "/api/v1/key/claim",JSON.stringify(requestMessage)).then(function(res) {
-          let key = res.key;
-          let data = CryptoJS.AES.decrypt(ciphertext, key);
-          let plainText = data.toString(CryptoJS.enc.Utf8);
-          const wordArray = CryptoJS.enc.Hex.parse(plainText);
-          let BaText = this.wordArrayToByteArray(wordArray, wordArray.length);
-          var arrayBufferView = new Uint8Array(BaText);
-          var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
-          FileSaver.saveAs(blob,this.state.Name);
-        })
+        let signedMessage = this.signData(account,ciphertext);
+        // console.log(signedMessage)
+        // let requestMessage = {
+        //   account: account,
+        //   root_nft_id: this.props.match.params.id,
+        //   signature: signedMessage
+        // }
+        // axios.post(this.backend + "/api/v1/key/claim",JSON.stringify(requestMessage)).then(function(res) {
+        //   let key = res.key;
+        //   let data = CryptoJS.AES.decrypt(ciphertext, key);
+        //   let plainText = data.toString(CryptoJS.enc.Utf8);
+        //   const wordArray = CryptoJS.enc.Hex.parse(plainText);
+        //   let BaText = this.wordArrayToByteArray(wordArray, wordArray.length);
+        //   var arrayBufferView = new Uint8Array(BaText);
+        //   var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
+        //   FileSaver.saveAs(blob,this.state.Name);
+        // })
         // let data = CryptoJS.AES.decrypt(ciphertext, "secret key 123");
         // let plainText = data.toString(CryptoJS.enc.Utf8);
         // const wordArray = CryptoJS.enc.Hex.parse(plainText);
@@ -181,36 +188,36 @@ class NFTInfo extends Component{
         // link.remove();
       });
   }
-  wordToByteArray = (word, length) => {
-    var ba = [],i,xFF = 0xFF;
-    if (length > 0)
-     ba.push(word >>> 24);
-    if (length > 1)
-     ba.push((word >>> 16) & xFF);
-    if (length > 2)
-     ba.push((word >>> 8) & xFF);
-    if (length > 3)
-     ba.push(word & xFF);
-    return ba;
-   }
+  // wordToByteArray = (word, length) => {
+  //   var ba = [],i,xFF = 0xFF;
+  //   if (length > 0)
+  //    ba.push(word >>> 24);
+  //   if (length > 1)
+  //    ba.push((word >>> 16) & xFF);
+  //   if (length > 2)
+  //    ba.push((word >>> 8) & xFF);
+  //   if (length > 3)
+  //    ba.push(word & xFF);
+  //   return ba;
+  //  }
 
-   wordArrayToByteArray = (wordArray, length) => {
-    if (wordArray.hasOwnProperty("sigBytes") && wordArray.hasOwnProperty("words")) {
-      length = wordArray.sigBytes;
-      wordArray = wordArray.words;
-    }
+  //  wordArrayToByteArray = (wordArray, length) => {
+  //   if (wordArray.hasOwnProperty("sigBytes") && wordArray.hasOwnProperty("words")) {
+  //     length = wordArray.sigBytes;
+  //     wordArray = wordArray.words;
+  //   }
   
-    var result = [],
-      bytes,
-      i = 0;
-    while (length > 0) {
-      bytes = this.wordToByteArray(wordArray[i], Math.min(4, length));
-      length -= bytes.length;
-      result.push(bytes);
-      i++;
-    }
-    return [].concat.apply([], result);
-  }
+  //   var result = [],
+  //     bytes,
+  //     i = 0;
+  //   while (length > 0) {
+  //     bytes = this.wordToByteArray(wordArray[i], Math.min(4, length));
+  //     length -= bytes.length;
+  //     result.push(bytes);
+  //     i++;
+  //   }
+  //   return [].concat.apply([], result);
+  // }
 
 
   
@@ -236,8 +243,8 @@ class NFTInfo extends Component{
       }
     })
     let web3 = new Web3(window.ethereum);
-    let nft = new web3.eth.Contract(NFT.abi, NFT.address);
-    this.setState({contract: nft});
+    let nft = contract;
+    this.setState({contract: contract});
     let obj = this;
     nft.methods.ownerOf(this.props.match.params.id).call().then(owner => {
       window.ethereum.request({ method: 'eth_requestAccounts' }).then( accounts => {
@@ -271,19 +278,83 @@ class NFTInfo extends Component{
         this.setState({dataUrl: data.data});
       });
     });
-    let leafUrl = backend + "/api/v1/tree/children?" + this.props.match.params.id;
+    let leafUrl = this.backend + "/api/v1/tree/children?" + this.props.match.params.id;
     axios.get(leafUrl).then(data => {
       this.setState({Leaf: data.children.length});
       
     });
     
   }
+  signData = (signer, ciphertext) => {
+    //event.preventDefault();
+    console.log("in")
+    
+    let obj = this;
+    
+    const domainData = {
+      chainId: 4,
+      name: 'SparkNFT',
+      verifyingContract: contract.address,
+      version: '1',
+    }
 
+    const domain = [
+      { name: "name", type: "string" },
+      { name: "version", type: "string" },
+      { name: "chainId", type: "uint256" },
+      { name: "verifyingContract", type: "address" },
+    ];
+
+    const rootNFTId = [
+      { name: "root_nft_id", type: "string" },
+    ];
+    var message = {
+      "root_nft_id": "47244640258"
+    };
+    const msgParams = JSON.stringify({
+      types: {
+        EIP712Domain: domain,
+        RootNFTId: rootNFTId
+      }, 
+      domain: domainData,
+      primaryType: "RootNFTId",
+      message: message
+    });
+    web3.currentProvider.send({
+      method: "eth_signTypedData_v3",
+      params: [signer, msgParams],
+      from: signer
+    }, function (err, result) {
+      if (err) {
+        return console.error(err);
+      }
+
+      const signature = result.result.substring(2);
+      let requestMessage = {
+        account: signer,
+        root_nft_id: obj.props.match.params.id,
+        signature: signature
+      }
+      axios.post(obj.backend + "/api/v1/key/claim",JSON.stringify(requestMessage)).then(function(res) {
+        let key = res.key;
+        let data = CryptoJS.AES.decrypt(ciphertext, key);
+        let plainText = data.toString(CryptoJS.enc.Utf8);
+        const wordArray = CryptoJS.enc.Hex.parse(plainText);
+        let BaText = this.wordArrayToByteArray(wordArray, wordArray.length);
+        var arrayBufferView = new Uint8Array(BaText);
+        var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
+        FileSaver.saveAs(blob,this.state.Name);
+      })
+      return signature;
+    })
+  }
+
+  
 
   spark = () => {
     
     if(this.state.spark) {
-      document.getElementById('isSpark').innerHTML = '点火';
+      document.getElementById('isSpark').innerHTML = '点火—分享';
     } else {
       document.getElementById('isSpark').innerHTML = '隐藏';
     }
@@ -298,12 +369,12 @@ class NFTInfo extends Component{
       return (
         <Grid container >
           <Grid item xs>
-          <Typography color="inherit" align="center" noWrap style={{ fontFamily: 'Teko', fontSize: 20, marginTop: '5%', marginLeft: 300}}>
-            请将下方链接分享给买方，买方会进入此链接来购买这个NFT <br />
+          <Typography color="inherit" align="center" noWrap style={{ fontFamily: 'Teko', fontSize: 20, marginTop: '5%', marginLeft: 200}}>
+            请将下方链接分享给买方，买方会进入此链接来铸造这个NFT的子节点 <br />
             {toUrl}
           </Typography>
           </Grid>
-          <Grid item xs style={{ marginTop: 70 }}>
+          <Grid item xs style={{ marginTop: 30 }}>
             <CopyToClipboard text={toUrl}
               onCopy={() => this.setState({ copied: true })}>
               <IconButton color="primary" aria-label="upload picture" component="span">
@@ -320,140 +391,90 @@ class NFTInfo extends Component{
     const { classes } = this.props
     const gateway = this.gateway
     return (
-       <div>
+
+      <div>
         <Helmet>
           <title>SparkNFT | Sell</title>
         </Helmet>
+
         <ThemeProvider theme={theme}>
           <TopBar />
-        </ThemeProvider>
-      <main>
-      
-      <Grid container direction="column" justifyContent="center" alignItems="center"  xs={12}>
-        <Grid container direction="row" justifyContent="center" alignItems="center"  xs={12}>
-          <Grid xs={2}>
+          <Container component="main" className={classes.container}>
+            <Grid container direction="row" justifyContent="center" alignItems="flex-start">
+              <Grid>
             <Button
-                color="primary"
-                startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
-                href='/#/collections'
-                style={{ marginTop: 20, marginBottom: 10, fontSize: 20 }}
-              >
-                回到我的NFTs
+              startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
+              href='/#/collections'
+              style={{ marginTop: 20, marginBottom: 100, fontSize: 22 }}
+            >
+              回到我的NFTs
             </Button>
-          </Grid>
-          <Grid xs={5}></Grid>
-          <Grid>
+            </Grid>
+            <Grid xs={8}></Grid>
+            <Grid>
               <Button size="large" variant="outlined" color="secondary"  className={classes.btnSecond} startIcon={<AttachMoneyIcon />}  href={'/#/sellSingle/' +  this.props.match.params.id}  >
-                <Typography variant="button" component="h2" gutterBottom >
+                 <Typography variant="button" component="h2" gutterBottom >
                   售卖
-                </Typography>
-              </Button>
-            </Grid>
-          
-        </Grid>
-        
-        <Grid container direction="row" justifyContent="center" alignItems="center"  xs={12}>
-        <Grid xs={2}>
-          
-        </Grid>
-      <Grid container direction="column" justifyContent="center" alignItems="center"  xs={8}>
-
-        <Grid container direction="row" justifyContent="center" alignItems="center" xs={12}>
-          
-          <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 40}}>
-              我的NFT Gallery
-          </Typography>
-        </Grid>
-        <Grid  container direction="row" justifyContent="center" alignItems="center">
-        
-          <Grid xs={3} >
-          
-              <Card className={classes.card} >
-              < Paper elevation={3} >
-                  <CardMedia
-                      className={classes.cardMedia}
-                      image={this.state.Cover}
-                      title="Image title" 
-                  />        
+                 </Typography>
+               </Button>
+             </Grid>
+             </Grid>
+            <Grid container direction="row" justifyContent="center" alignItems="flex-start">
+           <Grid xs={8}>
+             <div style={{marginTop: 0}}>
+                 {this.sell_info()}
+             </div>
+           </Grid>
+         </Grid>
+            <div className={classes.paper}>
+              <Grid container justifyContent="space-evenly" spacing= {5}>
+                <Grid item xs={4} style={{ maxWidth: 600}}>
+                  <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: '40%'}}>
+                    <img style={{ width: 300, marginTop: 20}} src={this.state.Cover}></img>  
                   </Paper>
-              </Card>
-        </Grid>
-        
-        <Grid xs={1}></Grid>
-        <Grid xs={4} container direction="column" justifyContent="flex-start" alignItems="center">
-            <Grid container direction="row" justifyContent="flex-start" alignItems="center">
-              <Grid>
-              <Typography variant="h3" component="h2" gutterBottom>
-                {this.state.Name}
-              </Typography>
-            </Grid>
-            </Grid>
-            
-            <Grid>
-              <Typography variant="body1" gutterBottom>
-                {this.state.Description}
-              </Typography>
-            </Grid>
-            <br /><br /><br />
-            <Grid container direction="row" justifyContent="flex-end" alignItems="center">
-            <Grid>
-                
-                  <Typography style={{ fontFamily: 'Teko', fontSize: 18}}  >
-                    子叶数量: {this.state.Leaf}
+                </Grid>
+                <Grid item xs style={{ marginLeft: '5%'}}>
+                  <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
+                    #{this.props.match.params.id}
                   </Typography>
-                
-              </Grid>
-            <Grid xs ={2}></Grid>
-              <Grid>
-                  <Typography style={{ fontFamily: 'Teko', fontSize: 18}}  >
-                    分红比: {this.state.BonusFee} %
+                  <Typography color="inherit" align="left" noWrap style={{ fontFamily: 'Teko', fontSize: 34, marginTop: '2%'}}>
+                    <b>{this.state.Name}</b>
                   </Typography>
+                  <Typography align="left" color="textSecondary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 16 }}>
+                    {this.state.Description}
+                  </Typography>
+                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '65%', fontSize: 24 }}>
+                    创作者分红比例: {this.state.BonusFee} %
+                  </Typography>
+                  
+                  
+                 
+                </Grid>
+                <Grid container direction="row" justifyContent="center" alignItems="center">
+                  <Grid>
+                    <Button size="large" variant="contained"  color="primary" target="_blank" className={classes.btnMain} startIcon={<GetAppIcon />} onClick={this.downloadIPFS} >
+                      <Typography variant="button" component="h2" gutterBottom >
+                        <font color='white'>
+                          下载
+                        </font>
+                      </Typography>
+                    </Button>
+                    </Grid>
+                    <Grid xs ={1}></Grid>
+                    <Grid>
+                      <Button size="large"  variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<WhatshotIcon />} onClick={this.spark} >
+                        <Typography id="isSpark" variant="button" component="h2" gutterBottom >
+                          点火—分享
+                        </Typography>
+                      </Button>
+                    </Grid>
+                  </Grid>
               </Grid>
-            </Grid>
-          </Grid>
-          </Grid>
-          <br /><br /><br />
-          <Grid container direction="row" justifyContent="center" alignItems="center">
-            <Grid>
-              <Typography style={{  fontSize: 12}} >
-                  NFT Address: {NFT.address}
-              </Typography>
-            </Grid>
-            <Grid xs={1}>
-              
-            </Grid>
-            <Grid>
-              <Button size="large" variant="contained"  color="primary" target="_blank" className={classes.btnMain} startIcon={<GetAppIcon />} onClick={this.downloadIPFS} >
-                <Typography variant="button" component="h2" gutterBottom >
-                  <font color='white'>
-                    下载
-                  </font>
-                </Typography>
-              </Button>
-            </Grid>
-            <Grid xs ={1}></Grid>
-            <Grid>
-              <Button size="large"  variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<WhatshotIcon />} onClick={this.spark} >
-                <Typography id="isSpark" variant="button" component="h2" gutterBottom >
-                  点火
-                </Typography>
-              </Button>
-            </Grid>
-        </Grid>
-        <br /><br />
-        
-        </Grid>
-        <Grid xs={2}></Grid>
-        </Grid>
-        </Grid>
-        <Grid container direction="row" justifyContent="center" alignItems="center">
-          <Grid xs={8}>
-            <div style={{marginTop: 50}}>
-                {this.sell_info()}
             </div>
-          </Grid>
-        </Grid>
-      </main>
+            
+            <br /><br />
+          </Container>
+        </ThemeProvider>
       </div>
     );
   }

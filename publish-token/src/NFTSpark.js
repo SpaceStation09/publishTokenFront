@@ -18,6 +18,8 @@ import NFT from "./ShillNFT";
 import BuildIcon from '@material-ui/icons/Build';
 import Web3 from 'web3';
 import axios from 'axios';
+import contract from './contract';
+import web3 from './web3';
 
 const theme = createTheme({
   palette: {
@@ -100,8 +102,7 @@ class NFTSpark extends Component{
   shill = async() => {
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     const account = accounts[0];
-    let web3 = new Web3(window.ethereum);
-    let nft = new web3.eth.Contract(NFT.abi, NFT.address);
+    let nft = contract;
     nft.methods.acceptShill(this.props.match.params.id).send({
         from: account,
         value: this.state.price
@@ -114,8 +115,7 @@ class NFTSpark extends Component{
 
   constructor(props)  {
     super(props);
-    let web3 = new Web3(window.ethereum);
-    let nft = new web3.eth.Contract(NFT.abi, NFT.address);
+    let nft = contract;
     let url = this.gateway + this.props.match.params.hash;
     nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
         let hash = meta.split('/');
@@ -123,9 +123,15 @@ class NFTSpark extends Component{
         this.setState({hash: hash[hash.length-1]});
         axios.get(meta).then(res => {
           let data = res.data;
+          let bouns;
+          for(let i = 0; i < data.attributes.length; i++) {
+            if(data.attributes[i].trait_type === 'bonusFee') {
+              bouns = data.attributes[i].value;
+            }
+          }
           this.setState({Name: data.name});
           this.setState({Description: data.description});
-          this.setState({BonusFee: data.BonusFee});
+          this.setState({BonusFee: bouns});
           this.setState({Cover: data.image});
         });
       });
