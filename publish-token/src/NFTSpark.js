@@ -13,14 +13,14 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import GetAppIcon from '@material-ui/icons/GetApp';
-import { Paper } from '@material-ui/core';
+import { Paper, Container } from '@material-ui/core';
 import NFT from "./ShillNFT";
 import BuildIcon from '@material-ui/icons/Build';
 import Web3 from 'web3';
 import axios from 'axios';
 import contract from './contract';
 import web3 from './web3';
-
+import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 const theme = createTheme({
   palette: {
     primary: {
@@ -33,6 +33,10 @@ const theme = createTheme({
 });
 
 const styles = theme => ({
+    container: {
+        maxWidth: 1500,
+        // backgroundColor: '#2196f3'
+      },
   icon: {
     marginRight: theme.spacing(2),
   },
@@ -113,6 +117,8 @@ class NFTSpark extends Component{
 
   }
 
+  
+
   constructor(props)  {
     super(props);
     let nft = contract;
@@ -160,7 +166,7 @@ class NFTSpark extends Component{
           <TopBar />
         </ThemeProvider>
       <main>
-        <Grid container direction="row" justifyContent="center" alignItems="center"  xs={12}>
+        {/* <Grid container direction="row" justifyContent="center" alignItems="center"  xs={12}>
         <Grid xs={2}></Grid>
       <Grid container direction="column" justifyContent="center" alignItems="center"  xs={8}>
         
@@ -190,6 +196,7 @@ class NFTSpark extends Component{
             <Grid>
               <Typography variant="body1" gutterBottom>
                 {this.state.Description}
+                
               </Typography>
             </Grid>
             <br /><br /><br />
@@ -236,7 +243,79 @@ class NFTSpark extends Component{
         
         </Grid>
         <Grid xs={2}></Grid>
-        </Grid>
+        </Grid> */}
+        <Container component="main" className={classes.container}>
+            <Grid container direction="row" justifyContent="center" alignItems="flex-start">
+              <Grid>
+            <Button
+              startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
+              href='/#/collections'
+              style={{ marginTop: 20, marginBottom: 10, fontSize: 22 }}
+            >
+              回到我的收藏馆
+            </Button>
+            </Grid>
+            <Grid xs={8}></Grid>
+            <Grid>
+             </Grid>
+             </Grid>
+             <Grid container direction="row" justifyContent="center" alignItems="center" xs={12}>
+                <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 65}}>
+                    🔥 NFT 🔥
+                </Typography>
+            </Grid>
+            <Grid container direction="row" justifyContent="center" alignItems="flex-start">
+         </Grid>
+            <div className={classes.paper}>
+              {/* <Grid container direction="column" justifyContent="center" alignItems="center"> */}
+              <Grid container justifyContent="space-evenly" spacing= {5}>
+                {/* <Grid xs={2}></Grid> */}
+                <Grid item xs style={{ maxWidth: 100}}>
+                <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: 10}}>
+                    <img style={{ width: 300, marginTop: 20}} src={this.state.Cover}></img>  
+                </Paper>
+                </Grid>
+                <Grid item xs  style={{ marginLeft:20, maxWidth: 500}} >
+                  <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
+                    #{this.props.match.params.id}
+                  </Typography>
+                  <Typography color="inherit" align="left" noWrap style={{ fontFamily: 'Teko', fontSize: 34, marginTop: '2%'}}>
+                    <b>{this.state.Name}</b>
+                  </Typography>
+                  <Typography align="left" color="textSecondary" paragraph style={{ marginTop: '2%', maxWidth: '100%', fontSize: 16 }}>
+                    {this.state.Description}
+                  </Typography>
+                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '100%', fontSize: 24 }}>
+                  点火价格: {this.state.priceString}
+                  </Typography>
+                  <Grid container direction="row" justifyContent="flex-end" alignItems="center">
+                  <Grid>
+                    <Grid container direction="row" justifyContent="center" alignItems="center">
+        
+                    <Grid xs={2}>
+                    
+                    </Grid>
+
+                    <Grid>
+                    <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond}  onClick={this.shill}>
+                    
+                        <Typography variant="button" component="h2" color='white' gutterBottom >
+                            <font size="4">🔥   </font>&nbsp;   铸造
+                        </Typography>
+                    </Button>
+                    </Grid>
+                    </Grid>
+                    </Grid>
+                  </Grid>
+                </Grid>
+                
+                
+              </Grid>
+              <br /><br /><br /><br />
+            </div>
+            
+            <br /><br />
+          </Container>
       </main>
       </div>
     );

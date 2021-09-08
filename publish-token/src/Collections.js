@@ -10,7 +10,7 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Container from '@material-ui/core/Container';
-import { Helmet } from 'react-helmet';
+import { canUseDOM, Helmet } from 'react-helmet';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import GitHubIcon from '@material-ui/icons/GitHub';
@@ -137,7 +137,6 @@ class Collections extends Component {
             return;
         }
         document.getElementById('viewButton').innerHTML = '正在加载。。';
-        web3.eth.getBlockNumber().then(console.log);
         let nft = contract;
         let cards = [];
 
@@ -232,7 +231,14 @@ class Collections extends Component {
   };
 
     
-    
+  renderDescription = (description) => {
+    if(description.length <= 150) {
+        return (description);
+    } else {
+        let newDescription = description.substring(0,150) + "..........";
+        return (newDescription); 
+    }
+}
    
     
 
@@ -245,7 +251,7 @@ class Collections extends Component {
         const gateway = this.gateway;
         // 
 
-        
+        let obj = this;
         window.ethereum.on('chainChanged', handleChainChanged);
 
         function handleChainChanged(_chainId) {
@@ -280,7 +286,6 @@ class Collections extends Component {
         }
         
         function showCard(card) {
-            console.log(gateway + card.image);
             let res = (
                 <Grid item key={card.id} xs={12} sm={6} md={4}>
                     <Card className={classes.card}>
@@ -294,7 +299,7 @@ class Collections extends Component {
                                 <b>{card.title}</b>
                             </Typography>
                             <Typography>
-                                {card.description}
+                                {obj.renderDescription(card.description)}
                                 {/* It contains 41 articles he published between 1918-1924.
                                     Sharp, poignant, varying vastly on their topic, length, and style, these articles redefined the genre of "essay" in Chinese literature,
                                     as well as played an important part in the new cultural movement. */}
@@ -305,6 +310,10 @@ class Collections extends Component {
 
                                 <b>查看 </b>
                             </Button>
+                            <Grid xs={3}></Grid>
+                            <Typography variant="body2" gutterBottom>
+                            <b>NFT id: {card.id} </b>
+                            </Typography>
                         </CardActions>
                     </Card>
                 </Grid>
