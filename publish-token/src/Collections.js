@@ -15,7 +15,9 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import GitHubIcon from '@material-ui/icons/GitHub';
 //import web3 from './web3';
-import Web3 from 'web3';
+// import Web3 from 'web3';
+import contract from './contract';
+import web3 from './web3';
 import { CodeOutlined } from '@ant-design/icons';
 import { render } from '@testing-library/react';
 import TopBar from "./TopBar";
@@ -136,8 +138,12 @@ class Collections extends Component {
             return;
         }
         document.getElementById('viewButton').innerHTML = '正在加载。。';
+<<<<<<< HEAD
         this.web3 = new Web3(window.ethereum);
         this.web3.eth.getBlockNumber().then(console.log);
+=======
+        web3.eth.getBlockNumber().then(console.log);
+>>>>>>> 5e86b76e93e804a7d8850683682c225a51fcd996
         let nft = contract;
         let cards = [];
 
