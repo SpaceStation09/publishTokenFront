@@ -114,7 +114,8 @@ class Publish extends Component {
 		rootNFTId: '',
 		issueId: '',
 		allowSubmitPDF: false,
-		currentAcc: ''
+		currentAcc: '',
+		sig: ''
   };
 
 	async componentDidMount() {
@@ -172,6 +173,7 @@ class Publish extends Component {
 				from: account
 			}).then(function (receipt) {
 				//55834574849
+				console.log(receipt)
 				var publish_event = receipt.events.Publish
 				var returned_values = publish_event.returnValues
 				var root_nft_id = returned_values.rootNFTId
@@ -268,7 +270,8 @@ class Publish extends Component {
 					var trimmed_des = obj.state.description.replace(/(\r\n\t|\n|\r\t)/gm, " ");
 					const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
 					const account = accounts[0];
-					var url_gen_key = "http://18.162.56.46:5001/api/v0/key/gen?arg=" + account //8sh5t
+					var url_gen_key = "http://127.0.0.1:5001/api/v0/key/gen?arg=" + account
+					// var url_gen_key = "http://18.162.56.46:5001/api/v0/key/gen?arg=" + account //8sh5t
 					if(obj.state.ipfsHashCover !== ''){
 						axios.post(url_gen_key)
 							.then(function (response) {
@@ -334,24 +337,21 @@ class Publish extends Component {
 				return new Promise(async (resolve, reject) => {
 					try {
 						const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-						const account = accounts[0];
-						var JSONBody = {
-							"account": account,
-							"root_nft_id": obj.state.rootNFTId
-						}
-						var json_str = JSON.stringify(JSONBody)
-						let sig
-						web3.eth.personal.sign(json_str, account).then((response) => {
-							console.log("sig: " + response)
-							sig = response
-						})
+						const signer = accounts[0];
+						var rootNftId = parseInt(obj.state.rootNFTId);
+						var message = {
+							account: signer,
+							root_nft_id: 47244640258
+						};
+						const sig = await web3.eth.personal.sign(JSON.stringify(message), signer)
+
 						var payload = {
-							"account": account,
+							"account": signer,
 							"root_nft_id": obj.state.rootNFTId,
 							"signature": sig
 						}
 						var payload_str = JSON.stringify(payload)
-						var req_key_url = 'http://example.com/api/v1/key/claim'
+						var req_key_url = 'http://192.168.0.64:3000/api/v1/key/claim'
 						const res = await axios.post(req_key_url, payload_str, {
 							headers: {
 								'Content-Type': 'application/json'
@@ -378,6 +378,7 @@ class Publish extends Component {
 						}
 						
 					} catch (e) {
+						console.log(e)
 						message.error('Read file error')
 						reject()
 					}
