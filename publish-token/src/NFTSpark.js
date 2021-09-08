@@ -113,6 +113,15 @@ class NFTSpark extends Component{
 
   }
 
+  renderDescription = () => {
+      if(this.state.Description.length <= 150) {
+          return (this.state.Description);
+      } else {
+          let newDescription = this.state.Description.substring(0,150) + "......";
+          return (newDescription); 
+      }
+  }
+
   constructor(props)  {
     super(props);
     let nft = contract;
@@ -189,7 +198,8 @@ class NFTSpark extends Component{
             
             <Grid>
               <Typography variant="body1" gutterBottom>
-                {this.state.Description}
+                
+                {this.renderDescription()}
               </Typography>
             </Grid>
             <br /><br /><br />

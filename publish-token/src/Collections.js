@@ -22,6 +22,7 @@ import TopBar from "./TopBar";
 import BigNumber from 'bignumber.js';
 import NFT from "./ShillNFT";
 import { data } from 'jquery';
+import contract from './contract';
 import axios from 'axios';
 var $;
 $ = require('jquery');
@@ -137,7 +138,7 @@ class Collections extends Component {
         document.getElementById('viewButton').innerHTML = '正在加载。。';
         this.web3 = new Web3(window.ethereum);
         this.web3.eth.getBlockNumber().then(console.log);
-        let nft = new this.web3.eth.Contract(NFT.abi, NFT.address);
+        let nft = contract;
         let cards = [];
 
         let ids = await this.getNft(nft);
@@ -231,7 +232,14 @@ class Collections extends Component {
   };
 
     
-    
+  renderDescription = (description) => {
+    if(description.length <= 150) {
+        return (description);
+    } else {
+        let newDescription = description.substring(0,150) + "..........";
+        return (newDescription); 
+    }
+}
    
     
 
@@ -244,7 +252,7 @@ class Collections extends Component {
         const gateway = this.gateway;
         // 
 
-        
+        let obj = this;
         window.ethereum.on('chainChanged', handleChainChanged);
 
         function handleChainChanged(_chainId) {
@@ -279,7 +287,6 @@ class Collections extends Component {
         }
         
         function showCard(card) {
-            console.log(gateway + card.image);
             let res = (
                 <Grid item key={card.id} xs={12} sm={6} md={4}>
                     <Card className={classes.card}>
@@ -293,7 +300,7 @@ class Collections extends Component {
                                 <b>{card.title}</b>
                             </Typography>
                             <Typography>
-                                {card.description}
+                                {obj.renderDescription(card.description)}
                                 {/* It contains 41 articles he published between 1918-1924.
                                     Sharp, poignant, varying vastly on their topic, length, and style, these articles redefined the genre of "essay" in Chinese literature,
                                     as well as played an important part in the new cultural movement. */}

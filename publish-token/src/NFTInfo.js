@@ -154,71 +154,9 @@ class NFTInfo extends Component{
           root_nft_id: this.props.match.params.id
         }
         signJson = JSON.stringify(signJson);
-        let signedMessage = this.signData(account,ciphertext);
-        // console.log(signedMessage)
-        // let requestMessage = {
-        //   account: account,
-        //   root_nft_id: this.props.match.params.id,
-        //   signature: signedMessage
-        // }
-        // axios.post(this.backend + "/api/v1/key/claim",JSON.stringify(requestMessage)).then(function(res) {
-        //   let key = res.key;
-        //   let data = CryptoJS.AES.decrypt(ciphertext, key);
-        //   let plainText = data.toString(CryptoJS.enc.Utf8);
-        //   const wordArray = CryptoJS.enc.Hex.parse(plainText);
-        //   let BaText = this.wordArrayToByteArray(wordArray, wordArray.length);
-        //   var arrayBufferView = new Uint8Array(BaText);
-        //   var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
-        //   FileSaver.saveAs(blob,this.state.Name);
-        // })
-        // let data = CryptoJS.AES.decrypt(ciphertext, "secret key 123");
-        // let plainText = data.toString(CryptoJS.enc.Utf8);
-        // const wordArray = CryptoJS.enc.Hex.parse(plainText);
-        // let BaText = this.wordArrayToByteArray(wordArray, wordArray.length);
-        // var arrayBufferView = new Uint8Array(BaText);
-        // var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
-        // FileSaver.saveAs(blob,this.state.Name);
-        // const downloadUrl = window.URL.createObjectURL(new Blob([data]));
-        
-        // const link = document.createElement('a');
-        // link.href = downloadUrl;
-        // link.setAttribute('download', 'file.pdf'); //any other extension
-        // document.body.appendChild(link);
-        // link.click();
-        // link.remove();
+        await this.signData(account,ciphertext);
       });
   }
-  // wordToByteArray = (word, length) => {
-  //   var ba = [],i,xFF = 0xFF;
-  //   if (length > 0)
-  //    ba.push(word >>> 24);
-  //   if (length > 1)
-  //    ba.push((word >>> 16) & xFF);
-  //   if (length > 2)
-  //    ba.push((word >>> 8) & xFF);
-  //   if (length > 3)
-  //    ba.push(word & xFF);
-  //   return ba;
-  //  }
-
-  //  wordArrayToByteArray = (wordArray, length) => {
-  //   if (wordArray.hasOwnProperty("sigBytes") && wordArray.hasOwnProperty("words")) {
-  //     length = wordArray.sigBytes;
-  //     wordArray = wordArray.words;
-  //   }
-  
-  //   var result = [],
-  //     bytes,
-  //     i = 0;
-  //   while (length > 0) {
-  //     bytes = this.wordToByteArray(wordArray[i], Math.min(4, length));
-  //     length -= bytes.length;
-  //     result.push(bytes);
-  //     i++;
-  //   }
-  //   return [].concat.apply([], result);
-  // }
-
 
   
 
@@ -285,61 +223,35 @@ class NFTInfo extends Component{
     });
     
   }
-  signData = (signer, ciphertext) => {
+  signData = async (signer, ciphertext) => {
     //event.preventDefault();
 
     
-    let obj = this;
-    let b32 = web3.utils.soliditySha3(123);
-    console.log(b32);
-    const domainData = {
-      name: 'SparkNFT',
-      version: '1',
-      chainId: 4,    
-      verifyingContract: "0xe9c60FDa46227952950c626b74a823cA2c1DC1e6",
-      salt: b32
-    }
-
-    const domain = [
-      { name: "name", type: "string" },
-      { name: "version", type: "string" },
-      { name: "chainId", type: "uint256" },
-      { name: "verifyingContract", type: "address" },
-      { name: "salt", type: "bytes32" },
-    ];
-    
-    const rootNFTId = [
-      { name: "root_nft_id", type: "string" },
-    ];
-    var BN = web3.utils.BN;
-    var message = {
-      "root_nft_id": new BN("47244640258")
-    };
-    
-    const msgParams = JSON.stringify({
-      types: {
-        EIP712Domain: domain,
-        RootNFTId: rootNFTId
-      }, 
-      domain: domainData,
-      primaryType: "RootNFTId",
-      message: message
-    });
-    web3.currentProvider.send({
-      method: "eth_signTypedData_v3",
-      params: [signer, msgParams],
-      from: signer
-    }, function (err, result) {
-      if (err) {
-        return console.error(err);
+      var JSONBody = {
+        "account": signer,
+        "root_nft_id": this.props.match.params.id
       }
-      const signature = result.result.substring(2);
-      let requestMessage = {
-        account: signer,
-        root_nft_id: obj.props.match.params.id,
-        signature: signature
+      var json_str = JSON.stringify(JSONBody)
+      let sig
+      await web3.eth.personal.sign(json_str, signer).then((response) => {
+        sig = response
+      })
+      console.log(sig)
+      var payload = {
+        "account": signer,
+        "root_nft_id": this.props.match.params.id,
+        "signature": sig
       }
-      axios.post(obj.backend + "/api/v1/key/claim",JSON.stringify(requestMessage)).then(function(res) {
+      console.log(sig)
+      var payload_str = JSON.stringify(payload)
+      var req_key_url = this.backend + "/api/v1/key/claim"
+      const res = await axios.post(req_key_url, payload_str, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(res);
+      if(res.status == 200) {
         let key = res.key;
         let data = CryptoJS.AES.decrypt(ciphertext, key);
         let plainText = data.toString(CryptoJS.enc.Utf8);
@@ -348,10 +260,11 @@ class NFTInfo extends Component{
         var arrayBufferView = new Uint8Array(BaText);
         var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
         FileSaver.saveAs(blob,this.state.Name);
-      })
-      return signature;
-    })
-  }
+      } else {
+        var error_msg = res.data.message
+        alert("获取密钥失败" + error_msg)
+      }
+    }
 
   
 
@@ -433,7 +346,7 @@ class NFTInfo extends Component{
             <div className={classes.paper}>
               <Grid container justifyContent="space-evenly" spacing= {5}>
                 <Grid item xs={4} style={{ maxWidth: 600}}>
-                  <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: '40%'}}>
+                <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: '40%'}}>
                     <img style={{ width: 300, marginTop: 20}} src={this.state.Cover}></img>  
                   </Paper>
                 </Grid>
