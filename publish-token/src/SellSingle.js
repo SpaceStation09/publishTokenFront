@@ -98,6 +98,7 @@ class SellSingle extends Component {
   async componentWillMount() {
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     const account = accounts[0];
+    let obj = this
     this.setState({
       currentAcc: account
     })
@@ -128,17 +129,36 @@ class SellSingle extends Component {
       })
     })
 
-    const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id=' + this.state.NFTId
-    const res = await axios.get(url)
-    if (res.status == 200) {
+    await contract.methods.getTransferPriceByNFTId(this.props.match.params.NFTId).call().then(price => {
+      if (price == '0'){
+        this.setState({
+          onSale: false
+        })
+      }else {
+        this.setState({
+          onSale: true
+        })
+      }
+    })
+
+    try{
+      const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id=' + this.state.NFTId
+      const res = await axios.get(url)
       var children = res.data.children
       var children_num = children.length
       this.setState({
         childrenNum: children_num
       })
-    } else {
-      alert('获取nft子节点情况页面失败')
+    } catch (error) {
+      if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
+        this.setState({
+          childrenNum: 0
+        })
+      } else {
+        alert('获取nft子节点情况页面失败')
+      }
     }
+    
   }
 
   handleClickOpen = (e) => {
