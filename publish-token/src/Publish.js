@@ -11,7 +11,7 @@ import {message} from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import Dragger from 'antd/lib/upload/Dragger';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import { Input, InputNumber } from 'antd';
+import { Upload, Input, InputNumber } from 'antd';
 import 'antd/dist/antd.css';
 import TopBar from './TopBar';
 import axios from 'axios';
@@ -157,35 +157,35 @@ class Publish extends Component {
 		 * then call backend to get a secret key. Then encrypt the pdf file and upload it to IPFS
 		 * Finally, form a new metadata json file and send its ipfs hash to backend and publish it
 		*/
-		if (this.state.price === 0 || this.state.bonusFee === 0 || this.state.shareTimes === 0 || this.state.ipfsMeta === ''){
-			alert("你有信息尚未填写")
-		}else {
-			const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-			const account = accounts[0];
+		// if (this.state.price === 0 || this.state.bonusFee === 0 || this.state.shareTimes === 0 || this.state.ipfsMeta === ''){
+		// 	alert("你有信息尚未填写")
+		// }else {
+		// 	const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+		// 	const account = accounts[0];
 
-			var price_eth = web3.utils.toWei(this.state.price.toString())
-			this.setState({
-				onLoading: true
-			})
-			var obj = this
-			var ipfsToContract = '0x' + this.state.ipfsMeta
-			contract.methods.publish(price_eth, this.state.bonusFee, this.state.shareTimes, ipfsToContract).send({
-				from: account
-			}).then(function (receipt) {
-				//55834574849
-				console.log(receipt)
-				var publish_event = receipt.events.Publish
-				var returned_values = publish_event.returnValues
-				var root_nft_id = returned_values.rootNFTId
-				var issue_id = returned_values.issue_id
-				obj.setState({
-					onLoading: false,
-					rootNFTId: root_nft_id,
-					issueId: issue_id
-				})
-				alert("已经成功发布作品");
-			});
-		}
+		// 	var price_eth = web3.utils.toWei(this.state.price.toString())
+		// 	this.setState({
+		// 		onLoading: true
+		// 	})
+		// 	var obj = this
+		// 	var ipfsToContract = '0x' + this.state.ipfsMeta
+		// 	contract.methods.publish(price_eth, this.state.bonusFee, this.state.shareTimes, ipfsToContract).send({
+		// 		from: account
+		// 	}).then(function (receipt) {
+		// 		//55834574849
+		// 		console.log(receipt)
+		// 		var publish_event = receipt.events.Publish
+		// 		var returned_values = publish_event.returnValues
+		// 		var root_nft_id = returned_values.rootNFTId
+		// 		var issue_id = returned_values.issue_id
+		// 		obj.setState({
+		// 			onLoading: false,
+		// 			rootNFTId: root_nft_id,
+		// 			issueId: issue_id
+		// 		})
+		// 		alert("已经成功发布作品");
+		// 	});
+		// }
 
 		this.setState({
 			allowSubmitPDF: true
@@ -223,7 +223,6 @@ class Publish extends Component {
 		const { TextArea } = Input;
 		const prop = {
 			name: 'file',
-			multiple: true,
 			action: `https://api.pinata.cloud/pinning/pinFileToIPFS`,
 			headers: {
 				pinata_api_key: pinata_api_key,
@@ -232,6 +231,11 @@ class Publish extends Component {
 			data: this.state.buffer,
 			beforeUpload: file => {
 				return new Promise((resolve, reject) => {
+					if (file.type !== 'image/*') {
+						message.error(`${file.name} is not an image file`);
+						// Upload.LIST_IGNORE
+						reject()
+					}
 					try {
 						const reader = new FileReader()
 						reader.readAsArrayBuffer(file)
@@ -251,21 +255,15 @@ class Publish extends Component {
 				})
 			},
 			async onChange(info) {
-				const imgType = ['png', 'jpg', 'jpeg', 'svg']
+				// const imgType = ['png', 'jpg', 'jpeg', 'svg']
 				const { status } = info.file;
 				// if (status !== 'uploading') {
 					
 				// }
 				if (status === 'done') {
-					var fileName = info.file.name
-					var index = fileName.lastIndexOf('.')
-					var ext = fileName.substr(index + 1)
-					var isImg = (imgType.indexOf(ext.toLowerCase()) != -1)
-					if(isImg){
-						obj.setState({
-							ipfsHashCover: info.file.response.IpfsHash
-						})
-					}
+					obj.setState({
+						ipfsHashCover: info.file.response.IpfsHash
+					})
 					var img_url = 'https://gateway.pinata.cloud/ipfs/' + obj.state.ipfsHashCover
 					var trimmed_des = obj.state.description.replace(/(\r\n\t|\n|\r\t)/gm, " ");
 					const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -320,6 +318,7 @@ class Publish extends Component {
 				}
 			},
 			onDrop(e) {
+				message.error(`Only image file supported`);
 				console.log('Dropped files', e.dataTransfer.files);
 			},
 		};
@@ -341,7 +340,7 @@ class Publish extends Component {
 						var rootNftId = parseInt(obj.state.rootNFTId);
 						var message = {
 							account: signer,
-							root_nft_id: 47244640258
+							root_nft_id: rootNftId
 						};
 						const sig = await web3.eth.personal.sign(JSON.stringify(message), signer)
 
@@ -490,7 +489,7 @@ class Publish extends Component {
 											/>
 										</Grid>
 										<Grid item xs={12}>
-											<label style={{ fontSize: 18, marginTop: 20 }}>售卖价格 *</label>
+											<label style={{ fontSize: 18, marginTop: 20 }}>售卖价格 (ether)*</label>
 											<InputNumber
 												id="price"
 												defaultValue={0}
@@ -522,14 +521,14 @@ class Publish extends Component {
 									</Grid>
 									<label style={{ fontSize: 18, marginTop: 50 }}>封面图片 *</label>
 									<p style={{ fontSize: 12 }}>请在下方区域上传您的封面图片 <br />
-										封面文件支持这些格式：PNG, JPG, SVG</p>
-									<Dragger {...prop} style={{ width: 680, minHeight: 200 }} id="Uploader">
+										封面文件支持这些格式：image/*</p>
+									<Dragger {...prop} style={{ width: 680, minHeight: 200 }} id="Uploader" accept="image/*" >
 										<p className="ant-upload-drag-icon">
 											<InboxOutlined />
 										</p>
 										<p className="ant-upload-text">上传文件请点击或者拖拽文件到此处</p>
 										<p className="ant-upload-hint">
-											支持单个文件的上传和多个文件的上传，支持多种类型文件的上传
+											支持单个文件的上传，支持多种类型文件的上传
 										</p>
 									</Dragger>
 								</form>
