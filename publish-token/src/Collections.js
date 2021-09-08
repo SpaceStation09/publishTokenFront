@@ -10,7 +10,7 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Container from '@material-ui/core/Container';
-import { Helmet } from 'react-helmet';
+import { canUseDOM, Helmet } from 'react-helmet';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import GitHubIcon from '@material-ui/icons/GitHub';
@@ -24,7 +24,6 @@ import TopBar from "./TopBar";
 import BigNumber from 'bignumber.js';
 import NFT from "./ShillNFT";
 import { data } from 'jquery';
-import contract from './contract';
 import axios from 'axios';
 var $;
 $ = require('jquery');
@@ -138,12 +137,6 @@ class Collections extends Component {
             return;
         }
         document.getElementById('viewButton').innerHTML = '正在加载。。';
-<<<<<<< HEAD
-        this.web3 = new Web3(window.ethereum);
-        this.web3.eth.getBlockNumber().then(console.log);
-=======
-        web3.eth.getBlockNumber().then(console.log);
->>>>>>> 5e86b76e93e804a7d8850683682c225a51fcd996
         let nft = contract;
         let cards = [];
 
@@ -317,6 +310,10 @@ class Collections extends Component {
 
                                 <b>查看 </b>
                             </Button>
+                            <Grid xs={3}></Grid>
+                            <Typography variant="body2" gutterBottom>
+                            <b>NFT id: {card.id} </b>
+                            </Typography>
                         </CardActions>
                     </Card>
                 </Grid>

@@ -62,6 +62,12 @@ const styles = theme => ({
   icon: {
     marginRight: theme.spacing(2),
   },
+  paper: {
+    marginTop: theme.spacing(1),
+    textAlign: 'center',
+    maxWidth: 1500,
+    // backgroundColor: "green"
+  },
   btn: {
     color: '#424949',
     borderWidth: 2,
@@ -75,7 +81,7 @@ const styles = theme => ({
     borderColor: '#e3f2fd',
     fontSize: 16,
     borderRadius: 25,
-    width: 150
+    width: 120
   },
   btnSecond: {
     marginTop: theme.spacing(3),
@@ -84,7 +90,7 @@ const styles = theme => ({
     borderColor: '#03A9F4',
     fontSize: 16,
     borderRadius: 25,
-    width: 150
+    width: 120
   },
   heroContent: {
     backgroundColor: theme.palette.background.paper,
@@ -111,14 +117,14 @@ const styles = theme => ({
 class NFTInfo extends Component{
 
   gateway = 'https://gateway.pinata.cloud/ipfs/';
-  backend = '';
+  backend = 'http://192.168.0.64:3000';
   state = {
       Name: '',
       Description: '',
       BonusFee: 0,
       Cover: '',
       contract: null,
-      Leaf: 0,
+      childrenNum: 0,
       spark: false,
       dataUrl: null,
       account: null
@@ -201,10 +207,9 @@ class NFTInfo extends Component{
       this.setState({hash: hash[hash.length-1]});
       axios.get(meta).then(res => {
         let data = res.data;
-        console.log(data);
         let bouns = 0;
         for(let i = 0; i < data.attributes.length; i++) {
-          if(data.attributes[i].trait_type === 'bonusFee') {
+          if(data.attributes[i].trait_type === "bonusPercentage") {
             bouns = data.attributes[i].value;
           }
         }
@@ -216,11 +221,23 @@ class NFTInfo extends Component{
         this.setState({dataUrl: data.data});
       });
     });
-    let leafUrl = this.backend + "/api/v1/tree/children?" + this.props.match.params.id;
-    axios.get(leafUrl).then(data => {
-      this.setState({Leaf: data.children.length});
-      
-    });
+
+    const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id
+      axios.get(leafUrl).then(res => {
+        var children = res.data.children
+        var children_num = children.length
+        this.setState({
+          childrenNum: children_num
+        })
+    }).catch(error => {
+      console.log(error);
+      if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
+        console.debug("no children")
+      } else {
+        alert('获取nft子节点情况页面失败')
+      }
+    })
+    
     
   }
   signData = async (signer, ciphertext) => {
@@ -245,25 +262,33 @@ class NFTInfo extends Component{
       console.log(sig)
       var payload_str = JSON.stringify(payload)
       var req_key_url = this.backend + "/api/v1/key/claim"
-      const res = await axios.post(req_key_url, payload_str, {
+      
+      axios.post(req_key_url, payload_str, {
         headers: {
           'Content-Type': 'application/json'
         }
+      }).then(res => {
+        if(res.status == 200) {
+          let key = res.key;
+          let data = CryptoJS.AES.decrypt(ciphertext, key);
+          let plainText = data.toString(CryptoJS.enc.Utf8);
+          const wordArray = CryptoJS.enc.Hex.parse(plainText);
+          let BaText = this.wordArrayToByteArray(wordArray, wordArray.length);
+          var arrayBufferView = new Uint8Array(BaText);
+          var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
+          FileSaver.saveAs(blob,this.state.Name);
+        } else {
+          var error_msg = res.data.message
+          alert("获取密钥失败" + error_msg)
+        }
+      }).catch(reason => {
+        console.log(reason);
+        //var error_msg = reason.data.message
+				alert("获取密钥失败(" + reason + ")")
+
       })
-      console.log(res);
-      if(res.status == 200) {
-        let key = res.key;
-        let data = CryptoJS.AES.decrypt(ciphertext, key);
-        let plainText = data.toString(CryptoJS.enc.Utf8);
-        const wordArray = CryptoJS.enc.Hex.parse(plainText);
-        let BaText = this.wordArrayToByteArray(wordArray, wordArray.length);
-        var arrayBufferView = new Uint8Array(BaText);
-        var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
-        FileSaver.saveAs(blob,this.state.Name);
-      } else {
-        var error_msg = res.data.message
-        alert("获取密钥失败" + error_msg)
-      }
+      
+      
     }
 
   
@@ -322,54 +347,49 @@ class NFTInfo extends Component{
             <Button
               startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
               href='/#/collections'
-              style={{ marginTop: 20, marginBottom: 100, fontSize: 22 }}
+              style={{ marginTop: 20, marginBottom: 50, fontSize: 22 }}
             >
               回到我的NFTs
             </Button>
             </Grid>
             <Grid xs={8}></Grid>
             <Grid>
-              <Button size="large" variant="outlined" color="secondary"  className={classes.btnSecond} startIcon={<AttachMoneyIcon />}  href={'/#/sellSingle/' +  this.props.match.params.id}  >
+              <Button style={{ marginTop: 80, marginBottom: 50, fontSize: 22 }} size="large" variant="outlined" color="secondary"  className={classes.btnSecond} startIcon={<AttachMoneyIcon />}  href={'/#/sellSingle/' +  this.props.match.params.id}  >
                  <Typography variant="button" component="h2" gutterBottom >
                   售卖
                  </Typography>
                </Button>
              </Grid>
              </Grid>
-            <Grid container direction="row" justifyContent="center" alignItems="flex-start">
-           <Grid xs={8}>
-             <div style={{marginTop: 0}}>
-                 {this.sell_info()}
-             </div>
-           </Grid>
-         </Grid>
+          
             <div className={classes.paper}>
+              {/* <Grid container direction="column" justifyContent="center" alignItems="center"> */}
               <Grid container justifyContent="space-evenly" spacing= {5}>
-                <Grid item xs={4} style={{ maxWidth: 600}}>
-                <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: '40%'}}>
+                {/* <Grid xs={2}></Grid> */}
+                <Grid item xs style={{ maxWidth: 100}}>
+                <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: 10}}>
                     <img style={{ width: 300, marginTop: 20}} src={this.state.Cover}></img>  
-                  </Paper>
+                </Paper>
                 </Grid>
-                <Grid item xs style={{ marginLeft: '5%'}}>
+                <Grid item xs  style={{ marginLeft:20, maxWidth: 500}} >
                   <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
                     #{this.props.match.params.id}
                   </Typography>
                   <Typography color="inherit" align="left" noWrap style={{ fontFamily: 'Teko', fontSize: 34, marginTop: '2%'}}>
                     <b>{this.state.Name}</b>
                   </Typography>
-                  <Typography align="left" color="textSecondary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 16 }}>
+                  <Typography align="left" color="textSecondary" paragraph style={{ marginTop: '2%', maxWidth: '100%', fontSize: 16 }}>
                     {this.state.Description}
                   </Typography>
-                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '65%', fontSize: 24 }}>
+                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '100%', fontSize: 24 }}>
                     创作者分红比例: {this.state.BonusFee} %
                   </Typography>
-                  
-                  
-                 
-                </Grid>
-                <Grid container direction="row" justifyContent="center" alignItems="center">
+                  <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
+                    当前拥有的子节点数量: {this.state.childrenNum}
+                  </Typography>
+                  <Grid container direction="row" justifyContent="flex-end" alignItems="center">
                   <Grid>
-                    <Button size="large" variant="contained"  color="primary" target="_blank" className={classes.btnMain} startIcon={<GetAppIcon />} onClick={this.downloadIPFS} >
+                    <Button size="small" variant="contained"  color="primary" target="_blank" className={classes.btnMain} startIcon={<GetAppIcon />} onClick={this.downloadIPFS} >
                       <Typography variant="button" component="h2" gutterBottom >
                         <font color='white'>
                           下载
@@ -379,16 +399,26 @@ class NFTInfo extends Component{
                     </Grid>
                     <Grid xs ={1}></Grid>
                     <Grid>
-                      <Button size="large"  variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<WhatshotIcon />} onClick={this.spark} >
+                      <Button size="small"  variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<WhatshotIcon />} onClick={this.spark} >
                         <Typography id="isSpark" variant="button" component="h2" gutterBottom >
                           点火—分享
                         </Typography>
                       </Button>
                     </Grid>
                   </Grid>
+                </Grid>
+                
+                
               </Grid>
+              <br /><br /><br /><br />
             </div>
-            
+            <Grid container direction="row" justifyContent="center" alignItems="flex-start">
+           <Grid xs={8}>
+             <div style={{marginTop: 0}}>
+                 {this.sell_info()}
+             </div>
+           </Grid>
+         </Grid>
             <br /><br />
           </Container>
         </ThemeProvider>
