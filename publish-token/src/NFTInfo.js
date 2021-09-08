@@ -287,15 +287,17 @@ class NFTInfo extends Component{
   }
   signData = (signer, ciphertext) => {
     //event.preventDefault();
-    console.log("in")
+
     
     let obj = this;
-    
+    let b32 = web3.utils.soliditySha3(123);
+    console.log(b32);
     const domainData = {
-      chainId: 4,
       name: 'SparkNFT',
-      verifyingContract: contract.address,
       version: '1',
+      chainId: 4,    
+      verifyingContract: "0xe9c60FDa46227952950c626b74a823cA2c1DC1e6",
+      salt: b32
     }
 
     const domain = [
@@ -303,14 +305,17 @@ class NFTInfo extends Component{
       { name: "version", type: "string" },
       { name: "chainId", type: "uint256" },
       { name: "verifyingContract", type: "address" },
+      { name: "salt", type: "bytes32" },
     ];
-
+    
     const rootNFTId = [
       { name: "root_nft_id", type: "string" },
     ];
+    var BN = web3.utils.BN;
     var message = {
-      "root_nft_id": "47244640258"
+      "root_nft_id": new BN("47244640258")
     };
+    
     const msgParams = JSON.stringify({
       types: {
         EIP712Domain: domain,
@@ -328,7 +333,6 @@ class NFTInfo extends Component{
       if (err) {
         return console.error(err);
       }
-
       const signature = result.result.substring(2);
       let requestMessage = {
         account: signer,
