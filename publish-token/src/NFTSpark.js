@@ -14,9 +14,7 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { Paper, Container } from '@material-ui/core';
-import NFT from "./ShillNFT";
 import BuildIcon from '@material-ui/icons/Build';
-import Web3 from 'web3';
 import axios from 'axios';
 import contract from './contract';
 import web3 from './web3';
@@ -45,6 +43,12 @@ const styles = theme => ({
     borderWidth: 2,
     borderColor: '#e3f2fd',
     fontSize: 16,
+  },
+  paper: {
+    marginTop: theme.spacing(1),
+    textAlign: 'center',
+    maxWidth: 1370,
+    // backgroundColor: "green"
   },
   btnMain: {
     marginTop: theme.spacing(3),
@@ -91,7 +95,7 @@ const styles = theme => ({
 class NFTSpark extends Component{
 
   gateway = 'https://gateway.pinata.cloud/ipfs/';
-
+  backend = 'http://192.168.0.64:3000';
   state = {
       Name: '',
       Description: '',
@@ -123,12 +127,14 @@ class NFTSpark extends Component{
     super(props);
     let nft = contract;
     let url = this.gateway + this.props.match.params.hash;
+    let obj = this;
     nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
         let hash = meta.split('/');
   
         this.setState({hash: hash[hash.length-1]});
         axios.get(meta).then(res => {
           let data = res.data;
+          console.log(data);
           let bouns;
           for(let i = 0; i < data.attributes.length; i++) {
             if(data.attributes[i].trait_type === 'bonusFee') {
@@ -147,11 +153,21 @@ class NFTSpark extends Component{
         etherPrice += ' ETH';
         this.setState({priceString: etherPrice});
       });
-      let leafUrl = "" + "/api/v1/tree/children?" + this.props.match.params.id;
-        axios.get(leafUrl).then(data => {
-        this.setState({Leaf: data.children.length});
-      
-      });
+      const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id
+      axios.get(leafUrl).then(res => {
+        var children = res.data.children
+        var children_num = children.length
+        this.setState({
+          childrenNum: children_num
+        })
+    }).catch(error => {
+      console.log(error);
+      if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
+        console.debug("no children")
+      } else {
+        alert('获取nft子节点情况页面失败(' + error + ')')
+      }
+    })
   }
 
   render() {
@@ -270,7 +286,7 @@ class NFTSpark extends Component{
               {/* <Grid container direction="column" justifyContent="center" alignItems="center"> */}
               <Grid container justifyContent="space-evenly" spacing= {5}>
                 {/* <Grid xs={2}></Grid> */}
-                <Grid item xs style={{ maxWidth: 100}}>
+                <Grid item style={{ maxWidth: 100}}>
                 <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: 10}}>
                     <img style={{ width: 300, marginTop: 20}} src={this.state.Cover}></img>  
                 </Paper>
@@ -299,7 +315,7 @@ class NFTSpark extends Component{
                     <Grid>
                     <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond}  onClick={this.shill}>
                     
-                        <Typography variant="button" component="h2" color='white' gutterBottom >
+                        <Typography variant="button" component="h2" gutterBottom >
                             <font size="4">🔥   </font>&nbsp;   铸造
                         </Typography>
                     </Button>

@@ -16,7 +16,6 @@ import CardMedia from '@material-ui/core/CardMedia';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import WhatshotIcon from '@material-ui/icons/Whatshot';
 import Web3 from 'web3';
-import NFT from "./ShillNFT";
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 import BigNumber from 'bignumber.js';
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
@@ -65,7 +64,7 @@ const styles = theme => ({
   paper: {
     marginTop: theme.spacing(1),
     textAlign: 'center',
-    maxWidth: 1500,
+    maxWidth: 1370,
     // backgroundColor: "green"
   },
   btn: {
@@ -118,6 +117,7 @@ class NFTInfo extends Component{
 
   gateway = 'https://gateway.pinata.cloud/ipfs/';
   backend = 'http://192.168.0.64:3000';
+  ipfs_node = "http://18.162.56.46:5001"
   state = {
       Name: '',
       Description: '',
@@ -139,29 +139,62 @@ class NFTInfo extends Component{
 
     //      window.open(url) // Mostly the same, I was just experimenting with different approaches, tried link.click, iframe and other solutions
     // })
-    const method = 'GET';
+    const Method = 'GET';
     let obj = this;
-    const url = 'https://gateway.pinata.cloud/ipfs/QmaefpFuLZNwuRU8Q7pF6A2juQbi3XcPcV5TLGwBmVEUx9';
-    axios.request({
-        url,
-        method,
-        //responseType: 'blob', //important
-      })
-      .then(async (response) => {
-        
-        let ciphertext = response.data;
-        //console.log(ciphertext);
-        // var data  = this.decryptCipherTextToBlob(ciphertext, "secret key 123");
-        let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        let account = accounts[0];
-        console.log(account);
-        let signJson = {
-          account: account,
-          root_nft_id: this.props.match.params.id
-        }
-        signJson = JSON.stringify(signJson);
-        await this.signData(account,ciphertext);
-      });
+    let url = "";
+    let ipnsUrl = obj.ipfs_node + "/api/v0/name/resolve?arg=" + this.state.dataUrl
+    //const url = "https://gateway.pinata.cloud/ipfs/QmYwBRgs16U2LmQbcjFWWm6JgwpcSL1qF3frj9hkJ32Pob";
+    // axios.request({
+    //   ipnsUrl ,
+    //   method,
+    // }).then(res => {
+    //   url = obj.ipfs_node + "/api/v0/get?arg=" + res.Path;
+    //   console.log(url);
+    // }).catch(
+    //   error => { 
+    //     alert('转换IPNS地址失败(' + error + ')')
+    //     return
+    //   }
+    // )
+
+    var config = {
+      method: 'post',
+      url: ipnsUrl,
+      headers: { },
+    };
+    let dataHash;
+    await axios(config)
+    .then(function (response) {
+      console.log(JSON.stringify(response.data));
+      url = obj.ipfs_node + "/api/v0/get?arg=" + response.data.Path;
+      let strhash = response.data.Path.split('/');
+      dataHash = obj.gateway + strhash[strhash.length - 1];
+      console.log(dataHash)     
+     
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+    console.log(dataHash) 
+    var cipher_config = {
+      method: 'get',
+      url: dataHash,
+      headers: { },
+    };
+    axios(cipher_config).then(async (response) => {
+      console.log(response)
+      let ciphertext = response.data;
+      let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      let account = accounts[0];
+      console.log(account);
+      let signJson = {
+        account: account,
+        root_nft_id: this.props.match.params.id
+      }
+      signJson = JSON.stringify(signJson);
+      await this.signDataAndDecrypt(account,ciphertext);
+    });
+    
   }
 
   
@@ -170,19 +203,19 @@ class NFTInfo extends Component{
     super(props);
     if(!window.ethereum) {
       alert("请先安装metamask");
-      window.location.href = '/#';
+      window.location.href = '/#/collections';
       return;
     }
     if(!window.ethereum.isConnected()) {
       alert("请先链接metamask");
-      window.location.href = '/#';
+      window.location.href = '/#/collections';
       return;
     }
     // const chainId = await window.ethereum.request({ method: 'eth_chainId' });
     window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
       if(chainId !== '0x4') {
         alert("请切换至rinkeby network");
-        window.location.href = '/#';
+        window.location.href = '/#/collections';
         return;
       }
     })
@@ -208,22 +241,26 @@ class NFTInfo extends Component{
       axios.get(meta).then(res => {
         let data = res.data;
         let bouns = 0;
+        let fileAddr = "";
         for(let i = 0; i < data.attributes.length; i++) {
           if(data.attributes[i].trait_type === "bonusPercentage") {
             bouns = data.attributes[i].value;
           }
+          if(data.attributes[i].trait_type === "fileAddress") {
+            fileAddr = data.attributes[i].value;
+          }
         }
-        
         this.setState({Name: data.name});
         this.setState({Description: data.description});
         this.setState({BonusFee: bouns});
         this.setState({Cover: data.image});
-        this.setState({dataUrl: data.data});
+        this.setState({dataUrl: fileAddr});
       });
     });
 
     const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id
       axios.get(leafUrl).then(res => {
+
         var children = res.data.children
         var children_num = children.length
         this.setState({
@@ -232,21 +269,21 @@ class NFTInfo extends Component{
     }).catch(error => {
       console.log(error);
       if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
-        console.debug("no children")
+        console.log("no children")
       } else {
-        alert('获取nft子节点情况页面失败')
+        alert('获取nft子节点情况页面失败(' + error + ')')
       }
     })
     
     
   }
-  signData = async (signer, ciphertext) => {
+  signDataAndDecrypt = async (signer, ciphertext) => {
     //event.preventDefault();
 
     
       var JSONBody = {
         "account": signer,
-        "root_nft_id": this.props.match.params.id
+        "nft_id": this.props.match.params.id
       }
       var json_str = JSON.stringify(JSONBody)
       let sig
@@ -256,30 +293,33 @@ class NFTInfo extends Component{
       console.log(sig)
       var payload = {
         "account": signer,
-        "root_nft_id": this.props.match.params.id,
+        "nft_id": this.props.match.params.id,
         "signature": sig
       }
       console.log(sig)
       var payload_str = JSON.stringify(payload)
+      console.log(payload_str)
       var req_key_url = this.backend + "/api/v1/key/claim"
-      
+      console.log(req_key_url)
       axios.post(req_key_url, payload_str, {
         headers: {
           'Content-Type': 'application/json'
         }
       }).then(res => {
+        console.log(res);
         if(res.status == 200) {
-          let key = res.key;
+          let key = res.data.key;
           let data = CryptoJS.AES.decrypt(ciphertext, key);
           let plainText = data.toString(CryptoJS.enc.Utf8);
+          //console.log(plainText.length)
           const wordArray = CryptoJS.enc.Hex.parse(plainText);
           let BaText = this.wordArrayToByteArray(wordArray, wordArray.length);
           var arrayBufferView = new Uint8Array(BaText);
-          var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
+          var blob = new Blob( [ arrayBufferView ], { type: "txt" } );
           FileSaver.saveAs(blob,this.state.Name);
         } else {
           var error_msg = res.data.message
-          alert("获取密钥失败" + error_msg)
+          alert("获取密钥失败  " + error_msg)
         }
       }).catch(reason => {
         console.log(reason);
@@ -287,10 +327,40 @@ class NFTInfo extends Component{
 				alert("获取密钥失败(" + reason + ")")
 
       })
-      
-      
     }
-
+    wordToByteArray = (word, length) => {
+      var ba = [],
+        i,
+        xFF = 0xFF;
+      if (length > 0)
+        ba.push(word >>> 24);
+      if (length > 1)
+        ba.push((word >>> 16) & xFF);
+      if (length > 2)
+        ba.push((word >>> 8) & xFF);
+      if (length > 3)
+        ba.push(word & xFF);
+    
+      return ba;
+    }
+    
+    wordArrayToByteArray = (wordArray, length) => {
+      if (wordArray.hasOwnProperty("sigBytes") && wordArray.hasOwnProperty("words")) {
+        length = wordArray.sigBytes;
+        wordArray = wordArray.words;
+      }
+    
+      var result = [],
+        bytes,
+        i = 0;
+      while (length > 0) {
+        bytes = this.wordToByteArray(wordArray[i], Math.min(4, length));
+        length -= bytes.length;
+        result.push(bytes);
+        i++;
+      }
+      return [].concat.apply([], result);
+    }
   
 
   spark = () => {
@@ -332,6 +402,19 @@ class NFTInfo extends Component{
   render() {
     const { classes } = this.props
     const gateway = this.gateway
+    if(false){
+			// return(
+			// 	<div>
+			// 		<Helmet>
+			// 			<title>SparkNFT | Publish</title>
+			// 		</Helmet>
+
+			// 		<div style={{ width: '300px', height: '300px', position: 'relative', left: '43%', marginTop: '20%' }}>
+			// 			<ReactLoading type={'bars'} color={'#2196f3'} height={300} width={300} />
+			// 		</div>
+			// 	</div>
+			// );
+		} else {
     return (
 
       <div>
@@ -424,6 +507,7 @@ class NFTInfo extends Component{
         </ThemeProvider>
       </div>
     );
+    }
   }
 }
 
