@@ -19,6 +19,7 @@ import axios from 'axios';
 import contract from './contract';
 import web3 from './web3';
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
+import ReactLoading from 'react-loading';
 const theme = createTheme({
   palette: {
     primary: {
@@ -104,21 +105,32 @@ class NFTSpark extends Component{
       contract: null,
       price: '',
       priceString: '',
-      Leaf:0
+      Leaf: 0,
+      onLoading: false
   };
 
   shill = async() => {
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     const account = accounts[0];
     let nft = contract;
+    this.loadLoadingState();
+    let obj = this;
     nft.methods.acceptShill(this.props.match.params.id).send({
         from: account,
         value: this.state.price
     }).then(function(receipt){
         // receipt can also be a new contract instance, when coming from a "contract.deploy({...}).send()"
         alert("交易已上链");
+        obj.setState({onloading: false});
     });
 
+  }
+  
+  loadLoadingState = () => {
+    this.setState({onloading: true},function() {
+        console.log(this.state.onLoading)
+    });
+    
   }
 
   
@@ -173,93 +185,29 @@ class NFTSpark extends Component{
   render() {
     const { classes } = this.props
     const gateway = this.gateway
+    if(this.state.onLoading) {
+        return (
+            <div>
+                <Helmet>
+                    <title>SparkNFT | Spark</title>
+                </Helmet>
+
+                <div style={{ width: '300px', height: '300px', position: 'relative', left: '43%', marginTop: '20%' }}>
+                    <ReactLoading type={'bars'} color={'#2196f3'} height={300} width={300} />
+                </div>
+            </div>
+        );
+    }else {
     return (
        <div>
         <Helmet>
-          <title>Publish Token | Sprrk</title>
+          <title>SparkNFT | Sprrk</title>
         </Helmet>
         <ThemeProvider theme={theme}>
           <TopBar />
         </ThemeProvider>
       <main>
-        {/* <Grid container direction="row" justifyContent="center" alignItems="center"  xs={12}>
-        <Grid xs={2}></Grid>
-      <Grid container direction="column" justifyContent="center" alignItems="center"  xs={8}>
-        
-        <Grid container direction="row" justifyContent="center" alignItems="center" xs={12}>
-          <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 65}}>
-             🔥 NFT 🔥
-          </Typography>
-        </Grid>
-        <Grid  container direction="row" justifyContent="center" alignItems="center">
-          <Grid xs={3} >
-              <Card className={classes.card} >
-                  <CardMedia
-                      className={classes.cardMedia}
-                      image={this.state.Cover}
-                      title="Image title" 
-                  />        
-              </Card>
-        </Grid>
-        <Grid xs={1}></Grid>
-        <Grid xs={4} container direction="column" justifyContent="flex-start" alignItems="center">
-            <Grid>
-            <Typography variant="h3" component="h2" gutterBottom>
-            {this.state.Name}
-            </Typography>
-            </Grid>
-            
-            <Grid>
-              <Typography variant="body1" gutterBottom>
-                {this.state.Description}
-                
-              </Typography>
-            </Grid>
-            <br /><br /><br />
-            <Grid container direction="row" justifyContent="flex-end" alignItems="center">
-            <Grid>
-                
-                  <Typography style={{ fontFamily: 'Teko', fontSize: 20}}  >
-                  子叶数量: {this.state.Leaf}
-                  </Typography>
-                
-              </Grid>
-              <Grid xs ={2}></Grid>
-              <Grid>
-                
-                  <Typography style={{ fontFamily: 'Teko', fontSize: 20}}  >
-                    BonusFee: {this.state.BonusFee}
-                  </Typography>
-                
-              </Grid>
-            </Grid>
-          </Grid>
-          </Grid>
-          <br /><br /><br />
-          <Grid container direction="row" justifyContent="center" alignItems="center">
-            <Grid>
-            <Typography style={{  fontSize: 14}} >
-                  点火价格: {this.state.priceString}
-              </Typography>
-            </Grid>
-            <Grid xs={2}>
-              
-            </Grid>
-            <Grid xs={3}></Grid>
-            <Grid>
-              <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond}  onClick={this.shill}>
-              
-                <Typography variant="button" component="h2" color='white' gutterBottom >
-                    <font size="4">🔥   </font>&nbsp;   铸造 
-                </Typography>
-              </Button>
-            </Grid>
-        </Grid>
-        <br /><br />
-        
-        </Grid>
-        <Grid xs={2}></Grid>
-        </Grid> */}
+       
         <Container component="main" className={classes.container}>
             <Grid container direction="row" justifyContent="center" alignItems="flex-start">
               <Grid>
@@ -335,6 +283,7 @@ class NFTSpark extends Component{
       </main>
       </div>
     );
+    }
   }
 }
 
