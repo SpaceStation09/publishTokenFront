@@ -26,6 +26,7 @@ import contract from './contract';
 // import { Typography, Paper, Container }from '@material-ui/core';
 import axios from 'axios';
 import web3 from './web3';
+import LocalAtmIcon from '@material-ui/icons/LocalAtm';
 const FileSaver = require('file-saver');
 var CryptoJS = require("crypto-js");
 const sigUtil = require('ethereumjs-util');
@@ -127,7 +128,8 @@ class NFTInfo extends Component{
       childrenNum: 0,
       spark: false,
       dataUrl: null,
-      account: null
+      account: null,
+      Profit: ''
   };
 
   downloadIPFS = async () =>{
@@ -142,7 +144,7 @@ class NFTInfo extends Component{
     const Method = 'GET';
     let obj = this;
     let url = "";
-    let ipnsUrl = obj.ipfs_node + "/api/v0/name/resolve?arg=" + this.state.dataUrl
+    let dataHash = this.state.dataUrl
     //const url = "https://gateway.pinata.cloud/ipfs/QmYwBRgs16U2LmQbcjFWWm6JgwpcSL1qF3frj9hkJ32Pob";
     // axios.request({
     //   ipnsUrl ,
@@ -157,25 +159,25 @@ class NFTInfo extends Component{
     //   }
     // )
 
-    var config = {
-      method: 'post',
-      url: ipnsUrl,
-      headers: { },
-    };
-    let dataHash;
-    await axios(config)
-    .then(function (response) {
-      console.log(JSON.stringify(response.data));
-      url = obj.ipfs_node + "/api/v0/get?arg=" + response.data.Path;
-      let strhash = response.data.Path.split('/');
-      dataHash = obj.gateway + strhash[strhash.length - 1];
-      console.log(dataHash)     
+    // var config = {
+    //   method: 'post',
+    //   url: ipnsUrl,
+    //   headers: { },
+    // };
+    // let dataHash;
+    // await axios(config)
+    // .then(function (response) {
+    //   console.log(JSON.stringify(response.data));
+    //   url = obj.ipfs_node + "/api/v0/get?arg=" + response.data.Path;
+    //   let strhash = response.data.Path.split('/');
+    //   dataHash = obj.gateway + strhash[strhash.length - 1];
+    //   console.log(dataHash)     
      
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-    console.log(dataHash) 
+    // })
+    // .catch(function (error) {
+    //   console.log(error);
+    // });
+    // console.log(dataHash) 
     var cipher_config = {
       method: 'get',
       url: dataHash,
@@ -197,7 +199,6 @@ class NFTInfo extends Component{
     
   }
 
-  
 
   constructor(props)  {
     super(props);
@@ -234,6 +235,9 @@ class NFTInfo extends Component{
         }
       })
         
+    })
+    nft.methods.getProfitByNFTId(this.props.match.params.id).call().then(res => {
+      this.setState({Profit: web3.utils.fromWei(res) + 'ETH'});
     })
     nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
       let hash = meta.split('/');
@@ -274,13 +278,16 @@ class NFTInfo extends Component{
         alert('获取nft子节点情况页面失败(' + error + ')')
       }
     })
-    
-    
   }
+
+  claim = async () => {
+    await contract.methods.claimProfit(this.props.match.params.id).send({
+      from: this.state.account
+  });
+  }
+
   signDataAndDecrypt = async (signer, ciphertext) => {
     //event.preventDefault();
-
-    
       var JSONBody = {
         "account": signer,
         "nft_id": this.props.match.params.id
@@ -435,7 +442,17 @@ class NFTInfo extends Component{
               回到我的NFTs
             </Button>
             </Grid>
-            <Grid xs={8}></Grid>
+            <Grid xs={7}></Grid>
+            <Grid>
+                <Button style={{ marginTop: 80,marginRight: 30, marginBottom: 50, fontSize: 22 }} size="large" variant="contained" color="primary"  className={classes.btnMain} startIcon={<LocalAtmIcon />} onClick={this.claim} >
+                  <Typography id="isSpark" variant="button" component="h3" gutterBottom >
+                    <font color='white'>
+                          领收益
+                    </font>
+                  </Typography>
+                </Button>
+            </Grid>
+            {/* <Grid xs ={1}></Grid> */}
             <Grid>
               <Button style={{ marginTop: 80, marginBottom: 50, fontSize: 22 }} size="large" variant="outlined" color="secondary"  className={classes.btnSecond} startIcon={<AttachMoneyIcon />}  href={'/#/sellSingle/' +  this.props.match.params.id}  >
                  <Typography variant="button" component="h2" gutterBottom >
@@ -447,12 +464,20 @@ class NFTInfo extends Component{
           
             <div className={classes.paper}>
               {/* <Grid container direction="column" justifyContent="center" alignItems="center"> */}
-              <Grid container justifyContent="space-evenly" spacing= {5}>
+              <Grid container  justifyContent="space-evenly" spacing= {5}>
                 {/* <Grid xs={2}></Grid> */}
-                <Grid item xs style={{ maxWidth: 100}}>
-                <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: 10}}>
-                    <img style={{ width: 300, marginTop: 20}} src={this.state.Cover}></img>  
-                </Paper>
+                <Grid container direction="column" item xs style={{ maxWidth: 100}}>
+                  <Grid>
+                    <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: 10}}>
+                        <img style={{ width: 300, marginTop: 20, marginBottom: 10}} src={this.state.Cover}></img>  
+                    </Paper>
+                  </Grid>
+                  <Grid>
+                    
+                    <Typography id="isSpark" variant="button" component="h1" gutterBottom >
+                    目前收益:{this.state.Profit}
+                        </Typography>
+                  </Grid>
                 </Grid>
                 <Grid item xs  style={{ marginLeft:20, maxWidth: 500}} >
                   <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
@@ -465,7 +490,7 @@ class NFTInfo extends Component{
                     {this.state.Description}
                   </Typography>
                   <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '100%', fontSize: 24 }}>
-                    创作者分红比例: {this.state.BonusFee} %
+                    分红比例: {this.state.BonusFee} %
                   </Typography>
                   <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
                     当前拥有的子节点数量: {this.state.childrenNum}
@@ -488,6 +513,7 @@ class NFTInfo extends Component{
                         </Typography>
                       </Button>
                     </Grid>
+                    
                   </Grid>
                 </Grid>
                 
