@@ -11,7 +11,7 @@ import {message} from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import Dragger from 'antd/lib/upload/Dragger';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import { Upload, Input, InputNumber } from 'antd';
+import { Input, InputNumber } from 'antd';
 import 'antd/dist/antd.css';
 import TopBar from './TopBar';
 import axios from 'axios';
@@ -20,6 +20,8 @@ import web3 from './web3';
 import ReactLoading from 'react-loading';
 
 
+const IPFS = require('ipfs-core')
+const Websockets = require('libp2p-websockets')
 const {
 	pinata_api_key,
 	pinata_secret_api_key,
@@ -64,7 +66,7 @@ const styles = theme => ({
 		height: 60
   },
   form: {
-    width: '170%', // Fix IE 11 issue.
+    width: '170%', 
     marginTop: theme.spacing(7),
   },
   submit: {
@@ -114,12 +116,54 @@ class Publish extends Component {
 		rootNFTId: '',
 		issueId: '',
 		allowSubmitPDF: false,
-		currentAcc: '',
-		sig: ''
+		usedAcc: '',
+		sig: '',
+		node: null
   };
 
 	async componentDidMount() {
-		
+		// if (this.state.node == null){
+		// 	var ipfs = await IPFS.create({
+		// 		config: {
+		// 			Addresses: {
+		// 				Swarm: [
+		// 					// These are public webrtc-star servers
+		// 					'/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
+		// 					'/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
+		// 					'/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star/p2p/12D3KooWC3kaejMzfgkx1MCAsZDCmasyXzv69hdoV6WbB2RUnQ3S'
+		// 				]
+		// 			},
+		// 			// This removes the default IPFS peers to dial to. You can specify any known addresses you wish, or leave blank.
+		// 			Bootstrap: []
+		// 		}
+		// 	})
+		// 	this.setState({
+		// 		node: ipfs
+		// 	})
+		// 	const validIp4 = '/dns4/ipfs.r2d2.to/tcp/443/wss/p2p/12D3KooWC3kaejMzfgkx1MCAsZDCmasyXzv69hdoV6WbB2RUnQ3S'
+		// 	const res = await ipfs.swarm.connect(validIp4)
+		// 	// const peerInfos = await ipfs.swarm.peers()
+		// 	// console.debug(peerInfos)
+		// 	console.debug(res.Peers)
+		// }else {
+		// 	var ipfs = this.state.node
+		// 	const peerInfos = await ipfs.swarm.addrs()
+		// 	console.debug(peerInfos)
+		// }
+
+		// const res = await ipfs.bootstrap.list()
+		// console.log(res.Peers)
+		// const file = {
+		// 	path: '/tmp/myfile.txt',
+		// 	content: 'ABC'
+		// }
+		// const result = await ipfs.add('content')
+		// console.info(result)
+
+		// const pub = await ipfs.name.publish(result.cid)
+		// console.log('pub name: ', pub.name)
+		// console.debug(peerInfos)
+		// console.debug(addr)
 	}
 
 	handleGetPubName = (event) => {
@@ -157,35 +201,33 @@ class Publish extends Component {
 		 * then call backend to get a secret key. Then encrypt the pdf file and upload it to IPFS
 		 * Finally, form a new metadata json file and send its ipfs hash to backend and publish it
 		*/
-		// if (this.state.price === 0 || this.state.bonusFee === 0 || this.state.shareTimes === 0 || this.state.ipfsMeta === ''){
-		// 	alert("你有信息尚未填写")
-		// }else {
-		// 	const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-		// 	const account = accounts[0];
-
-		// 	var price_eth = web3.utils.toWei(this.state.price.toString())
-		// 	this.setState({
-		// 		onLoading: true
-		// 	})
-		// 	var obj = this
-		// 	var ipfsToContract = '0x' + this.state.ipfsMeta
-		// 	contract.methods.publish(price_eth, this.state.bonusFee, this.state.shareTimes, ipfsToContract).send({
-		// 		from: account
-		// 	}).then(function (receipt) {
-		// 		//55834574849
-		// 		console.log(receipt)
-		// 		var publish_event = receipt.events.Publish
-		// 		var returned_values = publish_event.returnValues
-		// 		var root_nft_id = returned_values.rootNFTId
-		// 		var issue_id = returned_values.issue_id
-		// 		obj.setState({
-		// 			onLoading: false,
-		// 			rootNFTId: root_nft_id,
-		// 			issueId: issue_id
-		// 		})
-		// 		alert("已经成功发布作品");
-		// 	});
-		// }
+		if (this.state.price === 0 || this.state.bonusFee === 0 || this.state.shareTimes === 0 || this.state.ipfsMeta === ''){
+			alert("你有信息尚未填写")
+		}else {
+		
+			var price_eth = web3.utils.toWei(this.state.price.toString())
+			this.setState({
+				onLoading: true
+			})
+			var obj = this
+			var ipfsToContract = '0x' + this.state.ipfsMeta
+			contract.methods.publish(price_eth, this.state.bonusFee, this.state.shareTimes, ipfsToContract).send({
+				from: this.state.usedAcc
+			}).then(function (receipt) {
+				//55834574849
+				console.log(receipt)
+				var publish_event = receipt.events.Publish
+				var returned_values = publish_event.returnValues
+				var root_nft_id = returned_values.rootNFTId
+				var issue_id = returned_values.issue_id
+				obj.setState({
+					onLoading: false,
+					rootNFTId: root_nft_id,
+					issueId: issue_id
+				})
+				alert("已经成功发布作品");
+			});
+		}
 
 		this.setState({
 			allowSubmitPDF: true
@@ -193,24 +235,29 @@ class Publish extends Component {
 	}
 
 	submitWork = async () => {
-		const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-		const account = accounts[0];
-		const publish_url = 'http://18.162.56.46:5001/api/v0/name/publish?arg=' + this.state.fileIpfs + '&key=' + account
+		const stats = await ipfs.repo.stat()
+		console.log(stats)
+		const addr = new Multiaddr("/ip4/18.162.56.46/tcp/4001/p2p/12D3KooWC3kaejMzfgkx1MCAsZDCmasyXzv69hdoV6WbB2RUnQ3S")
+		// await ipfs.swarm.connect(json)
+		const peerInfos = await ipfs.swarm.peers()
+		console.log(typeof peerInfos[0].peer)
+		console.debug(addr)
+		const publish_url = 'http://18.162.56.46:5001/api/v0/name/publish?arg=' + this.state.fileIpfs + '&key=' + this.state.usedAcc
 		this.setState({
 			onLoading: true
 		})
 		alert("作品文件发布所需的时间较长，请耐心等待，此过程大约需要3分钟")
 		let obj = this
-		axios.post(publish_url)
-			.then((response)=> {
-				obj.setState({
-					onLoading: false
-				})
-				alert("作品文件发布成功")
-			})
-		const rm_key_url = 'http://18.162.56.46:5001/api/v0/key/rm?arg=' + account
+		const res = await axios.post(publish_url)
+		console.debug(res.data)
+		this.setState({
+			onLoading: false
+		})
+		alert("作品文件发布成功")
+		const rm_key_url = 'http://18.162.56.46:5001/api/v0/key/rm?arg=' + this.state.usedAcc
 		axios.post(rm_key_url)
 			.then((response) => {
+				console.debug("removed key")
 				obj.setState({
 					allowSubmitPDF: false
 				})
@@ -231,11 +278,6 @@ class Publish extends Component {
 			data: this.state.buffer,
 			beforeUpload: file => {
 				return new Promise((resolve, reject) => {
-					if (file.type !== 'image/*') {
-						message.error(`${file.name} is not an image file`);
-						// Upload.LIST_IGNORE
-						reject()
-					}
 					try {
 						const reader = new FileReader()
 						reader.readAsArrayBuffer(file)
@@ -255,7 +297,6 @@ class Publish extends Component {
 				})
 			},
 			async onChange(info) {
-				// const imgType = ['png', 'jpg', 'jpeg', 'svg']
 				const { status } = info.file;
 				// if (status !== 'uploading') {
 					
@@ -268,12 +309,15 @@ class Publish extends Component {
 					var trimmed_des = obj.state.description.replace(/(\r\n\t|\n|\r\t)/gm, " ");
 					const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
 					const account = accounts[0];
-					var url_gen_key = "http://127.0.0.1:5001/api/v0/key/gen?arg=" + account
-					// var url_gen_key = "http://18.162.56.46:5001/api/v0/key/gen?arg=" + account //8sh5t
+					obj.setState({
+						usedAcc: account
+					})
+
+					var url_gen_key = "http://18.162.56.46:5001/api/v0/key/gen?arg=" + account
 					if(obj.state.ipfsHashCover !== ''){
 						axios.post(url_gen_key)
 							.then(function (response) {
-								console.log(response.data)
+								console.log("gen key: ", response.data)
 								var JSONBody = {
 									"name": obj.state.name,
 									"description": trimmed_des,
@@ -331,33 +375,33 @@ class Publish extends Component {
 				pinata_api_key: pinata_api_key,
 				pinata_secret_api_key: pinata_secret_api_key
 			},
-			// data: this.state.bufferPDF,
 			beforeUpload: file => {
 				return new Promise(async (resolve, reject) => {
 					try {
 						const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
 						const signer = accounts[0];
-						var rootNftId = parseInt(obj.state.rootNFTId);
 						var message = {
 							account: signer,
-							root_nft_id: rootNftId
+							nft_id: obj.state.rootNFTId
 						};
+						console.debug(JSON.stringify(message))
 						const sig = await web3.eth.personal.sign(JSON.stringify(message), signer)
-
+						console.debug(sig)
 						var payload = {
+							"nft_id": obj.state.rootNFTId,
 							"account": signer,
-							"root_nft_id": obj.state.rootNFTId,
 							"signature": sig
 						}
 						var payload_str = JSON.stringify(payload)
 						var req_key_url = 'http://192.168.0.64:3000/api/v1/key/claim'
-						const res = await axios.post(req_key_url, payload_str, {
-							headers: {
-								'Content-Type': 'application/json'
-							}
-						})
-						if(res.status == 200) {
+						try{
+							const res = await axios.post(req_key_url, payload_str, {
+								headers: {
+									'Content-Type': 'application/json'
+								}
+							})
 							var secret_key = res.data.key
+							console.debug(secret_key)
 							const reader = new FileReader()
 							reader.readAsArrayBuffer(file)
 							reader.onload = (e) => {
@@ -370,11 +414,22 @@ class Publish extends Component {
 								});
 								resolve(myblob)
 							}
-						} else {
-							var error_msg = res.data.message
-							alert("获取密钥失败" + error_msg)
-							reject()
+						} catch (error) {
+							if (error.response.status == 400) {
+								if (error.response.data.message.includes("signature invalid")){
+									alert("您的签名有误，请查看签名账号是否正确")
+								} else if (error.response.data.message.includes("param invalid")){
+									alert("参数错误")
+								} else if (error.response.data.message.includes("not owned")){
+									alert("您并不拥有此nft")
+								} else if (error.response.data.message.includes("not found")) {
+									alert("此nft还未生成")
+								}
+							} else {
+								alert('请求文件加密密钥失败')
+							}
 						}
+						
 						
 					} catch (e) {
 						console.log(e)
@@ -389,6 +444,7 @@ class Publish extends Component {
 					obj.setState({
 						fileIpfs: info.file.response.IpfsHash
 					})
+					console.debug("encrypted file hash: ", info.file.response.IpfsHash)
 					message.success(`${info.file.name} file uploaded successfully.`);
 				}
 				

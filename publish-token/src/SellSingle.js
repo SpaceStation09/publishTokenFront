@@ -144,8 +144,7 @@ class SellSingle extends Component {
     try{
       const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id=' + this.state.NFTId
       const res = await axios.get(url)
-      var children = res.data.children
-      var children_num = children.length
+      var children_num = res.data.count
       this.setState({
         childrenNum: children_num
       })
