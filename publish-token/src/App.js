@@ -86,7 +86,7 @@ class App extends Component {
                   </Typography>
                   <Grid container justifyContent="center">
                     <Grid item xs={3} >
-                      <Button size="large" variant="contained" color="secondary" className={classes.btnMain} href='/#/publish'>
+                      <Button size="large" variant="contained" color="secondary" className={classes.btnMain} href='/#/introPublish'>
                         <b>去发布</b>
                       </Button>
                     </Grid>

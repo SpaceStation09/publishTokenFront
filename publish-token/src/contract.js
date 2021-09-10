@@ -1,6 +1,6 @@
 import web3 from './web3';
 
-const address = '0x62a680d7616346EB890B5a7Ff1D151dBE2EbCAfD'; // rinkeby
+const address = '0x7B5B92B0eD1DfeafdbD724b177A7733Bda67497F'; // rinkeby
 
 const abi = [
   {
@@ -132,6 +132,25 @@ const abi = [
     "inputs": [
       {
         "indexed": true,
+        "internalType": "uint64",
+        "name": "NFT_id",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "content",
+        "type": "string"
+      }
+    ],
+    "name": "Label",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "uint32",
         "name": "issue_id",
         "type": "uint32"
@@ -150,6 +169,31 @@ const abi = [
       }
     ],
     "name": "Publish",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint64",
+        "name": "NFT_id",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "old_URI",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "new_URI",
+        "type": "bytes32"
+      }
+    ],
+    "name": "SetURI",
     "type": "event"
   },
   {
@@ -623,6 +667,24 @@ const abi = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint64",
+        "name": "_NFT_id",
+        "type": "uint64"
+      },
+      {
+        "internalType": "string",
+        "name": "content",
+        "type": "string"
+      }
+    ],
+    "name": "label",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "name",
     "outputs": [
@@ -747,6 +809,24 @@ const abi = [
       }
     ],
     "name": "setApprovalForAll",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint64",
+        "name": "_NFT_id",
+        "type": "uint64"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "ipfs_hash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setURI",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

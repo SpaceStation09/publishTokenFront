@@ -47,6 +47,7 @@ class TopBar extends Component {
 
   state = {
     isConnected: false,
+    user_address: ''
   };
 
   async componentWillMount() {
@@ -57,14 +58,10 @@ class TopBar extends Component {
   }
 
   getAccount = async () => {
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
     const account = accounts[0];
-    this.setState({
-      name: '22',
-    });
     this.setState({ isConnected: true, });
     this.setState({ user_address: account, });
-    
   }
 
   render() {
@@ -102,7 +99,7 @@ class TopBar extends Component {
               <Button size="large" className={classes.btn} href='/'>
                 <b>首页</b>
               </Button>
-              <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/publish'>
+              <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} href='/#/introPublish'>
                 <b>发布</b>
               </Button>
 
