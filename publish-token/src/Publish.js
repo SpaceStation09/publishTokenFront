@@ -127,10 +127,10 @@ class Publish extends Component {
 		// 		config: {
 		// 			Addresses: {
 		// 				Swarm: [
-		// 					// These are public webrtc-star servers
-		// 					'/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
-		// 					'/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
-		// 					'/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star/p2p/12D3KooWC3kaejMzfgkx1MCAsZDCmasyXzv69hdoV6WbB2RUnQ3S'
+		// 					// // These are public webrtc-star servers
+		// 					// '/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
+		// 					// '/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
+		// 					// '/dns4/rtc.r2d2.to/tcp/443/wss/p2p-webrtc-star/'
 		// 				]
 		// 			},
 		// 			// This removes the default IPFS peers to dial to. You can specify any known addresses you wish, or leave blank.
@@ -140,28 +140,30 @@ class Publish extends Component {
 		// 	this.setState({
 		// 		node: ipfs
 		// 	})
-		// 	const validIp4 = '/dns4/ipfs.r2d2.to/tcp/443/wss/p2p/12D3KooWC3kaejMzfgkx1MCAsZDCmasyXzv69hdoV6WbB2RUnQ3S'
-		// 	const res = await ipfs.swarm.connect(validIp4)
-		// 	// const peerInfos = await ipfs.swarm.peers()
-		// 	// console.debug(peerInfos)
-		// 	console.debug(res.Peers)
+		// 	await ipfs.swarm.connect('/dns4/ipfs.r2d2.to/tcp/443/wss/ipfs/12D3KooWC3kaejMzfgkx1MCAsZDCmasyXzv69hdoV6WbB2RUnQ3S')
+		// 	const peerIDs = await ipfs.swarm.peers()
+		// 	console.debug('peerIDs:', peerIDs)
 		// }else {
 		// 	var ipfs = this.state.node
 		// 	const peerInfos = await ipfs.swarm.addrs()
 		// 	console.debug(peerInfos)
 		// }
 
-		// const res = await ipfs.bootstrap.list()
-		// console.log(res.Peers)
-		// const file = {
-		// 	path: '/tmp/myfile.txt',
-		// 	content: 'ABC'
-		// }
+		// // const res = await ipfs.bootstrap.list()
+		// // console.log(res.Peers)
+		// // const file = {
+		// // 	path: '/tmp/myfile.txt',
+		// // 	content: 'ABC'
+		// // }
 		// const result = await ipfs.add('content')
-		// console.info(result)
+		// console.info(result.cid.toString())
 
 		// const pub = await ipfs.name.publish(result.cid)
-		// console.log('pub name: ', pub.name)
+		// console.debug("Published: ", pub.name)
+		
+		// for await (const resolved_result of ipfs.name.resolve(`/ipns/${pub.name}`, {nocache: true, recursive: true})) {
+		//   console.debug("Resolved: ", resolved_result)
+		// }
 		// console.debug(peerInfos)
 		// console.debug(addr)
 	}
@@ -235,13 +237,6 @@ class Publish extends Component {
 	}
 
 	submitWork = async () => {
-		const stats = await ipfs.repo.stat()
-		console.log(stats)
-		const addr = new Multiaddr("/ip4/18.162.56.46/tcp/4001/p2p/12D3KooWC3kaejMzfgkx1MCAsZDCmasyXzv69hdoV6WbB2RUnQ3S")
-		// await ipfs.swarm.connect(json)
-		const peerInfos = await ipfs.swarm.peers()
-		console.log(typeof peerInfos[0].peer)
-		console.debug(addr)
 		const publish_url = 'http://18.162.56.46:5001/api/v0/name/publish?arg=' + this.state.fileIpfs + '&key=' + this.state.usedAcc
 		this.setState({
 			onLoading: true
@@ -255,7 +250,7 @@ class Publish extends Component {
 		})
 		alert("作品文件发布成功")
 		const rm_key_url = 'http://18.162.56.46:5001/api/v0/key/rm?arg=' + this.state.usedAcc
-		axios.post(rm_key_url)
+		axios.post(rm_key_url) 
 			.then((response) => {
 				console.debug("removed key")
 				obj.setState({
