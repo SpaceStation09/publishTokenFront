@@ -144,7 +144,7 @@ class NFTInfo extends Component{
     const Method = 'GET';
     let obj = this;
     let url = "";
-    let ipnsUrl = obj.ipfs_node + "/api/v0/name/resolve?arg=" + this.state.dataUrl
+    let dataHash = this.state.dataUrl
     //const url = "https://gateway.pinata.cloud/ipfs/QmYwBRgs16U2LmQbcjFWWm6JgwpcSL1qF3frj9hkJ32Pob";
     // axios.request({
     //   ipnsUrl ,
@@ -159,25 +159,25 @@ class NFTInfo extends Component{
     //   }
     // )
 
-    var config = {
-      method: 'post',
-      url: ipnsUrl,
-      headers: { },
-    };
-    let dataHash;
-    await axios(config)
-    .then(function (response) {
-      console.log(JSON.stringify(response.data));
-      url = obj.ipfs_node + "/api/v0/get?arg=" + response.data.Path;
-      let strhash = response.data.Path.split('/');
-      dataHash = obj.gateway + strhash[strhash.length - 1];
-      console.log(dataHash)     
+    // var config = {
+    //   method: 'post',
+    //   url: ipnsUrl,
+    //   headers: { },
+    // };
+    // let dataHash;
+    // await axios(config)
+    // .then(function (response) {
+    //   console.log(JSON.stringify(response.data));
+    //   url = obj.ipfs_node + "/api/v0/get?arg=" + response.data.Path;
+    //   let strhash = response.data.Path.split('/');
+    //   dataHash = obj.gateway + strhash[strhash.length - 1];
+    //   console.log(dataHash)     
      
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-    console.log(dataHash) 
+    // })
+    // .catch(function (error) {
+    //   console.log(error);
+    // });
+    // console.log(dataHash) 
     var cipher_config = {
       method: 'get',
       url: dataHash,
