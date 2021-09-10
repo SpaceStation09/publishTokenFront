@@ -16,7 +16,6 @@ import CardMedia from '@material-ui/core/CardMedia';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import WhatshotIcon from '@material-ui/icons/Whatshot';
 import Web3 from 'web3';
-import NFT from "./ShillNFT";
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 import BigNumber from 'bignumber.js';
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney';

@@ -14,7 +14,6 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { Paper, Container } from '@material-ui/core';
-import NFT from "./ShillNFT";
 import BuildIcon from '@material-ui/icons/Build';
 import Web3 from 'web3';
 import axios from 'axios';

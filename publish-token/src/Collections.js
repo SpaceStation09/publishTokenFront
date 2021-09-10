@@ -22,7 +22,6 @@ import { CodeOutlined } from '@ant-design/icons';
 import { render } from '@testing-library/react';
 import TopBar from "./TopBar";
 import BigNumber from 'bignumber.js';
-import NFT from "./ShillNFT";
 import { data } from 'jquery';
 import axios from 'axios';
 var $;
