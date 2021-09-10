@@ -21,6 +21,8 @@ import ReactLoading from 'react-loading';
 import Paper from '@material-ui/core/Paper';
 
 
+const IPFS = require('ipfs-core')
+const Websockets = require('libp2p-websockets')
 const {
 	pinata_api_key,
 	pinata_secret_api_key,
