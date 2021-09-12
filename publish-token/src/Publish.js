@@ -120,8 +120,10 @@ class Publish extends Component {
   };
 
 	async componentDidMount() {
-	
 	}
+	//21474836481
+	//4294967297
+	//8589934593
 
 	handleGetPubName = (event) => {
 		this.setState({
@@ -189,6 +191,7 @@ class Publish extends Component {
 						"value": this.state.bonusFee
 					},
 					{
+						"trait_type": "File Address",
 						"value": file_url
 					}
 				]

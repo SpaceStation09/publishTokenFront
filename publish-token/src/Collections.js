@@ -14,8 +14,6 @@ import { canUseDOM, Helmet } from 'react-helmet';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import GitHubIcon from '@material-ui/icons/GitHub';
-//import web3 from './web3';
-// import Web3 from 'web3';
 import contract from './contract';
 import web3 from './web3';
 import { CodeOutlined } from '@ant-design/icons';
@@ -129,7 +127,7 @@ class Collections extends Component {
             return;
         }
         const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-        console.log(chainId);
+        // console.log(chainId);
         if(chainId !== '0x4') {
             alert("请切换至rinkeby网络");
             return;
@@ -146,8 +144,8 @@ class Collections extends Component {
           return;
         }
         let data = await this.getMetadata(nft, ids);
-
-        for(let i = 0; i < ids.length; i++) {
+        console.log("getMetadata ",data.length)
+        for (let i = 0; i < data.length; i++) {
             let element = {
                 id: ids[i],
                 title: data[i].name,
@@ -167,11 +165,41 @@ class Collections extends Component {
     getMetadata = async (nft, id) => {
       let metaDatas = [];
       for(let i = 0; i < id.length; i++) {
-        let meta = await nft.methods.tokenURI(id[i]).call();
-        let data = await axios.get(meta);
-        console.log(data.data);
-        metaDatas.push(data.data);
+        let ipfs_link = await nft.methods.tokenURI(id[i]).call();
+        var ipfs_hash_arr = ipfs_link.split('/')
+        var ipfs_hash = ipfs_hash_arr[ipfs_hash_arr.length -1]
+        var meta = "https://gateway.pinata.cloud/ipfs/" + ipfs_hash
+        // console.debug("meta: " + id[i] + " " + meta)
+        await axios({
+          method: 'get',
+          url: meta,
+          timeout: 1000 * 1,
+        }).then(res => {
+          console.log("meta: ", res.data)
+          metaDatas.push(res.data)
+        }).catch(error => {
+          console.log('time out')
+          var name_holder = 'SparkNFT#' + id[i]
+          var placeholder = {
+            "name": name_holder,
+            "description": '暂时无法获取到该nft的相关描述',
+            "image": 'https://testnets.opensea.io/static/images/placeholder.png',
+            "attributes": [
+              {
+                "display_type": "boost_percentage",
+                "trait_type": "Bonuse Percentage",
+                "value": 0
+              },
+              {
+                "trait_type": "File Address",
+                "value": 'file_url'
+              }
+            ]
+          }
+          metaDatas.push(placeholder);
+        })
       }
+      console.debug("before return ", metaDatas)
       return metaDatas;
     }
 
@@ -224,7 +252,7 @@ class Collections extends Component {
         }
         
       });
-    console.log(balanceId.length);
+    // console.log(balanceId.length);
       return balanceId;
   };
 
