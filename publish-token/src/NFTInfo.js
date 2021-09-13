@@ -4,9 +4,8 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import { createTheme, ThemeProvider, withStyles } from '@material-ui/core/styles';
 import { Helmet } from 'react-helmet';
-import Toolbar from '@material-ui/core/Toolbar';
+
 import Typography from '@material-ui/core/Typography';
-import GitHubIcon from '@material-ui/icons/GitHub'
 import TopBar from "./TopBar";
 import Card from '@material-ui/core/Card';
 import Paper from '@material-ui/core/Paper';
@@ -129,7 +128,8 @@ class NFTInfo extends Component{
       spark: false,
       dataUrl: null,
       account: null,
-      Profit: ''
+      Profit: '',
+      issueId: 0
   };
 
   downloadIPFS = async () =>{
@@ -202,6 +202,7 @@ class NFTInfo extends Component{
 
   constructor(props)  {
     super(props);
+    let obj = this
     if(!window.ethereum) {
       alert("请先安装metamask");
       window.location.href = '/#/collections';
@@ -223,7 +224,6 @@ class NFTInfo extends Component{
     let web3 = new Web3(window.ethereum);
     let nft = contract;
     this.setState({contract: contract});
-    let obj = this;
     nft.methods.ownerOf(this.props.match.params.id).call().then(owner => {
       window.ethereum.request({ method: 'eth_requestAccounts' }).then( accounts => {
         const account = accounts[0];
@@ -241,25 +241,59 @@ class NFTInfo extends Component{
     })
     nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
       let hash = meta.split('/');
-      this.setState({hash: hash[hash.length-1]});
-      axios.get(meta).then(res => {
-        let data = res.data;
-        let bouns = 0;
-        let fileAddr = "";
-        for(let i = 0; i < data.attributes.length; i++) {
-          if(data.attributes[i].trait_type === "bonusPercentage") {
-            bouns = data.attributes[i].value;
-          }
-          if(data.attributes[i].trait_type === "fileAddress") {
-            fileAddr = data.attributes[i].value;
-          }
-        }
-        this.setState({Name: data.name});
-        this.setState({Description: data.description});
-        this.setState({BonusFee: bouns});
-        this.setState({Cover: data.image});
-        this.setState({dataUrl: fileAddr});
-      });
+      nft.methods.getIssueIdByNFTId(this.props.match.params.id).call().then(issue => {
+        nft.methods.getRoyaltyFeeByIssueId(issue).call().then(royalty => {
+          this.setState({ hash: hash[hash.length - 1] });
+          axios({
+            method: 'get',
+            url: meta,
+            timeout: 1000 * 3,
+          }).then(res => {
+            let data = res.data;
+            let bouns = 0;
+            let fileAddr = "";
+            for (let i = 0; i < data.attributes.length; i++) {
+              if (data.attributes[i].trait_type === "Bonuse Percentage") {
+                bouns = data.attributes[i].value;
+              }
+              if (data.attributes[i].trait_type === "File Address") {
+                fileAddr = data.attributes[i].value;
+              }
+            }
+            this.setState({ Name: data.name });
+            this.setState({ Description: data.description });
+            this.setState({ BonusFee: royalty });
+            this.setState({ Cover: data.image });
+            this.setState({ dataUrl: fileAddr });
+          }).catch(error => {
+            this.setState({ Name: 'SparkNFT' });
+            this.setState({ Description: '暂时无法获取到该nft的相关描述' });
+            this.setState({ BonusFee: royalty });
+            this.setState({ Cover: 'https://via.placeholder.com/100x140.png?text=SparkNFT' });
+            this.setState({ dataUrl: 'fileAddr_PlaceHolder' });
+          })
+        })
+      })
+      
+      
+      // axios.get(meta).then(res => {
+      //   let data = res.data;
+      //   let bouns = 0;
+      //   let fileAddr = "";
+      //   for(let i = 0; i < data.attributes.length; i++) {
+      //     if (data.attributes[i].trait_type === "Bonuse Percentage") {
+      //       bouns = data.attributes[i].value;
+      //     }
+      //     if(data.attributes[i].trait_type === "File Address") {
+      //       fileAddr = data.attributes[i].value;
+      //     }
+      //   }
+      //   this.setState({Name: data.name});
+      //   this.setState({Description: data.description});
+      //   this.setState({BonusFee: bouns});
+      //   this.setState({Cover: data.image});
+      //   this.setState({dataUrl: fileAddr});
+      // });
     });
 
     const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id

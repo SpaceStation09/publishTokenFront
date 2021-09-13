@@ -101,21 +101,44 @@ class BuySingle extends Component {
     this.setState({
       NFTId: this.props.match.params.NFTId
     })
+    const issueId = await contract.methods.getIssueIdByNFTId(this.state.NFTId).call()
+    const royalty = await contract.methods.getRoyaltyFeeByIssueId(issueId).call()
     await contract.methods.tokenURI(this.props.match.params.NFTId).call().then(metadata => {
       let hash = metadata.split('/')
       this.setState({ ipfsHashMeta: hash[hash.length - 1] })
       var url = "https://gateway.pinata.cloud/ipfs/" + this.state.ipfsHashMeta
       var obj = this
-      axios.get(url)
-        .then(function (response) {
-          var content = response.data
-          obj.setState({
-            name: content.name,
-            description: content.description,
-            bonusFee: content.attributes[0].value,
-            coverURL: content.image
-          })
+      axios({
+        method: 'get',
+        url: url,
+        timeout: 1000 * 3,
+      }).then(res => {
+        let content = res.data;
+        let bonus = 0;
+        let fileAddr = "";
+        for (let i = 0; i < content.attributes.length; i++) {
+          if (content.attributes[i].trait_type === "Bonuse Percentage") {
+            bonus = content.attributes[i].value;
+          }
+          if (content.attributes[i].trait_type === "File Address") {
+            fileAddr = content.attributes[i].value;
+          }
+        }
+        obj.setState({
+          name: content.name,
+          description: content.description,
+          bonusFee: bonus,
+          coverURL: content.image
         })
+      }).catch(error => {
+        var name_holder = 'SparkNFT#' + this.props.match.params.NFTId
+        obj.setState({
+          name: name_holder,
+          description: '暂时无法获取到该nft的相关描述',
+          bonusFee: royalty,
+          coverURL: 'https://via.placeholder.com/100x140.png?text=SparkNFT'
+        })
+      })
     })
 
     await contract.methods.getTransferPriceByNFTId(this.props.match.params.NFTId).call().then(price => {
@@ -135,21 +158,25 @@ class BuySingle extends Component {
       })
     })
 
-    const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id='+this.state.NFTId
-    const res = await axios.get(url)
-    if(res.status==200){
-      var children = res.data.children
-      var children_num = children.length
+    try {
+      const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id=' + this.state.NFTId
+      const res = await axios.get(url)
+      var children_num = res.data.count
       this.setState({
         childrenNum: children_num
       })
-    }else{
-      alert('获取nft子节点情况页面失败')
+    } catch (error) {
+      if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
+        this.setState({
+          childrenNum: 0
+        })
+      } else {
+        alert('获取nft子节点情况页面失败')
+      }
     }
   }
 
   handleBuy = async (e) => {
-    //TODO: call smart contract to pay fee and get NFT
 
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     const account = accounts[0];
