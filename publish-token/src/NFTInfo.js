@@ -243,11 +243,14 @@ class NFTInfo extends Component{
       let hash = meta.split('/');
       nft.methods.getIssueIdByNFTId(this.props.match.params.id).call().then(issue => {
         nft.methods.getRoyaltyFeeByIssueId(issue).call().then(royalty => {
-          this.setState({ hash: hash[hash.length - 1] });
+          var file_hash = hash[hash.length - 1]
+          // this.setState({ hash: hash[hash.length - 1] });
+          console.debug('meta here: ', file_hash)
+          var request_url = "https://gateway.pinata.cloud/ipfs/" + file_hash
           axios({
             method: 'get',
-            url: meta,
-            timeout: 1000 * 3,
+            url: request_url,
+            timeout: 1000 * 5,
           }).then(res => {
             let data = res.data;
             let bouns = 0;
@@ -503,7 +506,7 @@ class NFTInfo extends Component{
                 <Grid container direction="column" item xs style={{ maxWidth: 100}}>
                   <Grid>
                     <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: 10}}>
-                        <img style={{ width: 300, marginTop: 20, marginBottom: 10}} src={this.state.Cover}></img>  
+                        <img style={{ width: 300, marginTop: 20, marginBottom: 50}} src={this.state.Cover}></img>  
                     </Paper>
                   </Grid>
                   <Grid>

@@ -214,30 +214,30 @@ class Publish extends Component {
 					obj.setState({
 						ipfsMeta: bytesToContract
 					})
-				})
 
-			var price_eth = web3.utils.toWei(this.state.price.toString())
-			var ipfsToContract = '0x' + this.state.ipfsMeta
-			contract.methods.publish(price_eth, this.state.bonusFee, this.state.shareTimes, ipfsToContract).send({
-				from: this.state.usedAcc
-			}).then(function (receipt) {
-				//55834574849
-				console.log(receipt)
-				var publish_event = receipt.events.Publish
-				var returned_values = publish_event.returnValues
-				var root_nft_id = returned_values.rootNFTId
-				var issue_id = returned_values.issue_id
-				obj.setState({
-					onLoading: false,
-					rootNFTId: root_nft_id,
-					issueId: issue_id
-				})
-				alert("已经成功发布作品");
-			});
+					var price_eth = web3.utils.toWei(obj.state.price.toString())
+					var ipfsToContract = '0x' + bytesToContract
+					contract.methods.publish(price_eth, obj.state.bonusFee, obj.state.shareTimes, ipfsToContract).send({
+						from: obj.state.usedAcc
+					}).then(function (receipt) {
+						//55834574849
+						console.log(receipt)
+						var publish_event = receipt.events.Publish
+						var returned_values = publish_event.returnValues
+						var root_nft_id = returned_values.rootNFTId
+						var issue_id = returned_values.issue_id
+						obj.setState({
+							onLoading: false,
+							rootNFTId: root_nft_id,
+							issueId: issue_id
+						})
+						alert("已经成功发布作品");
+					});
 
-			this.setState({
-				finished: true
-			})
+					obj.setState({
+						finished: true
+					})
+				})
 
 		}
 		
