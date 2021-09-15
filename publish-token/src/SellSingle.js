@@ -112,7 +112,6 @@ class SellSingle extends Component {
       let hash = metadata.split('/')
       this.setState({ ipfsHashMeta: hash[hash.length - 1] })
       var url = "https://gateway.pinata.cloud/ipfs/" + this.state.ipfsHashMeta
-      var obj = this
       axios({
         method: 'get',
         url: url,
@@ -143,6 +142,7 @@ class SellSingle extends Component {
           bonusFee: royalty,
           coverURL: 'https://via.placeholder.com/100x140.png?text=SparkNFT'
         })
+        console.debug(error)
       })
     })
 
@@ -164,22 +164,29 @@ class SellSingle extends Component {
       }
     })
 
-    try{
-      const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id=' + this.state.NFTId
-      const res = await axios.get(url)
-      var children_num = res.data.count
-      this.setState({
-        childrenNum: children_num
-      })
-    } catch (error) {
-      if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
-        this.setState({
-          childrenNum: 0
+    const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id=' + this.state.NFTId
+    await axios({
+      method: 'get',
+      url: url,
+      timeout: 1000 * 2,
+    }).then(res => {
+        var children_num = res.data.count
+        obj.setState({
+          childrenNum: children_num
         })
-      } else {
-        alert('获取nft子节点情况页面失败')
-      }
-    }
+      })
+      .catch((error) => {
+        console.debug(`error: ${error}`)
+        if (!String(error).includes('Error: timeout of')){
+          if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
+            obj.setState({
+              childrenNum: 0
+            })
+          } else {
+            alert('获取nft子节点情况页面失败')
+          }
+        }
+      })
     
   }
 

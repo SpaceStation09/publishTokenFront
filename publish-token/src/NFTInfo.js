@@ -300,13 +300,13 @@ class NFTInfo extends Component{
     });
 
     const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id
-      axios.get(leafUrl).then(res => {
+    axios.get(leafUrl).then(res => {
 
-        var children = res.data.children
-        var children_num = children.length
-        this.setState({
-          childrenNum: children_num
-        })
+      var children = res.data.children
+      var children_num = children.length
+      this.setState({
+        childrenNum: children_num
+      })
     }).catch(error => {
       console.log(error.data);
       if(error.message === "Network Error") {

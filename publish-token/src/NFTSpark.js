@@ -135,48 +135,48 @@ class NFTSpark extends Component{
 
   
 
-  constructor(props)  {
+  constructor(props) {
     super(props);
     let nft = contract;
     let url = this.gateway + this.props.match.params.hash;
     let obj = this;
     nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
-        let hash = meta.split('/');
-  
-        this.setState({hash: hash[hash.length-1]});
-        axios.get(meta).then(res => {
-          let data = res.data;
-          console.log(data);
-          let bouns;
-          for(let i = 0; i < data.attributes.length; i++) {
-            if(data.attributes[i].trait_type === 'bonusFee') {
-              bouns = data.attributes[i].value;
-            }
+      let hash = meta.split('/');
+
+      this.setState({ hash: hash[hash.length - 1] });
+      axios.get(meta).then(res => {
+        let data = res.data;
+        console.log(data);
+        let bouns;
+        for (let i = 0; i < data.attributes.length; i++) {
+          if (data.attributes[i].trait_type === 'bonusFee') {
+            bouns = data.attributes[i].value;
           }
-          this.setState({Name: data.name});
-          this.setState({Description: data.description});
-          this.setState({BonusFee: bouns});
-          this.setState({Cover: data.image});
-        });
+        }
+        this.setState({ Name: data.name });
+        this.setState({ Description: data.description });
+        this.setState({ BonusFee: bouns });
+        this.setState({ Cover: data.image });
       });
-      nft.methods.getShillPriceByNFTId(this.props.match.params.id).call().then(price => {
-        this.setState({price: price});
-        let etherPrice = web3.utils.fromWei(price, 'ether');
-        etherPrice += ' ETH';
-        this.setState({priceString: etherPrice});
-      });
-      const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id
-      axios.get(leafUrl,{headers: { "Access-Control-Allow-Origin": "*"},}).then(res => {
-        var children = res.data.children
-        var children_num = children.length
-        this.setState({
-          childrenNum: children_num
-        })
+    });
+    nft.methods.getShillPriceByNFTId(this.props.match.params.id).call().then(price => {
+      this.setState({ price: price });
+      let etherPrice = web3.utils.fromWei(price, 'ether');
+      etherPrice += ' ETH';
+      this.setState({ priceString: etherPrice });
+    });
+    const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id
+    axios.get(leafUrl, { headers: { "Access-Control-Allow-Origin": "*" }, }).then(res => {
+      var children = res.data.children
+      var children_num = children.length
+      this.setState({
+        childrenNum: children_num
+      })
     }).catch(error => {
       console.log(JSON.stringify(error));
       console.log(error.request.status);
       console.log(error.message);
-      if(error.message === "Network Error") {
+      if (error.message === "Network Error") {
         return;
       }
       console.log(error.response);

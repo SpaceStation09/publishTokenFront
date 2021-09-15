@@ -7,7 +7,7 @@ import { Helmet } from 'react-helmet';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
-import { message } from 'antd';
+import { Alert, message } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import Dragger from 'antd/lib/upload/Dragger';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
@@ -19,6 +19,7 @@ import contract from './contract';
 import web3 from './web3';
 import ReactLoading from 'react-loading';
 import Paper from '@material-ui/core/Paper';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Link } from "@material-ui/core";
 
 const {
   pinata_api_key,
@@ -117,6 +118,7 @@ class EncryptedPublish extends Component {
     usedAcc: '',
     sig: '',
     finished: false,
+    open: false,
   };
 
   async componentDidMount() {
@@ -154,6 +156,37 @@ class EncryptedPublish extends Component {
   handleGetDescription = (e) => {
     this.setState({
       description: e.target.value,
+    })
+  }
+
+  handleGetNFTId = (value) => {
+    this.setState({
+      rootNFTId: value,
+    })
+  }
+
+  handleClose = (e) => {
+    this.setState({
+      open: false,
+    })
+  }
+
+  handleClickOpen = (e) => {
+    this.setState({
+      open: true,
+    })
+  }
+
+  jump = async (event) => {
+    await contract.methods.ownerOf(this.state.rootNFTId).call().then(owner => {
+      if (this.state.usedAcc == owner.toLowerCase()){
+        this.setState({
+          onLoading: false,
+          allowSubmitPDF: true
+        })
+      }else {
+        alert('您并不是此NFT的持有者')
+      }
     })
   }
 
@@ -263,6 +296,8 @@ class EncryptedPublish extends Component {
             })
           })
         
+        }).catch((error) => {
+          alert(`似乎遇到了些小问题： ${ error }`);
         })
     }
   }
@@ -579,15 +614,50 @@ class EncryptedPublish extends Component {
                     </Grid>
                   </Grid>
                 </form>
-                <Button
-                  variant="contained"
-                  className={classes.button}
-                  startIcon={<CloudUploadIcon />}
-                  style={{ marginTop: 50, width: 200, height: 50, marginBottom: 50 }}
-                  onClick={this.submit}
+                <Grid container alignItems="center" spacing={4} style={{ marginTop: 20, marginBottom: 50}}>
+                  <Grid item xs>
+                    <Button
+                      variant="contained"
+                      className={classes.button}
+                      startIcon={<CloudUploadIcon />}
+                      style={{ width: 200, height: 50, marginBottom: 20, marginTop: 20 }}
+                      onClick={this.submit}
+                    >
+                      提交信息
+                    </Button>
+                  </Grid>
+                  <Grid item xs>
+                    <Link onClick={this.handleClickOpen} style={{ fontSize: 10, textDecoration: 'underline'}}>
+                      已经上传过基本信息？
+                    </Link>
+                  </Grid>
+                </Grid>
+                <Dialog
+                  open={this.state.open}
+                  onClose={this.handleClose}
+                  aria-labelledby="form-dialog-title"
                 >
-                  提交信息
-                </Button>
+                  <DialogTitle id="form-dialog-title">填写 NFT ID</DialogTitle>
+                  <DialogContent>
+                    <DialogContentText>
+                      请在下方区域填写您要绑定内容的 NFT ID
+                    </DialogContentText>
+                    <label style={{ fontSize: 14, marginBottom: 10 }}>NFT ID *</label>
+                    <InputNumber
+                      defaultValue={0}
+                      min={0}
+                      onChange={this.handleGetNFTId}
+                    />
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={this.handleClose} color="primary">
+                      取消
+                    </Button>
+                    <Button variant="contained" onClick={this.jump} color="primary" >
+                      去上传作品
+                    </Button>
+                  </DialogActions>
+                </Dialog>
               </div>
             </Container>
           </ThemeProvider>

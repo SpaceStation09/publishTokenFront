@@ -237,6 +237,9 @@ class Publish extends Component {
 					obj.setState({
 						finished: true
 					})
+				}).catch((error) => {
+					console.debug(error)
+					alert("上传pinata失败，请试着删除文件后重试")
 				})
 
 		}
