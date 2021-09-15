@@ -166,14 +166,20 @@ class NFTSpark extends Component{
         this.setState({priceString: etherPrice});
       });
       const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id
-      axios.get(leafUrl).then(res => {
+      axios.get(leafUrl,{headers: { "Access-Control-Allow-Origin": "*"},}).then(res => {
         var children = res.data.children
         var children_num = children.length
         this.setState({
           childrenNum: children_num
         })
     }).catch(error => {
-      console.log(error);
+      console.log(JSON.stringify(error));
+      console.log(error.request.status);
+      console.log(error.message);
+      if(error.message === "Network Error") {
+        return;
+      }
+      console.log(error.response);
       if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
         console.debug("no children")
       } else {

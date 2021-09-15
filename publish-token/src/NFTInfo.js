@@ -308,11 +308,14 @@ class NFTInfo extends Component{
           childrenNum: children_num
         })
     }).catch(error => {
-      console.log(error);
+      console.log(error.data);
+      if(error.message === "Network Error") {
+        return;
+      }
       if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
         console.log("no children")
       } else {
-        alert('获取nft子节点情况页面失败(' + error + ')')
+        //alert('获取nft子节点情况页面失败(' + error + ')')
       }
     })
   }

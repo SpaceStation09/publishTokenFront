@@ -26,7 +26,7 @@ const Websockets = require('libp2p-websockets')
 const {
 	pinata_api_key,
 	pinata_secret_api_key,
-} = require('./project.secret');
+} = require('./project.secret.js');
 const FormData = require('form-data');
 const bs58 = require('bs58');
 var CryptoJS = require("crypto-js");

@@ -23,7 +23,7 @@ import Paper from '@material-ui/core/Paper';
 const {
   pinata_api_key,
   pinata_secret_api_key,
-} = require('./project.secret');
+} = require('./project.secret.js');
 const FormData = require('form-data');
 const bs58 = require('bs58');
 var CryptoJS = require("crypto-js");
@@ -344,6 +344,7 @@ class EncryptedPublish extends Component {
             var payload_str = JSON.stringify(payload)
             console.log(payload_str);
             var req_key_url = 'http://192.168.0.64:3000/api/v1/key/claim'
+            console.log(pinata_api_key)
             try {
               // const res = await axios.post(req_key_url, payload_str, {
               //   headers: {
