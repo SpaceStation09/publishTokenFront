@@ -278,7 +278,8 @@ class Collections extends Component {
     
   renderDescription = (description) => {
     if(description.length <= 150) {
-        return (description);
+    
+      return (description);
     } else {
         let newDescription = description.substring(0,150) + "..........";
         return (newDescription); 
@@ -323,19 +324,15 @@ class Collections extends Component {
           console.log(card)
             let res = (
                 <Grid item xs={12} sm={6} md={4}>
-                    <Card className={classes.card}>
-                        {card ? 
-                            (<CardMedia
+                    
+                        
+                        {
+                        card ?(<Card className={classes.card}>
+                          <CardMedia
                               className={classes.cardMedia}
                               image={card.image}
                               title="Image title" 
                             />
-                            ):(
-                          <Skeleton variant="rect" style={{marginLeft:40,}} width={210} height={218} />
-                            )
-                        }
-                        {
-                        card ?(<Card>
                           <CardContent className={classes.cardContent}>
                           <Typography gutterBottom variant="h5" component="h2">
                               <b>{card.title}</b>
@@ -346,7 +343,6 @@ class Collections extends Component {
                           </CardContent>
                           <CardActions>
                               <Button size="small" variant="contained"  color="primary" target="_blank" href={'/#/NFT/' +  card.id} >
-
                                   <b>查看 </b>
                               </Button>
                               <Grid xs={3}></Grid>
@@ -355,7 +351,8 @@ class Collections extends Component {
                               </Typography>
                           </CardActions>
                           </Card>):(
-                            <Card>
+                            <Card className={classes.card}>
+                              <Skeleton variant="rect" style={{marginLeft:40,}} width={210} height={218} />
                               <Skeleton width="60%" style={{marginTop:40,}} height={30} />
                               <Skeleton height={30}/>
                               <Skeleton height={30}/>
@@ -363,8 +360,8 @@ class Collections extends Component {
                             </Card>
                           )
                         }
-                        
-                    </Card>
+                       
+                    
                 </Grid>
             );
             
