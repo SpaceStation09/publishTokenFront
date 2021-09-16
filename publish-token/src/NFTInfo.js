@@ -129,7 +129,9 @@ class NFTInfo extends Component{
       dataUrl: null,
       account: null,
       Profit: '',
-      issueId: 0
+      issueId: 0,
+      fileType: "",
+      isEncrypt: false
   };
 
   downloadIPFS = async () =>{
@@ -137,24 +139,47 @@ class NFTInfo extends Component{
     let obj = this;
     let url = "";
     let dataHash = this.state.dataUrl
-    var cipher_config = {
-      method: 'get',
-      url: dataHash,
-      headers: { },
-    };
-    axios(cipher_config).then(async (response) => {
-      console.log(response)
-      let ciphertext = response.data;
-      let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      let account = accounts[0];
-      console.log(account);
-      let signJson = {
-        account: account,
-        root_nft_id: this.props.match.params.id
-      }
-      signJson = JSON.stringify(signJson);
-      await this.signDataAndDecrypt(account,ciphertext);
+    if(this.state.isEncrypt) {
+      var cipher_config = {
+        method: 'get',
+        url: dataHash,
+        headers: { },
+      };
+      axios(cipher_config).then(async (response) => {
+        console.log(response)
+        let ciphertext = response.data;
+        let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        let account = accounts[0];
+        console.log(account);
+        let signJson = {
+          account: account,
+          root_nft_id: this.props.match.params.id
+        }
+        signJson = JSON.stringify(signJson);
+        await this.signDataAndDecrypt(account,ciphertext);
+      });
+    }else {
+      axios({
+        url: dataHash, //your url
+        method: 'GET',
+        responseType: 'blob', // important
+    }).then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        // text/plain application/pdf
+        let suffix;
+        if(obj.state.fileType === 'text/plain') {
+          suffix = '.txt'
+        } else {
+          suffix = '.pdf'
+        }
+        link.setAttribute('download', obj.state.Name + obj.state.fileType); //or any other extension
+        document.body.appendChild(link);
+        link.click();
     });
+    }
+    
     
   }
 
@@ -214,6 +239,8 @@ class NFTInfo extends Component{
             let data = res.data;
             let bouns = 0;
             let fileAddr = "";
+            let isEncrypt = false;
+            let fileType = bouns = data.attributes[2].value
             for (let i = 0; i < data.attributes.length; i++) {
               if (data.attributes[i].trait_type === "Bonuse Percentage") {
                 bouns = data.attributes[i].value;
@@ -221,12 +248,17 @@ class NFTInfo extends Component{
               if (data.attributes[i].trait_type === "File Address") {
                 fileAddr = data.attributes[i].value;
               }
+              if (data.attributes[i].trait_type === "Encrypted") {
+                isEncrypt = data.attributes[i].value;
+              }
             }
             this.setState({ Name: data.name });
             this.setState({ Description: data.description });
             this.setState({ BonusFee: royalty });
             this.setState({ Cover: data.image });
             this.setState({ dataUrl: fileAddr });
+            this.setState({ isEncrypt: isEncrypt });
+            this.setState({ fileType: fileType });
           }).catch(error => {
             this.setState({ Name: 'SparkNFT' });
             this.setState({ Description: '暂时无法获取到该nft的相关描述' });

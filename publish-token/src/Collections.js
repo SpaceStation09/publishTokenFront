@@ -14,12 +14,15 @@ import { canUseDOM, Helmet } from 'react-helmet';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import GitHubIcon from '@material-ui/icons/GitHub';
+//import web3 from './web3';
+// import Web3 from 'web3';
 import contract from './contract';
 import web3 from './web3';
 import { CodeOutlined } from '@ant-design/icons';
 import { render } from '@testing-library/react';
 import TopBar from "./TopBar";
 import BigNumber from 'bignumber.js';
+import Skeleton from '@material-ui/lab/Skeleton';
 import axios from 'axios';
 var $;
 $ = require('jquery');
@@ -108,7 +111,9 @@ class Collections extends Component {
         user_address: null,
         name: '',
         viewable: false,
-        cards: []
+        cards: [],
+        onloading: false,
+        SkeletoNumber: 0
     };
     getAccount = async () => {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -127,7 +132,7 @@ class Collections extends Component {
             return;
         }
         const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-        // console.log(chainId);
+        console.log(chainId);
         if(chainId !== '0x4') {
             alert("请切换至rinkeby网络");
             return;
@@ -142,10 +147,12 @@ class Collections extends Component {
           alert("暂无可展示NFTs");
           document.getElementById('viewButton').innerHTML = '查看我的收藏';
           return;
+        } else {
+
         }
         let data = await this.getMetadata(nft, ids);
-        console.log("getMetadata ",data.length)
-        for (let i = 0; i < data.length; i++) {
+
+        for(let i = 0; i < ids.length; i++) {
             let element = {
                 id: ids[i],
                 title: data[i].name,
@@ -159,6 +166,10 @@ class Collections extends Component {
         
         this.setState({viewable: true ,});
         this.setState({cards: cards ,});
+        this.setState({
+          onloading: false,
+          SkeletoNumber: 0
+        })
     };
 
 
@@ -200,7 +211,6 @@ class Collections extends Component {
           metaDatas.push(placeholder);
         })
       }
-      console.debug("before return ", metaDatas)
       return metaDatas;
     }
 
@@ -253,7 +263,15 @@ class Collections extends Component {
         }
         
       });
-    // console.log(balanceId.length);
+      console.log(balanceId.length);
+      if(balanceId.length > 0) {
+        this.setState({
+          onloading: true,
+          SkeletoNumber: balanceId.length
+        })
+        console.log("load")
+        console.log(this.state.onloading)
+      }
       return balanceId;
   };
 
@@ -300,48 +318,52 @@ class Collections extends Component {
             }
             return (<p>connect</p>);
         }
-
-        const setAccount = () => {
-            if (typeof window.ethereum == 'undefined') {
-                alert('MetaMask is not installed!');
-                return;
-            }
-            if(!window.ethereum.isConnected()) return
-            const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9,10,11];
-            return cards;
-            
-        }
         
         function showCard(card) {
+          console.log(card)
             let res = (
-                <Grid item key={card.id} xs={12} sm={6} md={4}>
+                <Grid item xs={12} sm={6} md={4}>
                     <Card className={classes.card}>
-                        <CardMedia
-                            className={classes.cardMedia}
-                            image={card.image}
-                            title="Image title" 
-                        />
-                        <CardContent className={classes.cardContent}>
-                            <Typography gutterBottom variant="h5" component="h2">
-                                <b>{card.title}</b>
-                            </Typography>
-                            <Typography>
-                                {obj.renderDescription(card.description)}
-                                {/* It contains 41 articles he published between 1918-1924.
-                                    Sharp, poignant, varying vastly on their topic, length, and style, these articles redefined the genre of "essay" in Chinese literature,
-                                    as well as played an important part in the new cultural movement. */}
-                            </Typography>
-                        </CardContent>
-                        <CardActions>
-                            <Button size="small" variant="contained"  color="primary" target="_blank" href={'/#/NFT/' +  card.id} >
+                        {card ? 
+                            (<CardMedia
+                              className={classes.cardMedia}
+                              image={card.image}
+                              title="Image title" 
+                            />
+                            ):(
+                          <Skeleton variant="rect" style={{marginLeft:40,}} width={210} height={218} />
+                            )
+                        }
+                        {
+                        card ?(<Card>
+                          <CardContent className={classes.cardContent}>
+                          <Typography gutterBottom variant="h5" component="h2">
+                              <b>{card.title}</b>
+                          </Typography>
+                          <Typography>
+                              {obj.renderDescription(card.description)}
+                          </Typography>
+                          </CardContent>
+                          <CardActions>
+                              <Button size="small" variant="contained"  color="primary" target="_blank" href={'/#/NFT/' +  card.id} >
 
-                                <b>查看 </b>
-                            </Button>
-                            <Grid xs={3}></Grid>
-                            <Typography variant="body2" gutterBottom>
-                            <b>NFT id: {card.id} </b>
-                            </Typography>
-                        </CardActions>
+                                  <b>查看 </b>
+                              </Button>
+                              <Grid xs={3}></Grid>
+                              <Typography variant="body2" gutterBottom>
+                              <b>NFT id: {card.id} </b>
+                              </Typography>
+                          </CardActions>
+                          </Card>):(
+                            <Card>
+                              <Skeleton width="60%" style={{marginTop:40,}} height={30} />
+                              <Skeleton height={30}/>
+                              <Skeleton height={30}/>
+                              <Skeleton height={30}/>
+                            </Card>
+                          )
+                        }
+                        
                     </Card>
                 </Grid>
             );
@@ -385,15 +407,15 @@ class Collections extends Component {
           </Container>
 				</ThemeProvider>
 				<main>
-					{this.state.viewable?<Container className={classes.cardGrid} maxWidth="md">
+					{<Container className={classes.cardGrid} maxWidth="md">
 						<Grid container spacing={4}>
 							{
-                                   this.state.cards.map((card) => {
-                                        return showCard(card);
-                                    })
-                            }
+                (this.state.onloading?Array.from(new Array(this.state.SkeletoNumber)):this.state.cards).map((card) => {
+                      return showCard(card);
+                  })
+              }
 						</Grid>
-					</Container>:null}
+					</Container>}
 				</main>
 			</div>
 		);
