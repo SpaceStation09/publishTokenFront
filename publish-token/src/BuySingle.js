@@ -14,6 +14,7 @@ import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 import contract from './contract';
 import web3 from './web3';
 import ReactLoading from 'react-loading';
+import Skeleton from '@material-ui/lab/Skeleton';
 
 
 const theme = createTheme({
@@ -85,7 +86,8 @@ class BuySingle extends Component {
     approvedAddr: '',
     currentAcc: '',
     onLoading: false,
-    childrenNum: 0
+    childrenNum: 0,
+    loadItem: true,
   };
 
   constructor(props) {
@@ -125,6 +127,7 @@ class BuySingle extends Component {
           }
         }
         obj.setState({
+          loadItem: false,
           name: content.name,
           description: content.description,
           bonusFee: bonus,
@@ -133,6 +136,7 @@ class BuySingle extends Component {
       }).catch(error => {
         var name_holder = 'SparkNFT#' + this.props.match.params.NFTId
         obj.setState({
+          loadItem: false,
           name: name_holder,
           description: '暂时无法获取到该nft的相关描述',
           bonusFee: royalty,
@@ -271,37 +275,52 @@ class BuySingle extends Component {
               回到首页
             </Button>
             <div className={classes.paper}>
-              <Grid container justifyContent="space-evenly" spacing={5}>
-                <Grid item xs={4} style={{ maxWidth: 600 }}>
-                  <Paper style={{ backgroundColor: '#EFEBE9', width: 350, marginLeft: '40%' }}>
-                    <img style={{ width: 300, marginTop: 20, marginBottom: 50 }} src={this.state.coverURL}></img>
-                  </Paper>
+              {this.state.loadItem ? (
+                <Grid container justifyContent="space-evenly" spacing={5}>
+                  <Grid item xs={4}>
+                    <Skeleton variant="rect" width={300} height={500} style={{ width: 300, marginLeft: 200, marginBottom: 50 }} />
+                  </Grid>
+                  <Grid item xs style={{ marginLeft: '5%' }}>
+                    <Skeleton animation="wave" variant="text" width={200} height={30} />
+                    <Skeleton animation="wave" variant="text" width={400} height={70} />
+                    <Skeleton animation="wave" variant="rect" width={500} height={300} style={{ marginBottom: 50 }} />
+                    {buyButton()}
+                  </Grid>
                 </Grid>
-                <Grid item xs style={{ marginLeft: '5%' }}>
-                  <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
-                    #{this.state.NFTId}
-                  </Typography>
-                  <Typography color="inherit" align="left" noWrap style={{ fontFamily: 'Teko', fontSize: 34}}>
-                    <b>{this.state.name}</b>
-                  </Typography>
-                  <Typography align="left" color="textSecondary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 16 }}>
-                    {this.state.description}
-                  </Typography>
-                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 24 }}>
-                    创作者分红比例: {this.state.bonusFee} %
-                  </Typography>
-                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize:18 }}>
-                    售价: {this.state.price} ETH
-                  </Typography>
-                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '1%', maxWidth: '65%', fontSize: 12 }}>
-                    当前拥有者: {this.state.owner}
-                  </Typography>
-                  <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
-                    当前拥有的子节点数量: {this.state.childrenNum}
-                  </Typography>
-                  {buyButton()}
+              ) : (
+                <Grid container justifyContent="space-evenly" spacing={5}>
+                  <Grid item xs={4} style={{ maxWidth: 600 }}>
+                    <Paper style={{ backgroundColor: '#EFEBE9', width: 350, marginLeft: '40%' }}>
+                      <img style={{ width: 300, marginTop: 20, marginBottom: 50 }} src={this.state.coverURL}></img>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs style={{ marginLeft: '5%' }}>
+                    <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
+                      #{this.state.NFTId}
+                    </Typography>
+                    <Typography color="inherit" align="left" noWrap style={{ fontFamily: 'Teko', fontSize: 34 }}>
+                      <b>{this.state.name}</b>
+                    </Typography>
+                    <Typography align="left" color="textSecondary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 16 }}>
+                      {this.state.description}
+                    </Typography>
+                    <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 24 }}>
+                      创作者分红比例: {this.state.bonusFee} %
+                    </Typography>
+                    <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 18 }}>
+                      售价: {this.state.price} ETH
+                    </Typography>
+                    <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '1%', maxWidth: '65%', fontSize: 12 }}>
+                      当前拥有者: {this.state.owner}
+                    </Typography>
+                    <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
+                      当前拥有的子节点数量: {this.state.childrenNum}
+                    </Typography>
+                    {buyButton()}
+                  </Grid>
                 </Grid>
-              </Grid>
+              )}
+              
               <div style={{ marginLeft: '40%' }}>
                 {showLoading()}
               </div>
