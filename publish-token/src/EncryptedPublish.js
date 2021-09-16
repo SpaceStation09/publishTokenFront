@@ -99,6 +99,7 @@ const styles = theme => ({
 
 
 class EncryptedPublish extends Component {
+  backend = 'http://192.168.0.64:3000'
   state = {
     name: '',
     bonusFee: 0,
@@ -306,7 +307,7 @@ class EncryptedPublish extends Component {
           },
           {
             "trait_type": "Encrypted",
-            "value": "true"
+            "value": "TRUE"
           }
         ]
       }
@@ -428,15 +429,15 @@ class EncryptedPublish extends Component {
             }
             var payload_str = JSON.stringify(payload)
             console.log(payload_str);
-            var req_key_url = 'http://192.168.0.64:3000/api/v1/key/claim'
+            var req_key_url = this.backend + '/api/v1/key/claim'
             try {
-              // const res = await axios.post(req_key_url, payload_str, {
-              //   headers: {
-              //     'Content-Type': 'application/json'
-              //   }
-              // })
-              var secret_key = 'secret key'//res.data.key
-              // console.debug(secret_key)
+              const res = await axios.post(req_key_url, payload_str, {
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              })
+              var secret_key = res.data.key//res.data.key
+              console.debug(secret_key)
               // if (file.type === 'text/plain') {
               const reader = new FileReader()
               reader.readAsArrayBuffer(file)
@@ -475,7 +476,7 @@ class EncryptedPublish extends Component {
                   alert("您并不拥有此nft")
                 } else if (error.response.data.message.includes("not found")) {
                   alert("此nft还未生成")
-                }
+                } 
               } else {
                 alert('请求文件加密密钥失败')
               }
