@@ -1,6 +1,6 @@
 import web3 from './web3';
 
-const address = '0x644Ffc6827359f7Bead24F1FDd5c0b6a8db833BB'; // rinkeby 0x7B5B92B0eD1DfeafdbD724b177A7733Bda67497F
+const address = '0xf7c08bEabb314A5105577f0209B28C2354DFbf5D'; // rinkeby 0x7B5B92B0eD1DfeafdbD724b177A7733Bda67497F
 
 const abi = [
   {

@@ -71,6 +71,8 @@ const styles = theme => ({
 });
 
 class BuySingle extends Component {
+  gateway = 'https://gateway.pinata.cloud/ipfs/'
+  backend = 'http://192.168.0.64:3000'
   state = {
     name: '',
     bonusFee: 0,
@@ -88,6 +90,7 @@ class BuySingle extends Component {
     onLoading: false,
     childrenNum: 0,
     loadItem: true,
+    encrypted: '未知'
   };
 
   constructor(props) {
@@ -109,7 +112,7 @@ class BuySingle extends Component {
     await contract.methods.tokenURI(this.props.match.params.NFTId).call().then(metadata => {
       let hash = metadata.split('/')
       this.setState({ ipfsHashMeta: hash[hash.length - 1] })
-      var url = "https://gateway.pinata.cloud/ipfs/" + this.state.ipfsHashMeta
+      var url = this.gateway + this.state.ipfsHashMeta
       axios({
         method: 'get',
         url: url,
@@ -117,13 +120,20 @@ class BuySingle extends Component {
       }).then(res => {
         let content = res.data;
         let bonus = 0;
-        let fileAddr = "";
+        let encrypted = '未知';
+
         for (let i = 0; i < content.attributes.length; i++) {
-          if (content.attributes[i].trait_type === "Bonuse Percentage") {
+          if(i === 0){
             bonus = content.attributes[i].value;
+            continue
           }
-          if (content.attributes[i].trait_type === "File Address") {
-            fileAddr = content.attributes[i].value;
+          if(i === 3){
+            if (content.attributes[i].value.toUpperCase() === 'TRUE'){
+              encrypted = '是';
+            }else{
+              encrypted = '否';
+            }
+            continue
           }
         }
         obj.setState({
@@ -131,7 +141,8 @@ class BuySingle extends Component {
           name: content.name,
           description: content.description,
           bonusFee: bonus,
-          coverURL: content.image
+          coverURL: content.image,
+          encrypted: encrypted
         })
       }).catch(error => {
         var name_holder = 'SparkNFT#' + this.props.match.params.NFTId
@@ -162,9 +173,9 @@ class BuySingle extends Component {
       })
     })
 
-    const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id=' + this.state.NFTId
+    const url = this.backend + '/api/v1/nft/info?nft_id=' + this.state.NFTId
     axios.get(url).then(res => {
-      var children_num = res.data.count
+      var children_num = res.data.children_count
       obj.setState({
         childrenNum: children_num
       })
@@ -315,6 +326,9 @@ class BuySingle extends Component {
                     </Typography>
                     <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
                       当前拥有的子节点数量: {this.state.childrenNum}
+                    </Typography>
+                    <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
+                      NFT作品是否加密: {this.state.encrypted}
                     </Typography>
                     {buyButton()}
                   </Grid>

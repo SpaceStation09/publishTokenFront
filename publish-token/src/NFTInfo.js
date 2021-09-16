@@ -258,10 +258,9 @@ class NFTInfo extends Component{
       // });
     });
 
-    const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id
+    const leafUrl = this.backend + '/api/v1/nft/info?nft_id=' + this.props.match.params.id
     axios.get(leafUrl).then(res => {
-      var children = res.data.children
-      var children_num = children.length
+      var children_num = res.data.children_count
       this.setState({
         childrenNum: children_num
       })
