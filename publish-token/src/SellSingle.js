@@ -15,6 +15,7 @@ import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 import contract from './contract';
 import web3 from './web3';
 import ReactLoading from 'react-loading';
+import Skeleton from '@material-ui/lab/Skeleton';
 
 
 const theme = createTheme({
@@ -80,7 +81,8 @@ class SellSingle extends Component {
     onLoading: false,
     owner: '',
     currentAcc: '',
-    childrenNum: 0
+    childrenNum: 0,
+    loadItem: true,
   };
 
   // https://gateway.pinata.cloud/ipfs/QmPsymsaqMZsiwLHXepXtEpYMq3xtnBLLbPgTEyybz1idQ
@@ -129,6 +131,7 @@ class SellSingle extends Component {
           }
         }
         obj.setState({
+          loadItem: false,
           name: content.name,
           description: content.description,
           bonusFee: bonus,
@@ -137,6 +140,7 @@ class SellSingle extends Component {
       }).catch(error => {
         var name_holder = 'SparkNFT#' + this.props.match.params.NFTId
         obj.setState({
+          loadItem: false,
           name: name_holder,
           description: '暂时无法获取到该nft的相关描述',
           bonusFee: royalty,
@@ -164,26 +168,26 @@ class SellSingle extends Component {
       }
     })
 
-    const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id=' + this.state.NFTId
-    axios.get(url).then(res => {
-        var children_num = res.data.count
-        obj.setState({
-          childrenNum: children_num
-        })
-      })
-      .catch(error => {
-        console.debug(error.message)
-        if (error.response === undefined) {
-          alert('服务器未响应,子节点数量获取失败')
-          return;
-        }
-        console.log(error.response);
-        if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
-          console.debug("no children")
-        } else {
-          alert('获取nft子节点情况页面失败(' + error + ')')
-        }
-      })
+    // const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id=' + this.state.NFTId
+    // axios.get(url).then(res => {
+    //     var children_num = res.data.count
+    //     obj.setState({
+    //       childrenNum: children_num
+    //     })
+    //   })
+    //   .catch(error => {
+    //     console.debug(error.message)
+    //     if (error.response === undefined) {
+    //       alert('服务器未响应,子节点数量获取失败')
+    //       return;
+    //     }
+    //     console.log(error.response);
+    //     if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
+    //       console.debug("no children")
+    //     } else {
+    //       alert('获取nft子节点情况页面失败(' + error + ')')
+    //     }
+    //   })
     
   }
 
@@ -311,13 +315,89 @@ class SellSingle extends Component {
           <Container component="main" className={classes.container}>
             <Button
               startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
-              href='/#/publish'
+              href='/#/collections'
               style={{ marginTop: 50, marginBottom: 100, fontSize: 22 }}
             >
               回到我的NFTs
             </Button>
             <div className={classes.paper}>
-              <Grid container justifyContent="space-evenly" spacing= {5}>
+              {this.state.loadItem ? (
+                <Grid container justifyContent="space-evenly" spacing={5}>
+                  <Grid item xs={4}>
+                    <Skeleton variant="rect" width={300} height={500} style={{ width: 300, marginLeft: 200, marginBottom: 50 }}/>
+                  </Grid>
+                  <Grid item xs style={{ marginLeft: '5%' }}>
+                    <Skeleton animation="wave" variant="text" width={200} height={30}/>
+                    <Skeleton animation="wave" variant="text" width={400} height={70}/>
+                    <Skeleton animation="wave" variant="rect" width={500} height={300} style={{ marginBottom: 50 }}/>
+                    {showSellBtn()}
+                  </Grid>
+
+                </Grid>
+              ) : (
+                <Grid container justifyContent="space-evenly" spacing={5}>
+                  <Grid item xs={4} style={{ maxWidth: 600 }}>
+                    <Paper style={{ backgroundColor: '#EFEBE9', width: 350, marginLeft: '40%' }}>
+                      <img style={{ width: 300, marginTop: 20, marginBottom: 50 }} src={this.state.coverURL}></img>
+                    </Paper>
+                  </Grid>
+                    <Grid item xs style={{ marginLeft: '5%' }}>
+                      <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
+                        #{this.state.NFTId}
+                      </Typography>
+                      <Typography color="inherit" align="left" noWrap style={{ fontFamily: 'Teko', fontSize: 34, marginTop: '2%' }}>
+                        <b>{this.state.name}</b>
+                      </Typography>
+                      <Typography align="left" color="textSecondary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 16 }}>
+                        {this.state.description}
+                      </Typography>
+                      <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '65%', fontSize: 24 }}>
+                        创作者分红比例: {this.state.bonusFee} %
+                      </Typography>
+                      <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
+                        当前拥有的子节点数量: {this.state.childrenNum}
+                      </Typography>
+                      {showSellBtn()}
+                      {showLoading()}
+                      <Dialog
+                        open={this.state.open}
+                        onClose={this.handleClose}
+                        aria-labelledby="form-dialog-title"
+                      >
+                        <DialogTitle id="form-dialog-title">填写售卖信息</DialogTitle>
+                        <DialogContent>
+                          <DialogContentText>
+                            请在下方区域填写你希望售卖的价格，以及售卖对象的钱包地址。
+                          </DialogContentText>
+                          <label style={{ fontSize: 14, marginBottom: 10 }}>售卖价格 *</label>
+                          <InputNumber
+                            defaultValue={0}
+                            min={0}
+                            onChange={this.handleGetPrice}
+                            className={classes.inputNum}
+                          />
+                          <label style={{ fontSize: 14, marginBottom: 10, marginTop: 10 }}>买方钱包地址 *</label>
+                          <Input
+                            placeholder="买方钱包地址"
+                            allowClear
+                            id="pubName"
+                            onChange={this.handleGetAddr}
+                            className={classes.input}
+                          />
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={this.handleClose} color="primary">
+                            取消
+                          </Button>
+                          <Button variant="contained" onClick={this.sell} color="primary" >
+                            卖出
+                          </Button>
+                        </DialogActions>
+                      </Dialog>
+                    </Grid>
+                </Grid>
+              )}
+              {/* <Grid container justifyContent="space-evenly" spacing= {5}>
                 <Grid item xs={4} style={{ maxWidth: 600}}>
                   <Paper style={{ backgroundColor: '#EFEBE9', width: 350, marginLeft: '40%'}}>
                     <img style={{ width: 300, marginTop: 20, marginBottom: 50}} src={this.state.coverURL}></img>  
@@ -377,7 +457,7 @@ class SellSingle extends Component {
                     </DialogActions>
                   </Dialog>
                 </Grid>
-              </Grid>
+              </Grid> */}
             </div>
             <div style={{marginTop: 50}}>
               {sell_info()}
