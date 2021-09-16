@@ -95,6 +95,7 @@ class BuySingle extends Component {
   async componentWillMount() {
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     const account = accounts[0];
+    var obj = this
     this.setState({
       currentAcc: account
     })
@@ -107,7 +108,6 @@ class BuySingle extends Component {
       let hash = metadata.split('/')
       this.setState({ ipfsHashMeta: hash[hash.length - 1] })
       var url = "https://gateway.pinata.cloud/ipfs/" + this.state.ipfsHashMeta
-      var obj = this
       axios({
         method: 'get',
         url: url,
@@ -158,22 +158,26 @@ class BuySingle extends Component {
       })
     })
 
-    try {
-      const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id=' + this.state.NFTId
-      const res = await axios.get(url)
+    const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id=' + this.state.NFTId
+    axios.get(url).then(res => {
       var children_num = res.data.count
-      this.setState({
+      obj.setState({
         childrenNum: children_num
       })
-    } catch (error) {
-      if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
-        this.setState({
-          childrenNum: 0
-        })
-      } else {
-        alert('获取nft子节点情况页面失败')
-      }
-    }
+    })
+      .catch(error => {
+        console.debug(error.message)
+        if (error.response === undefined) {
+          alert('服务器未响应,子节点数量获取失败')
+          return;
+        }
+        console.log(error.response);
+        if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
+          console.debug("no children")
+        } else {
+          alert('获取nft子节点情况页面失败(' + error + ')')
+        }
+      })
   }
 
   handleBuy = async (e) => {

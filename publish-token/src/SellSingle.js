@@ -95,7 +95,7 @@ class SellSingle extends Component {
     })
   }
 
-  async componentWillMount() {
+  async componentDidMount() {
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     const account = accounts[0];
     let obj = this
@@ -112,7 +112,6 @@ class SellSingle extends Component {
       let hash = metadata.split('/')
       this.setState({ ipfsHashMeta: hash[hash.length - 1] })
       var url = "https://gateway.pinata.cloud/ipfs/" + this.state.ipfsHashMeta
-      var obj = this
       axios({
         method: 'get',
         url: url,
@@ -143,6 +142,7 @@ class SellSingle extends Component {
           bonusFee: royalty,
           coverURL: 'https://via.placeholder.com/100x140.png?text=SparkNFT'
         })
+        console.debug(error)
       })
     })
 
@@ -164,22 +164,26 @@ class SellSingle extends Component {
       }
     })
 
-    try{
-      const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id=' + this.state.NFTId
-      const res = await axios.get(url)
-      var children_num = res.data.count
-      this.setState({
-        childrenNum: children_num
-      })
-    } catch (error) {
-      if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
-        this.setState({
-          childrenNum: 0
+    const url = 'http://192.168.0.64:3000/api/v1/tree/children?nft_id=' + this.state.NFTId
+    axios.get(url).then(res => {
+        var children_num = res.data.count
+        obj.setState({
+          childrenNum: children_num
         })
-      } else {
-        alert('获取nft子节点情况页面失败')
-      }
-    }
+      })
+      .catch(error => {
+        console.debug(error.message)
+        if (error.response === undefined) {
+          alert('服务器未响应,子节点数量获取失败')
+          return;
+        }
+        console.log(error.response);
+        if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
+          console.debug("no children")
+        } else {
+          alert('获取nft子节点情况页面失败(' + error + ')')
+        }
+      })
     
   }
 
@@ -235,17 +239,19 @@ class SellSingle extends Component {
   render() {
     const { classes } = this.props
     const sell_info = () => {
+      let url = window.location.host;
+      let toUrl = url + '/#/buySingle/' + this.state.NFTId
       if (this.state.onSale) {
         return (
           <Grid container >
             <Grid item xs>
             <Typography color="inherit" align="center" noWrap style={{ fontFamily: 'Teko', fontSize: 20, marginTop: '5%', marginLeft: 300}}>
               请将下方链接分享给买方，买方会进入此链接来购买这个NFT <br />
-              {'http://localhost:3000/#/buySingle/' + this.state.NFTId}
+                {toUrl}
             </Typography>
             </Grid>
             <Grid item xs style={{ marginTop: 70 }}>
-              <CopyToClipboard text={'http://localhost:3000/#/buySingle/' + this.state.NFTId}
+              <CopyToClipboard text={toUrl}
                 onCopy={() => this.setState({ copied: true })}>
                 <IconButton color="primary" aria-label="upload picture" component="span">
                   <FileCopyOutlinedIcon style={{ fontSize: 18 }} />

@@ -115,11 +115,30 @@ class Publish extends Component {
 		rootNFTId: '',
 		usedAcc: '',
 		sig: '',
+		fileType: '',
 		finished: false,
 		coverURL: ''
   };
 
 	async componentDidMount() {
+		if (!window.ethereum) {
+			alert("请先安装metamask");
+			window.location.href = '/#/introPublish';
+			return;
+		}
+		if (!window.ethereum.isConnected()) {
+			alert("请先链接metamask");
+			window.location.href = '/#/introPublish';
+			return;
+		}
+		// const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+		window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
+			if (chainId !== '0x4') {
+				alert("请切换至rinkeby network");
+				window.location.href = '/#/introPublish';
+				return;
+			}
+		})
 	}
 	//21474836481
 	//4294967297
@@ -193,6 +212,13 @@ class Publish extends Component {
 					{
 						"trait_type": "File Address",
 						"value": file_url
+					},
+					{
+						"value": this.state.fileType
+					},
+					{
+						"trait_type": "Encrypted",
+						"value": "FALSE"
 					}
 				]
 			}
@@ -237,6 +263,9 @@ class Publish extends Component {
 					obj.setState({
 						finished: true
 					})
+				}).catch((error) => {
+					console.debug(error)
+					alert("上传pinata失败，请试着删除文件后重试")
 				})
 
 		}
@@ -290,7 +319,8 @@ class Publish extends Component {
 					}else{
 						console.debug("another file ipfs hash: ", info.file.response.IpfsHash)
 						obj.setState({
-							fileIpfs: info.file.response.IpfsHash
+							fileIpfs: info.file.response.IpfsHash,
+							fileType: info.file.type
 						})
 					}
 					

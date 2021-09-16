@@ -173,12 +173,13 @@ class Collections extends Component {
         await axios({
           method: 'get',
           url: meta,
-          timeout: 1000 * 1,
+          timeout: 1000 * 3,
         }).then(res => {
           console.log("meta: ", res.data)
           metaDatas.push(res.data)
         }).catch(error => {
           console.log('time out')
+          console.debug(meta)
           var name_holder = 'SparkNFT#' + id[i]
           var placeholder = {
             "name": name_holder,
