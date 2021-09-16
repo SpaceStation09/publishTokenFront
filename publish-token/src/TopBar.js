@@ -50,18 +50,24 @@ class TopBar extends Component {
     user_address: ''
   };
 
-  async componentWillMount() {
+  async componentDidMount() {
     var connect = await window.ethereum.isConnected()
+    console.debug('connected:', connect)
     this.setState({
       isConnected: connect
     });
   }
 
   getAccount = async () => {
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-    const account = accounts[0];
-    this.setState({ isConnected: true, });
-    this.setState({ user_address: account, });
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      const account = accounts[0];
+      this.setState({ isConnected: true, });
+      this.setState({ user_address: account, });
+    } catch(error) {
+      console.debug(error)
+      this.setState({ isConnected: false, });
+    }
   }
 
   render() {
@@ -108,7 +114,7 @@ class TopBar extends Component {
                 <b>我的NFTs</b>
               </Button>
 
-              <Button size="large" href='https://github.com/SpaceStation09/publishTokenFront/tree/master/publish-token' target="_blank">
+              <Button size="large" href='https://github.com/SparkNFT' target="_blank">
                 <GitHubIcon />
               </Button>
               {account_info()}

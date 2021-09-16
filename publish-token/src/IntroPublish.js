@@ -8,7 +8,6 @@ import { createTheme, ThemeProvider, withStyles } from '@material-ui/core/styles
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import TopBar from './TopBar';
-import { AutoComplete } from 'antd';
 
 const styles = theme => ({
   icon: {
@@ -64,6 +63,7 @@ const theme = createTheme({
 class IntroPublish extends Component {
   render() {
     const { classes } = this.props
+    console.log(window.location.host)
     return (
       <div>
         <Helmet>

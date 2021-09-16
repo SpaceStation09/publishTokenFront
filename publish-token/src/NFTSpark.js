@@ -166,17 +166,15 @@ class NFTSpark extends Component{
       this.setState({ priceString: etherPrice });
     });
     const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id
-    axios.get(leafUrl, { headers: { "Access-Control-Allow-Origin": "*" }, }).then(res => {
+    axios.get(leafUrl).then(res => {
       var children = res.data.children
       var children_num = children.length
       this.setState({
         childrenNum: children_num
       })
     }).catch(error => {
-      console.log(JSON.stringify(error));
-      console.log(error.request.status);
-      console.log(error.message);
-      if (error.message === "Network Error") {
+      if (error.response === undefined) {
+        alert('服务器未响应')
         return;
       }
       console.log(error.response);
@@ -207,7 +205,7 @@ class NFTSpark extends Component{
     return (
        <div>
         <Helmet>
-          <title>SparkNFT | Sprrk</title>
+          <title>SparkNFT | Spark</title>
         </Helmet>
         <ThemeProvider theme={theme}>
           <TopBar />
@@ -242,7 +240,7 @@ class NFTSpark extends Component{
                 {/* <Grid xs={2}></Grid> */}
                 <Grid item style={{ maxWidth: 100}}>
                 <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: 10}}>
-                    <img style={{ width: 300, marginTop: 20}} src={this.state.Cover}></img>  
+                    <img style={{ width: 300, marginTop: 20, marginBottom: 50}} src={this.state.Cover}></img>
                 </Paper>
                 </Grid>
                 <Grid item xs  style={{ marginLeft:20, maxWidth: 500}} >

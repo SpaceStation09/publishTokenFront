@@ -133,51 +133,10 @@ class NFTInfo extends Component{
   };
 
   downloadIPFS = async () =>{
-    // axios.get('https://gateway.pinata.cloud/ipfs/QmVUnbW5CQbR9E4kaCvGNkfn9MKWaxjrB6SFdcEZ2xmviX').then(response => {
-    //   console.log(response)
-
-    //     let blob = new Blob([response.data], { type: 'application/pdf' }),
-    //     url = window.URL.createObjectURL(blob)
-
-    //      window.open(url) // Mostly the same, I was just experimenting with different approaches, tried link.click, iframe and other solutions
-    // })
     const Method = 'GET';
     let obj = this;
     let url = "";
     let dataHash = this.state.dataUrl
-    //const url = "https://gateway.pinata.cloud/ipfs/QmYwBRgs16U2LmQbcjFWWm6JgwpcSL1qF3frj9hkJ32Pob";
-    // axios.request({
-    //   ipnsUrl ,
-    //   method,
-    // }).then(res => {
-    //   url = obj.ipfs_node + "/api/v0/get?arg=" + res.Path;
-    //   console.log(url);
-    // }).catch(
-    //   error => { 
-    //     alert('转换IPNS地址失败(' + error + ')')
-    //     return
-    //   }
-    // )
-
-    // var config = {
-    //   method: 'post',
-    //   url: ipnsUrl,
-    //   headers: { },
-    // };
-    // let dataHash;
-    // await axios(config)
-    // .then(function (response) {
-    //   console.log(JSON.stringify(response.data));
-    //   url = obj.ipfs_node + "/api/v0/get?arg=" + response.data.Path;
-    //   let strhash = response.data.Path.split('/');
-    //   dataHash = obj.gateway + strhash[strhash.length - 1];
-    //   console.log(dataHash)     
-     
-    // })
-    // .catch(function (error) {
-    //   console.log(error);
-    // });
-    // console.log(dataHash) 
     var cipher_config = {
       method: 'get',
       url: dataHash,
@@ -301,21 +260,21 @@ class NFTInfo extends Component{
 
     const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id
     axios.get(leafUrl).then(res => {
-
       var children = res.data.children
       var children_num = children.length
       this.setState({
         childrenNum: children_num
       })
     }).catch(error => {
-      console.log(error.data);
-      if(error.message === "Network Error") {
+      if (error.response === undefined) {
+        alert('服务器未响应')
         return;
       }
+      console.log(error.response);
       if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
-        console.log("no children")
+        console.debug("no children")
       } else {
-        //alert('获取nft子节点情况页面失败(' + error + ')')
+        alert('获取nft子节点情况页面失败(' + error + ')')
       }
     })
   }

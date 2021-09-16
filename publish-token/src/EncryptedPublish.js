@@ -122,11 +122,27 @@ class EncryptedPublish extends Component {
   };
 
   async componentDidMount() {
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const account = accounts[0];
-    this.setState({
-      usedAcc: account
+    if (!window.ethereum) {
+      alert("请先安装metamask");
+      window.location.href = '/#/introPublish';
+      return;
+    }
+    if (!window.ethereum.isConnected()) {
+      alert("请先链接metamask");
+      window.location.href = '/#/introPublish';
+      return;
+    }
+    // const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
+      if (chainId !== '0x4') {
+        alert("请切换至rinkeby network");
+        window.location.href = '/#/introPublish';
+        return;
+      }
     })
+
+
+    
   }
 
   handleGetPubName = (event) => {
@@ -178,8 +194,13 @@ class EncryptedPublish extends Component {
   }
 
   jump = async (event) => {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const account = accounts[0];
+    this.setState({
+      usedAcc: account
+    })
     await contract.methods.ownerOf(this.state.rootNFTId).call().then(owner => {
-      if (this.state.usedAcc == owner.toLowerCase()){
+      if (account == owner.toLowerCase()){
         this.setState({
           onLoading: false,
           allowSubmitPDF: true
@@ -195,7 +216,11 @@ class EncryptedPublish extends Component {
      * then call backend to get a secret key. Then encrypt the pdf file and upload it to IPFS
      * Finally, form a new metadata json file and send its ipfs hash to backend and publish it
     */
-
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const account = accounts[0];
+    this.setState({
+      usedAcc: account
+    })
     if (this.state.price === 0 || this.state.bonusFee === 0 || this.state.shareTimes === 0 ) {
       alert("你有信息尚未填写")
     } else {
@@ -232,9 +257,7 @@ class EncryptedPublish extends Component {
     if (this.state.ipfsHashCover === '' || this.state.fileIpfs === '' ) {
       alert("你有文件尚未填写")
     } else {
-      this.setState({
-        onLoading: true
-      })
+      
       var img_url = 'https://gateway.pinata.cloud/ipfs/' + this.state.ipfsHashCover
       this.setState({
         coverURL: img_url
@@ -243,10 +266,27 @@ class EncryptedPublish extends Component {
       var trimmed_des = this.state.description.replace(/(\r\n\t|\n|\r\t)/gm, " ");
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const account = accounts[0];
-      this.setState({
-        usedAcc: account
-      })
+      if (account !== this.state.usedAcc){
+        alert('账户发生变化，请切换回原账户')
+        return
+      }
       var file_url = 'https://gateway.pinata.cloud/ipfs/' + this.state.fileIpfs
+      // var JSONBody = {
+      //   "name": this.state.name,
+      //   "description": trimmed_des,
+      //   "image": this.state.coverURL,
+      //   "attributes": [
+      //     {
+      //       "display_type": "boost_percentage",
+      //       "trait_type": "Bonuse Percentage",
+      //       "value": this.state.bonusFee
+      //     },
+      //     {
+      //       "trait_type": "File Address",
+      //       "value": file_url
+      //     }
+      //   ]
+      // }
       var JSONBody = {
         "name": this.state.name,
         "description": trimmed_des,
@@ -260,12 +300,22 @@ class EncryptedPublish extends Component {
           {
             "trait_type": "File Address",
             "value": file_url
+          },
+          {
+            "value": this.state.fileType
+          },
+          {
+            "trait_type": "Encrypted",
+            "value": "true"
           }
         ]
       }
       console.debug(JSONBody)
       const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`
       let obj = this
+      this.setState({
+        onLoading: true
+      })
       axios.post(url, JSONBody, {
         headers: {
           pinata_api_key: pinata_api_key,
