@@ -4,7 +4,7 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import { createTheme, ThemeProvider, withStyles } from '@material-ui/core/styles';
 import { Helmet } from 'react-helmet';
-
+import Skeleton from '@material-ui/lab/Skeleton';
 import Typography from '@material-ui/core/Typography';
 import TopBar from "./TopBar";
 import Card from '@material-ui/core/Card';
@@ -26,6 +26,7 @@ import contract from './contract';
 import axios from 'axios';
 import web3 from './web3';
 import LocalAtmIcon from '@material-ui/icons/LocalAtm';
+import ReactLoading from 'react-loading';
 const FileSaver = require('file-saver');
 var CryptoJS = require("crypto-js");
 const sigUtil = require('ethereumjs-util');
@@ -129,7 +130,11 @@ class NFTInfo extends Component{
       dataUrl: null,
       account: null,
       Profit: '',
-      issueId: 0
+      issueId: 0,
+      fileType: "",
+      isEncrypt: false,
+      onLoading: false,
+      loadItem: true,
   };
 
   downloadIPFS = async () =>{
@@ -137,25 +142,52 @@ class NFTInfo extends Component{
     let obj = this;
     let url = "";
     let dataHash = this.state.dataUrl
-    var cipher_config = {
-      method: 'get',
-      url: dataHash,
-      headers: { },
-    };
-    axios(cipher_config).then(async (response) => {
-      console.log(response)
-      let ciphertext = response.data;
-      let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      let account = accounts[0];
-      console.log(account);
-      let signJson = {
-        account: account,
-        root_nft_id: this.props.match.params.id
-      }
-      signJson = JSON.stringify(signJson);
-      await this.signDataAndDecrypt(account,ciphertext);
+    this.setState({onLoading: true})
+    if(this.state.isEncrypt) {
+      var cipher_config = {
+        method: 'get',
+        url: dataHash,
+        headers: { },
+      };
+      axios(cipher_config).then(async (response) => {
+        console.log(response)
+        let ciphertext = response.data;
+        let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        let account = accounts[0];
+        console.log(account);
+        let signJson = {
+          account: account,
+          root_nft_id: this.props.match.params.id
+        }
+        signJson = JSON.stringify(signJson);
+        await this.signDataAndDecrypt(account,ciphertext);
+      });
+    }else {
+      axios({
+        url: dataHash, //your url
+        method: 'GET',
+        responseType: 'blob', // important
+    }).then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        // text/plain application/pdf
+        let suffix;
+        if(obj.state.fileType === 'text/plain') {
+          suffix = '.txt'
+        } else {
+          suffix = '.pdf'
+        }
+        link.setAttribute('download', obj.state.Name + suffix); //or any other extension
+        document.body.appendChild(link);
+        link.click();
+    }).catch(error => {
+        this.setState({onLoading: false})
+        alert("下载失败：" + error);
     });
+    }
     
+    this.setState({onLoading: false})
   }
 
 
@@ -212,8 +244,11 @@ class NFTInfo extends Component{
             timeout: 1000 * 5,
           }).then(res => {
             let data = res.data;
+            console.log(data)
             let bouns = 0;
             let fileAddr = "";
+            let isEncrypt = false;
+            let fileType = bouns = data.attributes[2].value
             for (let i = 0; i < data.attributes.length; i++) {
               if (data.attributes[i].trait_type === "Bonuse Percentage") {
                 bouns = data.attributes[i].value;
@@ -221,18 +256,28 @@ class NFTInfo extends Component{
               if (data.attributes[i].trait_type === "File Address") {
                 fileAddr = data.attributes[i].value;
               }
+              if (data.attributes[i].trait_type === "Encrypted") {
+                if(data.attributes[i].value === "FALSE") {
+                  isEncrypt = false
+                } else {
+                  isEncrypt = true
+                }
+              }
             }
+            console.log(isEncrypt)
             this.setState({ Name: data.name });
             this.setState({ Description: data.description });
             this.setState({ BonusFee: royalty });
             this.setState({ Cover: data.image });
             this.setState({ dataUrl: fileAddr });
+            this.setState({ isEncrypt: isEncrypt });
+            this.setState({ fileType: fileType ,loadItem: false,});
           }).catch(error => {
             this.setState({ Name: 'SparkNFT' });
             this.setState({ Description: '暂时无法获取到该nft的相关描述' });
             this.setState({ BonusFee: royalty });
             this.setState({ Cover: 'https://via.placeholder.com/100x140.png?text=SparkNFT' });
-            this.setState({ dataUrl: 'fileAddr_PlaceHolder' });
+            this.setState({ dataUrl: 'fileAddr_PlaceHolder' ,loadItem: false,});
           })
         })
       })
@@ -266,7 +311,7 @@ class NFTInfo extends Component{
       })
     }).catch(error => {
       if (error.response === undefined) {
-        alert('服务器未响应')
+        alert('服务器未响应叶子节点数量请求')
         return;
       }
       console.log(error.response);
@@ -367,7 +412,15 @@ class NFTInfo extends Component{
       return [].concat.apply([], result);
     }
   
-
+  showLoading = () => {
+      if (this.state.onLoading) {
+        return (
+          <div>
+            <ReactLoading type={'bars'} color={'#2196f3'} height={200} width={200} />
+          </div>
+        );
+      }
+    }
   spark = () => {
     
     if(this.state.spark) {
@@ -462,7 +515,20 @@ class NFTInfo extends Component{
           
             <div className={classes.paper}>
               {/* <Grid container direction="column" justifyContent="center" alignItems="center"> */}
-              <Grid container  justifyContent="space-evenly" spacing= {5}>
+              {this.state.loadItem ? (
+                <Grid container justifyContent="space-evenly" spacing={5}>
+                  <Grid item xs={4}>
+                    <Skeleton variant="rect" width={300} height={500} style={{ width: 300, marginLeft: 200, marginBottom: 50 }}/>
+                  </Grid>
+                  <Grid item xs style={{ marginLeft: '5%' }}>
+                    <Skeleton animation="wave" variant="text" width={200} height={30}/>
+                    <Skeleton animation="wave" variant="text" width={400} height={70}/>
+                    <Skeleton animation="wave" variant="rect" width={500} height={300} style={{ marginBottom: 50 }}/>
+
+                  </Grid>
+
+                </Grid>
+              ) : (<Grid container  justifyContent="space-evenly" spacing= {5}>
                 {/* <Grid xs={2}></Grid> */}
                 <Grid container direction="column" item xs style={{ maxWidth: 100}}>
                   <Grid>
@@ -516,13 +582,14 @@ class NFTInfo extends Component{
                 </Grid>
                 
                 
-              </Grid>
+              </Grid>)}
               <br /><br /><br /><br />
             </div>
             <Grid container direction="row" justifyContent="center" alignItems="flex-start">
            <Grid xs={8}>
              <div style={{marginTop: 0}}>
                  {this.sell_info()}
+                 {this.showLoading()}
              </div>
            </Grid>
          </Grid>
