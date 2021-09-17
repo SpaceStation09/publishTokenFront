@@ -283,7 +283,53 @@ class Publish extends Component {
 				pinata_api_key: pinata_api_key,
 				pinata_secret_api_key: pinata_secret_api_key
 			},
-			multiple: true,
+			data: this.state.buffer,
+			beforeUpload: file => {
+				return new Promise((resolve, reject) => {
+					try {
+						const reader = new FileReader()
+						reader.readAsArrayBuffer(file)
+						reader.onload = (e) => {
+							var b = e.target.result
+							let params = new FormData()
+							params.append('file', b)
+							this.setState({
+								buffer: params
+							})
+						}
+						resolve()
+					} catch (e) {
+						message.error('Read file error')
+						reject()
+					}
+				})
+			},
+			async onChange(info) {
+				const { status } = info.file;
+				// text/plain image/jpeg application/pdf
+				if (status === 'done') {
+					message.success(`${info.file.name} file uploaded successfully.`);
+					obj.setState({
+						ipfsHashCover: info.file.response.IpfsHash
+					})
+
+				} else if (status === 'error') {
+					message.error(`${info.file.name} file upload failed.`);
+				}
+			},
+			onDrop(e) {
+				message.error(`Only image file supported`);
+				console.log('Dropped files', e.dataTransfer.files);
+			},
+		};
+
+		const propFile = {
+			name: 'file',
+			action: `https://api.pinata.cloud/pinning/pinFileToIPFS`,
+			headers: {
+				pinata_api_key: pinata_api_key,
+				pinata_secret_api_key: pinata_secret_api_key
+			},
 			data: this.state.buffer,
 			beforeUpload: file => {
 				return new Promise((resolve, reject) => {
@@ -311,19 +357,16 @@ class Publish extends Component {
 				// text/plain image/jpeg application/pdf
 				if (status === 'done') {
 					message.success(`${info.file.name} file uploaded successfully.`);
-					if (info.file.type.includes('image')){
-						console.debug("file ipfs hash: ", info.file.response.IpfsHash)
-						obj.setState({
-							ipfsHashCover: info.file.response.IpfsHash
-						})
-					}else{
-						console.debug("another file ipfs hash: ", info.file.response.IpfsHash)
-						obj.setState({
-							fileIpfs: info.file.response.IpfsHash,
-							fileType: info.file.type
-						})
-					}
-					
+					var file_type = info.file.name.split('\.')
+					var file_suffix = file_type[file_type.length - 1]
+					console.debug(file_suffix)
+					console.debug("file ipfs hash: ", info.file.response.IpfsHash)
+					obj.setState({
+						fileIpfs: info.file.response.IpfsHash,
+						fileType: file_suffix
+					})
+
+
 				} else if (status === 'error') {
 					message.error(`${info.file.name} file upload failed.`);
 				}
@@ -445,7 +488,31 @@ class Publish extends Component {
 											/>
 										</Grid>
 									</Grid>
-									<label style={{ fontSize: 18, marginTop: 50 }}>封面图片及作品文件 *</label>
+									<label style={{ fontSize: 18, marginTop: 50 }}>封面图片 *</label>
+									<p style={{ fontSize: 12 }}>请在下方区域上传您的封面图片 <br />
+										封面文件支持这些格式：JPEG/JPG/PNG</p>
+									<Dragger {...prop} style={{ width: 680, minHeight: 200 }} id="Uploader" accept=".png, .jpg, .jpeg" >
+										<p className="ant-upload-drag-icon">
+											<InboxOutlined />
+										</p>
+										<p className="ant-upload-text">上传文件请点击或者拖拽文件到此处</p>
+										<p className="ant-upload-hint">
+											支持单个文件的上传，支持多种类型文件的上传
+										</p>
+									</Dragger>
+
+									<label style={{ fontSize: 18, marginTop: 50 }}>作品文件 *</label>
+									<p style={{ fontSize: 12 }}>请在下方区域上传您的作品文件 </p>
+									<Dragger {...propFile} style={{ width: 680, minHeight: 200 }} id="Uploader2" >
+										<p className="ant-upload-drag-icon">
+											<InboxOutlined />
+										</p>
+										<p className="ant-upload-text">上传文件请点击或者拖拽文件到此处</p>
+										<p className="ant-upload-hint">
+											仅支持单个文件的上传，支持多种类型文件的上传
+										</p>
+									</Dragger>
+									{/* <label style={{ fontSize: 18, marginTop: 50 }}>封面图片及作品文件 *</label>
 									<p style={{ fontSize: 12 }}>请在下方区域上传您的封面图片及作品文件 <br />
 										封面文件支持这些格式：JPEG/JPG/PNG 作品支持这些格式： TXT, PDF</p>
 									<Dragger {...prop} style={{ width: 680, minHeight: 200 }} id="Uploader" accept=".jpg, .png, .jpeg, .txt, .pdf" >
@@ -456,7 +523,7 @@ class Publish extends Component {
 										<p className="ant-upload-hint">
 											支持单个文件的上传，支持多种类型文件的上传
 										</p>
-									</Dragger>
+									</Dragger> */}
 								</form>
 								<Button
 									variant="contained"

@@ -180,7 +180,6 @@ class EncryptedPublish extends Component {
     this.setState({
       rootNFTId: String(value),
     })
-    console.debug(typeof this.state.rootNFTId)
   }
 
   handleClose = (e) => {
@@ -405,7 +404,7 @@ class EncryptedPublish extends Component {
       },
     };
 
-    const propPDF = {
+    const propFile = {
       name: 'file',
       action: `https://api.pinata.cloud/pinning/pinFileToIPFS`,
       headers: {
@@ -446,10 +445,8 @@ class EncryptedPublish extends Component {
                 var b = e.target.result
                 var wordArray = CryptoJS.lib.WordArray.create(b);
                 const str = CryptoJS.enc.Hex.stringify(wordArray);
-                var cipher_text = CryptoJS.AES.encrypt(str, secret_key).toString();
-                var myblob = new Blob([cipher_text], {
-                  type: 'text/plain'
-                });
+                var cipher_text = CryptoJS.TripleDES.encrypt(str, secret_key).toString();
+                var myblob = new Blob([cipher_text]);
                 resolve(myblob)
               }
               // }else {
@@ -494,9 +491,11 @@ class EncryptedPublish extends Component {
       onChange(info) {
         const { status } = info.file;
         if (status === 'done') {
+          var file_type = info.file.name.split('\.')
+          var file_suffix = file_type[file_type.length - 1]
           obj.setState({
             fileIpfs: info.file.response.IpfsHash,
-            fileType: info.file.type
+            fileType: file_suffix
           })
           console.debug("encrypted file hash: ", info.file.response.IpfsHash)
           message.success(`${info.file.name} file uploaded successfully.`);
@@ -546,9 +545,8 @@ class EncryptedPublish extends Component {
             </Dragger>
 
             <label style={{ fontSize: 18, marginTop: 50 }}>作品文件 *</label>
-            <p style={{ fontSize: 12 }}>请在下方区域上传您的作品文件 <br />
-              作品文件支持这些格式：TXT/PDF</p>
-            <Dragger {...propPDF} style={{ width: 680, minHeight: 200 }} id="Uploader2" accept=".txt, .pdf">
+            <p style={{ fontSize: 12 }}>请在下方区域上传您的作品文件 </p>
+            <Dragger {...propFile} style={{ width: 680, minHeight: 200 }} id="Uploader2">
               <p className="ant-upload-drag-icon">
                 <InboxOutlined />
               </p>
