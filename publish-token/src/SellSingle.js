@@ -220,6 +220,11 @@ class SellSingle extends Component {
     })
   }
 
+  handleClickLink = (event) => {
+    var new_url = '/#/NFT/' + this.state.NFTId
+    window.open(new_url, '_self')
+  }
+
   sell = async (e) => {
     // TODO: call smart contract to approve nft 
     this.setState({
@@ -320,10 +325,10 @@ class SellSingle extends Component {
           <Container component="main" className={classes.container}>
             <Button
               startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
-              href='/#/collections'
+              onClick={this.handleClickLink}
               style={{ marginTop: 50, marginBottom: 100, fontSize: 22 }}
             >
-              回到我的NFTs
+              返回
             </Button>
             <div className={classes.paper}>
               {this.state.loadItem ? (

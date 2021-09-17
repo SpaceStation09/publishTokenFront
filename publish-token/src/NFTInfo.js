@@ -297,10 +297,9 @@ class NFTInfo extends Component{
       // });
     });
 
-    const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id
+    const leafUrl = this.backend + '/api/v1/nft/info?nft_id=' + this.props.match.params.id
     axios.get(leafUrl).then(res => {
-      var children = res.data.children
-      var children_num = children.length
+      var children_num = res.data.children_count
       this.setState({
         childrenNum: children_num
       })
@@ -312,6 +311,7 @@ class NFTInfo extends Component{
       if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
         console.debug("no children")
       } else {
+        console.debug(leafUrl)
         alert('获取nft子节点情况页面失败(' + error + ')')
       }
     })
@@ -472,7 +472,7 @@ class NFTInfo extends Component{
 
       <div>
         <Helmet>
-          <title>SparkNFT | Sell</title>
+          <title>SparkNFT | INFO</title>
         </Helmet>
 
         <ThemeProvider theme={theme}>
@@ -530,7 +530,7 @@ class NFTInfo extends Component{
                 {/* <Grid xs={2}></Grid> */}
                 <Grid container direction="column" item xs style={{ maxWidth: 100}}>
                   <Grid>
-                    <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: 10}}>
+                    <Paper style={{ backgroundColor: '#EFEBE9', width: 350, marginLeft: 10}}>
                         <img style={{ width: 300, marginTop: 20, marginBottom: 50}} src={this.state.Cover}></img>  
                     </Paper>
                   </Grid>

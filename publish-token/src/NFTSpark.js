@@ -13,7 +13,7 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import GetAppIcon from '@material-ui/icons/GetApp';
-import { Paper, Container } from '@material-ui/core';
+import { Paper, Container, Link } from '@material-ui/core';
 import BuildIcon from '@material-ui/icons/Build';
 import axios from 'axios';
 import contract from './contract';
@@ -21,6 +21,7 @@ import web3 from './web3';
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 import ReactLoading from 'react-loading';
 import Skeleton from '@material-ui/lab/Skeleton';
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -138,6 +139,11 @@ class NFTSpark extends Component{
     
   }
 
+  handleClickLink = (event) => {
+    var new_url = '/#/NFT/Spark/' + this.state.recommendNFT
+    window.open(new_url)
+  }
+
   
 
   constructor(props)  {
@@ -187,151 +193,181 @@ class NFTSpark extends Component{
         etherPrice += ' ETH';
         this.setState({priceString: etherPrice});
       });
-      const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id
-      axios.get(leafUrl,{headers: { "Access-Control-Allow-Origin": "*"},}).then(res => {
-        var children = res.data.children
-        var children_num = children.length
+      
+
+    const leafUrl = this.backend + '/api/v1/nft/info?nft_id=' + this.props.match.params.id
+    axios.get(leafUrl).then(res => {
+      var children_num = res.data.children_count
+      if (res.data.suggest_next_nft === this.props.match.params.id) {
         obj.setState({
           childrenNum: children_num,
-          loadItem: false
+          recommendNFT: res.data.suggest_next_nft,
+          showRecommend: false,
         })
-        console.log(this.state.loadItem)
-      }).catch(error => {
-        console.log(JSON.stringify(error));
-        console.log(error.request.status);
-        console.log(error.message);
-        if(error.message === "Network Error") {
-          obj.setState({
-            loadItem: false
-          })
-          return;
-        }
-        console.log(error.response);
-        if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
-          console.debug("no children")
-        } else {
-          alert('获取nft子节点情况页面失败(' + error + ')')
-        }
+      } else if (res.data.suggest_next_nft == '0') {
         obj.setState({
-          loadItem: false
+          childrenNum: children_num,
+          recommendNFT: res.data.suggest_next_nft,
+          showRecommend: false
         })
-        console.log(this.state.loadItem)
+      } else {
+        obj.setState({
+          childrenNum: children_num,
+          recommendNFT: res.data.suggest_next_nft,
+          showRecommend: true
+        })
+      }
+      obj.setState({
+        loadItem: false
       })
-      console.log(this.state.loadItem)
+    }).catch(error => {
+      if (error.response === undefined) {
+        alert('服务器未响应')
+        return;
+      }
+      console.log(error.response);
+      if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
+        console.debug("no children")
+      } else {
+        alert('获取nft子节点情况页面失败(' + error + ')')
+      }
+      obj.setState({
+        loadItem: false
+      })
+    })
   }
 
   render() {
     const { classes } = this.props
     const gateway = this.gateway
-    if(this.state.onLoading) {
-        return (
-            <div>
-                <Helmet>
-                    <title>SparkNFT | Spark</title>
-                </Helmet>
+    if (this.state.onLoading) {
+      return (
+        <div>
+          <Helmet>
+            <title>SparkNFT | Spark</title>
+          </Helmet>
 
-                <div style={{ width: '300px', height: '300px', position: 'relative', left: '43%', marginTop: '20%' }}>
-                    <ReactLoading type={'bars'} color={'#2196f3'} height={300} width={300} />
-                </div>
-            </div>
-        );
-    }else {
-    return (
-       <div>
-        <Helmet>
-          <title>SparkNFT | Sprrk</title>
-        </Helmet>
-        <ThemeProvider theme={theme}>
-          <TopBar />
-        </ThemeProvider>
-      <main>
-       
-        <Container component="main" className={classes.container}>
-            <Grid container direction="row" justifyContent="center" alignItems="flex-start">
-              <Grid>
-            <Button
-              startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
-              href='/#/collections'
-              style={{ marginTop: 20, marginBottom: 10, fontSize: 22 }}
-            >
-              回到我的收藏馆
-            </Button>
-            </Grid>
-            <Grid xs={8}></Grid>
-            <Grid>
-             </Grid>
-             </Grid>
-             <Grid container direction="row" justifyContent="center" alignItems="center" xs={12}>
-                <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 65}}>
-                    🔥 NFT 🔥
+          <div style={{ width: '300px', height: '300px', position: 'relative', left: '43%', marginTop: '20%' }}>
+            <ReactLoading type={'bars'} color={'#2196f3'} height={300} width={300} />
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <Helmet>
+            <title>SparkNFT | Spark</title>
+          </Helmet>
+          <ThemeProvider theme={theme}>
+            <TopBar />
+          </ThemeProvider>
+          <main>
+
+            <Container component="main" className={classes.container}>
+              <Grid container direction="row" justifyContent="center" alignItems="flex-start">
+                <Grid>
+                  <Button
+                    startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
+                    href='/#/collections'
+                    style={{ marginTop: 20, marginBottom: 10, fontSize: 22 }}
+                  >
+                    回到我的收藏馆
+                  </Button>
+                </Grid>
+                <Grid xs={8}></Grid>
+              </Grid>
+
+              <Grid container direction="row" justifyContent="center" alignItems="center" xs={12}>
+                <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 65 }}>
+                  🔥 NFT 🔥
                 </Typography>
-            </Grid>
-            <Grid container direction="row" justifyContent="center" alignItems="flex-start">
-         </Grid>
-            <div className={classes.paper}>
-              {/* <Grid container direction="column" justifyContent="center" alignItems="center"> */}
-            { this.state.loadItem ? (
-                <Grid container justifyContent="space-evenly" spacing={5}>
-                  <Grid item xs={4}>
-                    <Skeleton variant="rect" width={300} height={500} style={{ width: 300, marginLeft: 200, marginBottom: 50 }}/>
-                  </Grid>
-                  <Grid item xs style={{ marginLeft: '5%' }}>
-                    <Skeleton animation="wave" variant="text" width={200} height={30}/>
-                    <Skeleton animation="wave" variant="text" width={400} height={70}/>
-                    <Skeleton animation="wave" variant="rect" width={500} height={300} style={{ marginBottom: 50 }}/>
+              </Grid>
 
-                  </Grid>
+              <div className={classes.paper}>
+                {this.state.loadItem ? (
+                  <Grid container justifyContent="space-evenly" spacing={5}>
+                    <Grid item xs={4}>
+                      <Skeleton variant="rect" width={300} height={500} style={{ width: 300, marginLeft: 200, marginBottom: 50 }} />
+                    </Grid>
+                    <Grid item xs style={{ marginLeft: '5%' }}>
+                      <Skeleton animation="wave" variant="text" width={200} height={30} />
+                      <Skeleton animation="wave" variant="text" width={400} height={70} />
+                      <Skeleton animation="wave" variant="rect" width={500} height={300} style={{ marginBottom: 50 }} />
 
-                </Grid>
-              ) :(<Grid container justifyContent="space-evenly" spacing= {5}>
-                {/* <Grid xs={2}></Grid> */}
-                <Grid item style={{ maxWidth: 100}}>
-                <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: 10}}>
-                    <img style={{ width: 300, marginTop: 20}} src={this.state.Cover}></img>  
-                </Paper>
-                </Grid>
-                <Grid item xs  style={{ marginLeft:20, maxWidth: 500}} >
-                  <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
-                    #{this.props.match.params.id}
-                  </Typography>
-                  <Typography color="inherit" align="left" noWrap style={{ fontFamily: 'Teko', fontSize: 34, marginTop: '2%'}}>
-                    <b>{this.state.Name}</b>
-                  </Typography>
-                  <Typography align="left" color="textSecondary" paragraph style={{ marginTop: '2%', maxWidth: '100%', fontSize: 16 }}>
-                    {this.state.Description}
-                  </Typography>
-                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '100%', fontSize: 24 }}>
-                  点火价格: {this.state.priceString}
-                  </Typography>
-                  <Grid container direction="row" justifyContent="flex-end" alignItems="center">
-                  <Grid>
-                    <Grid container direction="row" justifyContent="center" alignItems="center">
-        
-                    <Grid xs={2}>
-                    
                     </Grid>
 
-                    <Grid>
-                    <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond}  onClick={this.shill}>
-                    
-                        <Typography variant="button" component="h2" gutterBottom >
-                            <font size="4">🔥   </font>&nbsp;   铸造
+                  </Grid>
+                ) : (
+                    <Grid container justifyContent="space-evenly" spacing={5}>
+                      <Grid item style={{ maxWidth: 100 }}>
+                        <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: 10 }}>
+                          <img style={{ width: 300, marginTop: 20, marginBottom: 50 }} src={this.state.Cover}></img>
+                        </Paper>
+                      </Grid>
+                      <Grid item xs style={{ marginLeft: 20, maxWidth: 500 }} >
+                        <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
+                          #{this.props.match.params.id}
                         </Typography>
-                    </Button>
+                        <Typography color="inherit" align="left" noWrap style={{ fontFamily: 'Teko', fontSize: 34, marginTop: '2%' }}>
+                          <b>{this.state.Name}</b>
+                        </Typography>
+                        <Typography align="left" color="textSecondary" paragraph style={{ marginTop: '2%', maxWidth: '100%', fontSize: 16 }}>
+                          {this.state.Description}
+                        </Typography>
+                        <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '100%', fontSize: 24 }}>
+                          点火价格: {this.state.priceString}
+                        </Typography>
+                        <Grid container direction="row" justifyContent="flex-end" alignItems="center">
+                          <Grid>
+                            <Grid container direction="row" justifyContent="center" alignItems="center">
+                              <Grid xs={2}></Grid>
+                              {this.state.showRecommend ? (
+                                <Grid>
+                                  <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} disabled>
+                                    <Typography variant="button" component="h2" gutterBottom >
+                                      <font size="4">🔥   </font>&nbsp;   铸造
+                                    </Typography>
+                                  </Button>
+                                </Grid>
+
+                              ) : (
+                                <Grid>
+                                  <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} onClick={this.shill}>
+                                    <Typography variant="button" component="h2" gutterBottom >
+                                      <font size="4">🔥   </font>&nbsp;   铸造
+                                    </Typography>
+                                  </Button>
+                                </Grid>
+                              )}
+                            </Grid>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+
                     </Grid>
-                    </Grid>
-                    </Grid>
+                ) }
+                {/* <Grid container direction="column" justifyContent="center" alignItems="center"> */}
+                
+                <br /><br /><br /><br />
+                {this.state.showRecommend ? (
+                  <Grid>
+                    <Typography variant="h4" gutterBottom >
+                      此NFT的子节点已经售完，我们给您推荐了其他还能购买的节点：
+                    </Typography>
+                    <Link onClick={this.handleClickLink} style={{ fontSize: 20, textDecoration: 'underline' }}>
+                      {window.location.host + '/#/NFT/Spark/' + this.state.recommendNFT}
+                    </Link>
                   </Grid>
-                </Grid>
-              </Grid>)}
-              <br /><br /><br /><br />
-            </div>
-            
-            <br /><br />
-          </Container>
-      </main>
-      </div>
-    );
+                ) : (
+                  <div></div>
+                )}
+              </div>
+
+              <br /><br />
+            </Container>
+          </main>
+        </div>
+      );
     }
   }
 }

@@ -82,7 +82,7 @@ class TopBar extends Component {
       } else {
         return (
           <Button color='primary' className={classes.btnConnected} style={{ marginLeft: "1%" }} >
-            <AccountBalanceWalletIcon style={{ fontSize: 25 }} />
+            <AccountBalanceWalletIcon style={{ fontSize: 24 }} />
           </Button>
         );
       }
@@ -115,9 +115,17 @@ class TopBar extends Component {
               </Button>
 
               <Button size="large" href='https://github.com/SparkNFT' target="_blank">
-                <GitHubIcon />
+                <GitHubIcon style={{ fontSize: 20 }}/>
               </Button>
-              {account_info()}
+              {this.state.isConnected ? (
+                <Button color='primary' className={classes.btnConnected} style={{ marginLeft: "1%" }} >
+                  <AccountBalanceWalletIcon style={{ fontSize: 24 }} />
+                </Button>
+              ) : (
+                <Button style = {{ marginLeft: "1%" }} className={classes.btn} onClick={this.getAccount}>
+                  <AccountBalanceWalletIcon style={{ fontSize: 24 }} />
+                </Button>
+              )}
             </Grid>
           </Grid>
         </Toolbar>

@@ -384,7 +384,7 @@ class Collections extends Component {
                     <b>我的收藏馆</b>
                   </Typography>
                   <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 30}}>
-                    <b>A ERC721 Token Trying to Solve Existing Publishing Dilemma</b>
+                    <b>An ERC721 Token Trying to Solve Existing Publishing Dilemma</b>
                   </Typography>
                   <Grid container justifyContent="center">
                     <Grid item xs={3} >
