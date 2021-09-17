@@ -157,11 +157,9 @@ class NFTInfo extends Component{
         headers: {},
       };
       axios(cipher_config).then(async (response) => {
-        console.log(response)
-        let ciphertext = response.data;
-        let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        let account = accounts[0];
-        console.log(account);
+        let ciphertext = response.data
+        let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+        let account = accounts[0]
         let signJson = {
           account: account,
           root_nft_id: this.props.match.params.id
@@ -180,13 +178,8 @@ class NFTInfo extends Component{
         const link = document.createElement('a');
         link.href = url;
         // text/plain application/pdf
-        let suffix;
-        if (obj.state.fileType === 'text/plain') {
-          suffix = '.txt'
-        } else {
-          suffix = '.pdf'
-        }
-        link.setAttribute('download', obj.state.Name + suffix); //or any other extension
+        let suffix = '.' + obj.state.fileType;
+        link.setAttribute(this.state.Name, obj.state.Name + suffix); //or any other extension
         document.body.appendChild(link);
         link.click();
         obj.setState({ onLoading: false })
@@ -208,11 +201,6 @@ class NFTInfo extends Component{
       window.location.href = '/#/collections';
       return;
     }
-    if(!window.ethereum.isConnected()) {
-      alert("请先链接metamask");
-      window.location.href = '/#/collections';
-      return;
-    }
     // const chainId = await window.ethereum.request({ method: 'eth_chainId' });
     window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
       if(chainId !== '0x4') {
@@ -229,7 +217,6 @@ class NFTInfo extends Component{
         const account = accounts[0];
         obj.setState({account: account});
         if(web3.utils.toChecksumAddress(account) !== owner) {
-
           alert("这枚nft不属于你");
           window.location.href = '/#';
         }
@@ -253,7 +240,6 @@ class NFTInfo extends Component{
             timeout: 1000 * 5,
           }).then(res => {
             let data = res.data;
-            console.log(data)
             let bouns = 0;
             let fileAddr = "";
             let isEncrypt = false;
@@ -273,7 +259,6 @@ class NFTInfo extends Component{
                 }
               }
             }
-            console.log(isEncrypt)
             this.setState({ Name: data.name });
             this.setState({ Description: data.description });
             this.setState({ BonusFee: royalty });
@@ -312,9 +297,10 @@ class NFTInfo extends Component{
       // });
     });
 
-    const leafUrl = this.backend + '/api/v1/nft/info?nft_id=' + this.props.match.params.id
+    const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id
     axios.get(leafUrl).then(res => {
-      var children_num = res.data.children_count
+      var children = res.data.children
+      var children_num = children.length
       this.setState({
         childrenNum: children_num
       })
@@ -323,7 +309,6 @@ class NFTInfo extends Component{
         alert('服务器未响应叶子节点数量请求')
         return;
       }
-      console.log(error.response);
       if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
         console.debug("no children")
       } else {
@@ -374,8 +359,9 @@ class NFTInfo extends Component{
           const wordArray = CryptoJS.enc.Hex.parse(plainText);
           let BaText = this.wordArrayToByteArray(wordArray, wordArray.length);
           var arrayBufferView = new Uint8Array(BaText);
-          var blob = new Blob( [ arrayBufferView ], { type: "txt" } );
-          FileSaver.saveAs(blob,this.state.Name);
+          var blob = new Blob( [ arrayBufferView ] );
+          let suffix = '.' + this.state.fileType;
+          FileSaver.saveAs(blob,this.state.Name + suffix);
         } else {
           var error_msg = res.data.message
           alert("获取密钥失败  " + error_msg)
@@ -504,9 +490,9 @@ class NFTInfo extends Component{
             </Grid>
             <Grid xs={7}></Grid>
             <Grid>
-                <Button style={{ marginTop: 80,marginRight: 30, marginBottom: 50, fontSize: 22 }} size="large" variant="contained" color="primary"  className={classes.btnMain} startIcon={<LocalAtmIcon />} onClick={this.claim} >
+                <Button style={{ marginTop: 80,marginRight: 30, marginBottom: 50}} size="large" variant="contained" color="primary"  className={classes.btnMain} startIcon={<LocalAtmIcon />} onClick={this.claim} >
                   <Typography id="isSpark" variant="button" component="h3" gutterBottom >
-                    <font color='white'>
+                    <font size="3" color='white'>
                           领收益
                     </font>
                   </Typography>
@@ -514,9 +500,12 @@ class NFTInfo extends Component{
             </Grid>
             {/* <Grid xs ={1}></Grid> */}
             <Grid>
-              <Button style={{ marginTop: 80, marginBottom: 50, fontSize: 22 }} size="large" variant="outlined" color="secondary"  className={classes.btnSecond} startIcon={<AttachMoneyIcon />}  href={'/#/sellSingle/' +  this.props.match.params.id}  >
+              <Button style={{ marginTop: 80, marginBottom: 50, fontSize: 32 }} size="large" variant="outlined" color="secondary"  className={classes.btnSecond} startIcon={<AttachMoneyIcon />}  href={'/#/sellSingle/' +  this.props.match.params.id}  >
                  <Typography variant="button" component="h2" gutterBottom >
+                  
+                  <font size="3">
                   售卖
+                    </font>
                  </Typography>
                </Button>
              </Grid>
@@ -547,9 +536,9 @@ class NFTInfo extends Component{
                   </Grid>
                   <Grid>
                     
-                    <Typography id="isSpark" variant="button" component="h1" gutterBottom >
-                    目前收益:{this.state.Profit}
-                        </Typography>
+                      <font size="3">
+                          目前收益:{this.state.Profit}
+                      </font>
                   </Grid>
                 </Grid>
                 <Grid item xs  style={{ marginLeft:20, maxWidth: 500}} >
@@ -572,7 +561,7 @@ class NFTInfo extends Component{
                   <Grid>
                     <Button size="small" variant="contained"  color="primary" target="_blank" className={classes.btnMain} startIcon={<GetAppIcon />} onClick={this.downloadIPFS} >
                       <Typography variant="button" component="h2" gutterBottom >
-                        <font color='white'>
+                        <font size="3" color='white'>
                           下载
                         </font>
                       </Typography>
@@ -582,7 +571,10 @@ class NFTInfo extends Component{
                     <Grid>
                       <Button size="small"  variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<WhatshotIcon />} onClick={this.spark} >
                         <Typography id="isSpark" variant="button" component="h2" gutterBottom >
-                          点火—分享
+                          
+                          <font size="3">
+                          点火分享
+                        </font>
                         </Typography>
                       </Button>
                     </Grid>
