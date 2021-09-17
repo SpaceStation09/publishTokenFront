@@ -485,9 +485,9 @@ class NFTInfo extends Component{
             <Grid container direction="row" justifyContent="space-between" alignItems="flex-start">
               <Grid>
             <Button
-              startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
+              startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: '2rem' }} />}
               href='/#/collections'
-              style={{ marginTop: 20, marginBottom: 50, fontSize: 22 }}
+              style={{ marginTop: 20, marginBottom: 10, fontSize: '2rem' }}
             >
               回到我的NFTs
             </Button>
@@ -545,6 +545,7 @@ class NFTInfo extends Component{
                     </font>
                   </Grid>
                 </Grid>
+                {/* <Grid xs={1}></Grid> */}
                 <Grid   style={{ marginLeft:50, maxWidth: 500}} >
                   <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
                     #{this.props.match.params.id}
