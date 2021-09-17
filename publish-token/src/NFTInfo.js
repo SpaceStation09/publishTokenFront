@@ -137,17 +137,24 @@ class NFTInfo extends Component{
       loadItem: true,
   };
 
-  downloadIPFS = async () =>{
+  downloadIPFS = async (event) =>{
     const Method = 'GET';
     let obj = this;
     let url = "";
     let dataHash = this.state.dataUrl
     this.setState({onLoading: true})
-    if(this.state.isEncrypt) {
+    console.log("onload" + this.state.onLoading)
+    this.finishDownload();
+  }
+
+  finishDownload = () => {
+    let obj = this;
+    let dataHash = this.state.dataUrl
+    if (this.state.isEncrypt) {
       var cipher_config = {
         method: 'get',
         url: dataHash,
-        headers: { },
+        headers: {},
       };
       axios(cipher_config).then(async (response) => {
         let ciphertext = response.data
@@ -157,48 +164,40 @@ class NFTInfo extends Component{
           account: account,
           root_nft_id: this.props.match.params.id
         }
-        signJson = JSON.stringify(signJson)
-        await this.signDataAndDecrypt(account,ciphertext)
+        signJson = JSON.stringify(signJson);
+        await this.signDataAndDecrypt(account, ciphertext);
+        obj.setState({ onLoading: false })
       });
-    }else {
+    } else {
       axios({
         url: dataHash, //your url
         method: 'GET',
         responseType: 'blob', // important
-    }).then((response) => {
+      }).then((response) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
         // text/plain application/pdf
-        let suffix;
-        if(obj.state.fileType === 'text/plain') {
-          suffix = '.txt'
-        } else {
-          suffix = '.pdf'
-        }
-        link.setAttribute('download', obj.state.Name + suffix); //or any other extension
+        let suffix = '.' + obj.state.fileType;
+        link.setAttribute(this.state.Name, obj.state.Name + suffix); //or any other extension
         document.body.appendChild(link);
         link.click();
-    }).catch(error => {
-        this.setState({onLoading: false})
+        obj.setState({ onLoading: false })
+        console.log('set close')
+      }).catch(error => {
+        obj.setState({ onLoading: false })
         alert("下载失败：" + error);
-    });
+      });
     }
-    
-    this.setState({onLoading: false})
-  }
 
+    // this.setState({ onLoading: false })
+  }
 
   constructor(props)  {
     super(props);
     let obj = this
     if(!window.ethereum) {
       alert("请先安装metamask");
-      window.location.href = '/#/collections';
-      return;
-    }
-    if(!window.ethereum.isConnected()) {
-      alert("请先链接metamask");
       window.location.href = '/#/collections';
       return;
     }
@@ -218,7 +217,6 @@ class NFTInfo extends Component{
         const account = accounts[0];
         obj.setState({account: account});
         if(web3.utils.toChecksumAddress(account) !== owner) {
-
           alert("这枚nft不属于你");
           window.location.href = '/#';
         }
@@ -361,8 +359,9 @@ class NFTInfo extends Component{
           const wordArray = CryptoJS.enc.Hex.parse(plainText);
           let BaText = this.wordArrayToByteArray(wordArray, wordArray.length);
           var arrayBufferView = new Uint8Array(BaText);
-          var blob = new Blob( [ arrayBufferView ], { type: "txt" } );
-          FileSaver.saveAs(blob,this.state.Name);
+          var blob = new Blob( [ arrayBufferView ] );
+          let suffix = '.' + this.state.fileType;
+          FileSaver.saveAs(blob,this.state.Name + suffix);
         } else {
           var error_msg = res.data.message
           alert("获取密钥失败  " + error_msg)
