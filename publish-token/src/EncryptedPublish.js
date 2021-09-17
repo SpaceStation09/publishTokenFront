@@ -178,8 +178,9 @@ class EncryptedPublish extends Component {
 
   handleGetNFTId = (value) => {
     this.setState({
-      rootNFTId: value,
+      rootNFTId: String(value),
     })
+    console.debug(typeof this.state.rootNFTId)
   }
 
   handleClose = (e) => {

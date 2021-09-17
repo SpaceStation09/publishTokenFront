@@ -137,17 +137,24 @@ class NFTInfo extends Component{
       loadItem: true,
   };
 
-  downloadIPFS = async () =>{
+  downloadIPFS = async (event) =>{
     const Method = 'GET';
     let obj = this;
     let url = "";
     let dataHash = this.state.dataUrl
     this.setState({onLoading: true})
-    if(this.state.isEncrypt) {
+    console.log("onload" + this.state.onLoading)
+    this.finishDownload();
+  }
+
+  finishDownload = () => {
+    let obj = this;
+    let dataHash = this.state.dataUrl
+    if (this.state.isEncrypt) {
       var cipher_config = {
         method: 'get',
         url: dataHash,
-        headers: { },
+        headers: {},
       };
       axios(cipher_config).then(async (response) => {
         console.log(response)
@@ -160,20 +167,21 @@ class NFTInfo extends Component{
           root_nft_id: this.props.match.params.id
         }
         signJson = JSON.stringify(signJson);
-        await this.signDataAndDecrypt(account,ciphertext);
+        await this.signDataAndDecrypt(account, ciphertext);
+        obj.setState({ onLoading: false })
       });
-    }else {
+    } else {
       axios({
         url: dataHash, //your url
         method: 'GET',
         responseType: 'blob', // important
-    }).then((response) => {
+      }).then((response) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
         // text/plain application/pdf
         let suffix;
-        if(obj.state.fileType === 'text/plain') {
+        if (obj.state.fileType === 'text/plain') {
           suffix = '.txt'
         } else {
           suffix = '.pdf'
@@ -181,15 +189,16 @@ class NFTInfo extends Component{
         link.setAttribute('download', obj.state.Name + suffix); //or any other extension
         document.body.appendChild(link);
         link.click();
-    }).catch(error => {
-        this.setState({onLoading: false})
+        obj.setState({ onLoading: false })
+        console.log('set close')
+      }).catch(error => {
+        obj.setState({ onLoading: false })
         alert("下载失败：" + error);
-    });
+      });
     }
-    
-    this.setState({onLoading: false})
-  }
 
+    // this.setState({ onLoading: false })
+  }
 
   constructor(props)  {
     super(props);
