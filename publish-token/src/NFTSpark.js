@@ -13,15 +13,14 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import GetAppIcon from '@material-ui/icons/GetApp';
-import { Paper, Container, Link } from '@material-ui/core';
+import { Paper, Container } from '@material-ui/core';
 import BuildIcon from '@material-ui/icons/Build';
 import axios from 'axios';
 import contract from './contract';
 import web3 from './web3';
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 import ReactLoading from 'react-loading';
-
-
+import Skeleton from '@material-ui/lab/Skeleton';
 const theme = createTheme({
   palette: {
     primary: {
@@ -109,17 +108,18 @@ class NFTSpark extends Component{
       priceString: '',
       Leaf: 0,
       onLoading: false,
-      recommendNFT: '',
-      encrypted: '未知',
-      showRecommend: false,
+      loadItem: true,
   };
 
-  shill = async() => {
+  shill = async(event) => {
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     const account = accounts[0];
     let nft = contract;
-    this.loadLoadingState();
+    
     let obj = this;
+
+    this.setState({onloading: true});
+    console.log(obj.state.onLoading)
     nft.methods.acceptShill(this.props.match.params.id).send({
         from: account,
         value: this.state.price
@@ -127,88 +127,97 @@ class NFTSpark extends Component{
         // receipt can also be a new contract instance, when coming from a "contract.deploy({...}).send()"
         alert("交易已上链");
         obj.setState({onloading: false});
+    }).catch(error => {
+      this.setState({ onLoading: false,});
     });
 
   }
   
   loadLoadingState = () => {
-    this.setState({onloading: true},function() {
-        console.log(this.state.onLoading)
-    });
+    this.setState({onloading: true});
     
-  }
-
-  handleClickLink = (event) => {
-    var new_url = '/#/NFT/Spark/' + this.state.recommendNFT
-    window.open(new_url)
   }
 
   
 
-  constructor(props) {
+  constructor(props)  {
     super(props);
+    if(!window.ethereum) {
+      alert("请先安装metamask");
+      //window.location.href = '/#/collections';
+      return;
+    }
+    if(!window.ethereum.isConnected()) {
+      window.ethereum.request({ method: 'eth_requestAccounts' })
+      //window.location.href = '/#/collections';
+    }
+    // const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
+      if(chainId !== '0x4') {
+        alert("请切换至rinkeby network");
+       // window.location.href = '/#/collections';
+        return;
+      }
+    })
     let nft = contract;
     let url = this.gateway + this.props.match.params.hash;
     let obj = this;
     nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
-      let hash = meta.split('/');
-
-      this.setState({ hash: hash[hash.length - 1] });
-      axios.get(meta).then(res => {
-        let data = res.data;
-        console.log(data);
-        let bouns;
-        for (let i = 0; i < data.attributes.length; i++) {
-          if (data.attributes[i].trait_type === 'bonusFee') {
-            bouns = data.attributes[i].value;
+        let hash = meta.split('/');
+  
+        this.setState({hash: hash[hash.length-1]});
+        axios.get(meta).then(res => {
+          let data = res.data;
+          console.log(data);
+          let bouns;
+          for(let i = 0; i < data.attributes.length; i++) {
+            if(data.attributes[i].trait_type === 'bonusFee') {
+              bouns = data.attributes[i].value;
+            }
           }
-        }
-        this.setState({ Name: data.name });
-        this.setState({ Description: data.description });
-        this.setState({ BonusFee: bouns });
-        this.setState({ Cover: data.image });
+          this.setState({Name: data.name});
+          this.setState({Description: data.description});
+          this.setState({BonusFee: bouns});
+          this.setState({Cover: data.image});
+        });
       });
-    });
-    nft.methods.getShillPriceByNFTId(this.props.match.params.id).call().then(price => {
-      this.setState({ price: price });
-      let etherPrice = web3.utils.fromWei(price, 'ether');
-      etherPrice += ' ETH';
-      this.setState({ priceString: etherPrice });
-    });
-    const leafUrl = this.backend + '/api/v1/nft/info?nft_id=' + this.props.match.params.id
-    axios.get(leafUrl).then(res => {
-      var children_num = res.data.children_count
-      if (res.data.suggest_next_nft === this.props.match.params.id){
+      nft.methods.getShillPriceByNFTId(this.props.match.params.id).call().then(price => {
+        this.setState({price: price});
+        let etherPrice = web3.utils.fromWei(price, 'ether');
+        etherPrice += ' ETH';
+        this.setState({priceString: etherPrice});
+      });
+      const leafUrl = this.backend + '/api/v1/tree/children?nft_id=' + this.props.match.params.id
+      axios.get(leafUrl,{headers: { "Access-Control-Allow-Origin": "*"},}).then(res => {
+        var children = res.data.children
+        var children_num = children.length
         obj.setState({
           childrenNum: children_num,
-          recommendNFT: res.data.suggest_next_nft,
-          showRecommend: false
+          loadItem: false
         })
-      } else if (res.data.suggest_next_nft == '0'){
+        console.log(this.state.loadItem)
+      }).catch(error => {
+        console.log(JSON.stringify(error));
+        console.log(error.request.status);
+        console.log(error.message);
+        if(error.message === "Network Error") {
+          obj.setState({
+            loadItem: false
+          })
+          return;
+        }
+        console.log(error.response);
+        if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
+          console.debug("no children")
+        } else {
+          alert('获取nft子节点情况页面失败(' + error + ')')
+        }
         obj.setState({
-          childrenNum: children_num,
-          recommendNFT: res.data.suggest_next_nft,
-          showRecommend: false
+          loadItem: false
         })
-      }else {
-        obj.setState({
-          childrenNum: children_num,
-          recommendNFT: res.data.suggest_next_nft,
-          showRecommend: true
-        })
-      }
-    }).catch(error => {
-      if (error.response === undefined) {
-        alert('服务器未响应')
-        return;
-      }
-      console.log(error.response);
-      if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
-        console.debug("no children")
-      } else {
-        alert('获取nft子节点情况页面失败(' + error + ')')
-      }
-    })
+        console.log(this.state.loadItem)
+      })
+      console.log(this.state.loadItem)
   }
 
   render() {
@@ -230,7 +239,7 @@ class NFTSpark extends Component{
     return (
        <div>
         <Helmet>
-          <title>SparkNFT | Spark</title>
+          <title>SparkNFT | Sprrk</title>
         </Helmet>
         <ThemeProvider theme={theme}>
           <TopBar />
@@ -240,32 +249,45 @@ class NFTSpark extends Component{
         <Container component="main" className={classes.container}>
             <Grid container direction="row" justifyContent="center" alignItems="flex-start">
               <Grid>
-                <Button
-                  startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
-                  href='/#/collections'
-                  style={{ marginTop: 20, marginBottom: 10, fontSize: 22 }}
-                >
-                  回到我的收藏馆
-                </Button>
-              </Grid>
-              <Grid xs={8}></Grid>  
+            <Button
+              startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
+              href='/#/collections'
+              style={{ marginTop: 20, marginBottom: 10, fontSize: 22 }}
+            >
+              回到我的收藏馆
+            </Button>
             </Grid>
-
-            <Grid container direction="row" justifyContent="center" alignItems="center" xs={12}>
+            <Grid xs={8}></Grid>
+            <Grid>
+             </Grid>
+             </Grid>
+             <Grid container direction="row" justifyContent="center" alignItems="center" xs={12}>
                 <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 65}}>
                     🔥 NFT 🔥
                 </Typography>
             </Grid>
-
-            {/* <Grid container direction="row" justifyContent="center" alignItems="flex-start">
-            </Grid> */}
+            <Grid container direction="row" justifyContent="center" alignItems="flex-start">
+         </Grid>
             <div className={classes.paper}>
               {/* <Grid container direction="column" justifyContent="center" alignItems="center"> */}
-              <Grid container justifyContent="space-evenly" spacing= {5}>
+            { this.state.loadItem ? (
+                <Grid container justifyContent="space-evenly" spacing={5}>
+                  <Grid item xs={4}>
+                    <Skeleton variant="rect" width={300} height={500} style={{ width: 300, marginLeft: 200, marginBottom: 50 }}/>
+                  </Grid>
+                  <Grid item xs style={{ marginLeft: '5%' }}>
+                    <Skeleton animation="wave" variant="text" width={200} height={30}/>
+                    <Skeleton animation="wave" variant="text" width={400} height={70}/>
+                    <Skeleton animation="wave" variant="rect" width={500} height={300} style={{ marginBottom: 50 }}/>
+
+                  </Grid>
+
+                </Grid>
+              ) :(<Grid container justifyContent="space-evenly" spacing= {5}>
                 {/* <Grid xs={2}></Grid> */}
                 <Grid item style={{ maxWidth: 100}}>
                 <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: 10}}>
-                    <img style={{ width: 300, marginTop: 20, marginBottom: 50}} src={this.state.Cover}></img>
+                    <img style={{ width: 300, marginTop: 20}} src={this.state.Cover}></img>  
                 </Paper>
                 </Grid>
                 <Grid item xs  style={{ marginLeft:20, maxWidth: 500}} >
@@ -282,46 +304,27 @@ class NFTSpark extends Component{
                   点火价格: {this.state.priceString}
                   </Typography>
                   <Grid container direction="row" justifyContent="flex-end" alignItems="center">
+                  <Grid>
+                    <Grid container direction="row" justifyContent="center" alignItems="center">
+        
+                    <Grid xs={2}>
+                    
+                    </Grid>
+
                     <Grid>
-                      <Grid container direction="row" justifyContent="center" alignItems="center">
-                        <Grid xs={2}></Grid>
-                        {this.state.showRecommend ? (
-                          <Grid>
-                            <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} disabled>
-                              <Typography variant="button" component="h2" gutterBottom >
-                                <font size="4">🔥   </font>&nbsp;   铸造
-                              </Typography>
-                            </Button>
-                          </Grid>
-                          
-                        ) : (
-                          <Grid>
-                              <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} onClick={this.shill}>
-                              <Typography variant="button" component="h2" gutterBottom >
-                                <font size="4">🔥   </font>&nbsp;   铸造
-                              </Typography>
-                            </Button>
-                          </Grid>
-                        )}
-                      </Grid>
+                    <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond}  onClick={this.shill}>
+                    
+                        <Typography variant="button" component="h2" gutterBottom >
+                            <font size="4">🔥   </font>&nbsp;   铸造
+                        </Typography>
+                    </Button>
+                    </Grid>
+                    </Grid>
                     </Grid>
                   </Grid>
                 </Grid>
-                
-              </Grid>
+              </Grid>)}
               <br /><br /><br /><br />
-              {this.state.showRecommend ? (
-                <Grid>
-                  <Typography variant="h4" gutterBottom >
-                    此NFT的子节点已经售完，我们给您推荐了其他还能购买的节点：
-                  </Typography>
-                  <Link onClick={this.handleClickLink} style={{ fontSize: 20, textDecoration: 'underline' }}>
-                    {window.location.host + '/#/NFT/Spark/' + this.state.recommendNFT}
-                  </Link>
-                </Grid>
-              ): (
-                <div></div>
-              )}
             </div>
             
             <br /><br />
