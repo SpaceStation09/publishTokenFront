@@ -81,7 +81,9 @@ const styles = theme => ({
     borderColor: '#e3f2fd',
     fontSize: 16,
     borderRadius: 25,
-    width: 120
+    width: 120,
+    maxWidth: '20rem',
+    minWidth: '10rem',
   },
   btnSecond: {
     marginTop: theme.spacing(3),
@@ -90,7 +92,9 @@ const styles = theme => ({
     borderColor: '#03A9F4',
     fontSize: 16,
     borderRadius: 25,
-    width: 120
+    width: 120,
+    maxWidth: '20rem',
+    minWidth: '10rem',
   },
   heroContent: {
     backgroundColor: theme.palette.background.paper,
@@ -434,7 +438,7 @@ class NFTInfo extends Component{
       return (
         <Grid container >
           <Grid item xs>
-          <Typography color="inherit" align="center" noWrap style={{ fontFamily: 'Teko', fontSize: 20, marginTop: '5%', marginLeft: 200}}>
+          <Typography variant="h4" gutterBottom >
             请将下方链接分享给买方，买方会进入此链接来铸造这个NFT的子节点 <br />
             {toUrl}
           </Typography>
@@ -478,19 +482,20 @@ class NFTInfo extends Component{
         <ThemeProvider theme={theme}>
           <TopBar />
           <Container component="main" className={classes.container}>
-            <Grid container direction="row" justifyContent="center" alignItems="flex-start">
+            <Grid container direction="row" justifyContent="space-between" alignItems="flex-start">
               <Grid>
             <Button
-              startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
+              startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: '2rem' }} />}
               href='/#/collections'
-              style={{ marginTop: 20, marginBottom: 50, fontSize: 22 }}
+              style={{ marginTop: 20, marginBottom: 10, fontSize: '2rem' }}
             >
               回到我的NFTs
             </Button>
             </Grid>
-            <Grid xs={7}></Grid>
+            <Grid xs={5}></Grid>
+            <Grid container  direction="row" justifyContent="flex-end" alignItems="flex-start">
             <Grid>
-                <Button style={{ marginTop: 80,marginRight: 30, marginBottom: 50}} size="large" variant="contained" color="primary"  className={classes.btnMain} startIcon={<LocalAtmIcon />} onClick={this.claim} >
+                <Button style={{ marginTop: 10,marginRight: 30, marginBottom: 20}} size="large" variant="contained" color="primary"  className={classes.btnMain} startIcon={<LocalAtmIcon />} onClick={this.claim} >
                   <Typography id="isSpark" variant="button" component="h3" gutterBottom >
                     <font size="3" color='white'>
                           领收益
@@ -500,7 +505,7 @@ class NFTInfo extends Component{
             </Grid>
             {/* <Grid xs ={1}></Grid> */}
             <Grid>
-              <Button style={{ marginTop: 80, marginBottom: 50, fontSize: 32 }} size="large" variant="outlined" color="secondary"  className={classes.btnSecond} startIcon={<AttachMoneyIcon />}  href={'/#/sellSingle/' +  this.props.match.params.id}  >
+              <Button style={{ marginTop: 10, marginBottom: 20}} size="large" variant="outlined" color="secondary"  className={classes.btnSecond} startIcon={<AttachMoneyIcon />}  href={'/#/sellSingle/' +  this.props.match.params.id}  >
                  <Typography variant="button" component="h2" gutterBottom >
                   
                   <font size="3">
@@ -510,7 +515,7 @@ class NFTInfo extends Component{
                </Button>
              </Grid>
              </Grid>
-          
+             </Grid>
             <div className={classes.paper}>
               {/* <Grid container direction="column" justifyContent="center" alignItems="center"> */}
               {this.state.loadItem ? (
@@ -526,22 +531,22 @@ class NFTInfo extends Component{
                   </Grid>
 
                 </Grid>
-              ) : (<Grid container  justifyContent="space-evenly" spacing= {5}>
+              ) : (<Grid container  justifyContent="space-evenly" spacing= {5} alignItems="flex-start">
                 {/* <Grid xs={2}></Grid> */}
-                <Grid container direction="column" item xs style={{ maxWidth: 100}}>
-                  <Grid>
-                    <Paper style={{ backgroundColor: '#EFEBE9', width: 350, marginLeft: 10}}>
-                        <img style={{ width: 300, marginTop: 20, marginBottom: 50}} src={this.state.Cover}></img>  
+                <Grid    style={{ maxWidth: 200}}>
+   
+                    <Paper style={{ backgroundColor: '#EFEBE9', width: 350}}>
+                        <img style={{ width: 300, marginTop: 20, marginBottom: 50,marginRight:50}} src={this.state.Cover}></img>  
                     </Paper>
-                  </Grid>
+    
                   <Grid>
-                    
-                      <font size="3">
-                          目前收益:{this.state.Profit}
-                      </font>
+                    <font size="3">
+                        目前收益:{this.state.Profit}
+                    </font>
                   </Grid>
                 </Grid>
-                <Grid item xs  style={{ marginLeft:20, maxWidth: 500}} >
+                {/* <Grid xs={1}></Grid> */}
+                <Grid   style={{ marginLeft:50, maxWidth: 500}} >
                   <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
                     #{this.props.match.params.id}
                   </Typography>
