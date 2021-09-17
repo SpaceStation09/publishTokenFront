@@ -4,22 +4,13 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import { createTheme, ThemeProvider, withStyles } from '@material-ui/core/styles';
 import { Helmet } from 'react-helmet';
-import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import GitHubIcon from '@material-ui/icons/GitHub'
 import TopBar from "./TopBar";
-import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import CardMedia from '@material-ui/core/CardMedia';
-import GetAppIcon from '@material-ui/icons/GetApp';
 import { Paper, Container, Link } from '@material-ui/core';
-import BuildIcon from '@material-ui/icons/Build';
 import axios from 'axios';
 import contract from './contract';
 import web3 from './web3';
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
-import ReactLoading from 'react-loading';
 import Skeleton from '@material-ui/lab/Skeleton';
 
 const theme = createTheme({
@@ -60,7 +51,9 @@ const styles = theme => ({
     borderColor: '#e3f2fd',
     fontSize: 16,
     borderRadius: 25,
-    width: 150
+    width: 150,
+    maxWidth: '20rem',
+    minWidth: '10rem',
   },
   btnSecond: {
     marginTop: theme.spacing(3),
@@ -69,7 +62,9 @@ const styles = theme => ({
     borderColor: '#03A9F4',
     fontSize: 16,
     borderRadius: 25,
-    width: 150
+    width: 150,
+    maxWidth: '20rem',
+    minWidth: '10rem',
   },
   heroContent: {
     backgroundColor: theme.palette.background.paper,
@@ -148,6 +143,7 @@ class NFTSpark extends Component{
 
   constructor(props)  {
     super(props);
+    console.log(this.state.loadItem)
     if(!window.ethereum) {
       alert("请先安装metamask");
       //window.location.href = '/#/collections';
@@ -166,7 +162,6 @@ class NFTSpark extends Component{
       }
     })
     let nft = contract;
-    let url = this.gateway + this.props.match.params.hash;
     let obj = this;
     nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
         let hash = meta.split('/');
@@ -204,7 +199,7 @@ class NFTSpark extends Component{
           recommendNFT: res.data.suggest_next_nft,
           showRecommend: false,
         })
-      } else if (res.data.suggest_next_nft == '0') {
+      } else if (res.data.suggest_next_nft === '0') {
         obj.setState({
           childrenNum: children_num,
           recommendNFT: res.data.suggest_next_nft,
@@ -226,7 +221,7 @@ class NFTSpark extends Component{
         return;
       }
       console.log(error.response);
-      if (error.response.status == 400 && error.response.data.message.includes("children not found")) {
+      if (error.response.status === 400 && error.response.data.message.includes("children not found")) {
         console.debug("no children")
       } else {
         alert('获取nft子节点情况页面失败(' + error + ')')
@@ -235,24 +230,12 @@ class NFTSpark extends Component{
         loadItem: false
       })
     })
+    console.log(this.state.loadItem)
   }
 
   render() {
     const { classes } = this.props
-    const gateway = this.gateway
-    if (this.state.onLoading) {
-      return (
-        <div>
-          <Helmet>
-            <title>SparkNFT | Spark</title>
-          </Helmet>
-
-          <div style={{ width: '300px', height: '300px', position: 'relative', left: '43%', marginTop: '20%' }}>
-            <ReactLoading type={'bars'} color={'#2196f3'} height={300} width={300} />
-          </div>
-        </div>
-      );
-    } else {
+    
       return (
         <div>
           <Helmet>
@@ -267,9 +250,9 @@ class NFTSpark extends Component{
               <Grid container direction="row" justifyContent="center" alignItems="flex-start">
                 <Grid>
                   <Button
-                    startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
+                    startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: '2rem' }} />}
                     href='/#/collections'
-                    style={{ marginTop: 20, marginBottom: 10, fontSize: 22 }}
+                    style={{ marginTop: 20, marginBottom: 10, fontSize: '2rem' }}
                   >
                     回到我的收藏馆
                   </Button>
@@ -298,13 +281,13 @@ class NFTSpark extends Component{
 
                   </Grid>
                 ) : (
-                    <Grid container justifyContent="space-evenly" spacing={5}>
-                      <Grid item style={{ maxWidth: 100 }}>
+                    <Grid container  justifyContent="space-evenly" spacing= {5} alignItems="flex-start">
+                      <Grid item style={{ maxWidth: 200 }}>
                         <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: 10 }}>
                           <img style={{ width: 300, marginTop: 20, marginBottom: 50 }} src={this.state.Cover}></img>
                         </Paper>
                       </Grid>
-                      <Grid item xs style={{ marginLeft: 20, maxWidth: 500 }} >
+                      <Grid item xs style={{ marginLeft: 50, maxWidth: 500 }} >
                         <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
                           #{this.props.match.params.id}
                         </Typography>
@@ -323,18 +306,18 @@ class NFTSpark extends Component{
                               <Grid xs={2}></Grid>
                               {this.state.showRecommend ? (
                                 <Grid>
-                                  <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} disabled>
+                                  <Button size="large" style={{ fontSize: '2rem' }}  variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} disabled>
                                     <Typography variant="button" component="h2" gutterBottom >
-                                      <font size="4">🔥   </font>&nbsp;   铸造
+                                      <font size="4">🔥   </font >&nbsp;  <font size="3">铸造  </font>  
                                     </Typography>
                                   </Button>
                                 </Grid>
 
                               ) : (
                                 <Grid>
-                                  <Button size="large" variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} onClick={this.shill}>
+                                  <Button size="large" style={{ fontSize: '3rem' }} variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} onClick={this.shill}>
                                     <Typography variant="button" component="h2" gutterBottom >
-                                      <font size="4">🔥   </font>&nbsp;   铸造
+                                      <font size="4">🔥   </font>&nbsp;  <font size="3">铸造  </font>  
                                     </Typography>
                                   </Button>
                                 </Grid>
@@ -369,7 +352,7 @@ class NFTSpark extends Component{
         </div>
       );
     }
-  }
+  
 }
 
 export default withStyles(styles, { withTheme: true })(NFTSpark);
