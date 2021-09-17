@@ -45,9 +45,14 @@ const theme = createTheme({
 
 
 const styles = theme => ({
-  icon: {
-    marginRight: theme.spacing(2),
-  },
+  main: {
+		[theme.breakpoints.between('xs', 'sm')]: {
+			width: '60%'
+		},
+		[theme.breakpoints.up('sm')]: {
+			width: 500
+		},
+	},
 	btn: {
 		color: '#424949',
 		borderWidth: 2,
@@ -67,7 +72,7 @@ const styles = theme => ({
 		height: 60
   },
   form: {
-    width: '170%', 
+    width: '150%', 
     marginTop: theme.spacing(7),
   },
   submit: {
@@ -94,7 +99,7 @@ const styles = theme => ({
 	inputNum: {
 		height: 40,
 		borderRadius: 5,
-		width: 675,
+		width: '100%',
 		fontSize: 20,
 	}
 });
@@ -424,7 +429,7 @@ class Publish extends Component {
 
 					<ThemeProvider theme={theme}>
 						<TopBar />
-						<Container component="main" maxWidth="xs">
+						<Container component="main" maxWidth="xs" className={classes.main}>
 							<div className={classes.paper}>
 								{/* {showLoading()} */}
 								<Typography component="h1" variant="h2" style={{ marginTop: "3%", fontFamily: 'Ubuntu' }}>
@@ -432,7 +437,7 @@ class Publish extends Component {
 								</Typography>
 								<form className={classes.form} noValidate>
 									<Grid container spacing={2}>
-										<Grid item xs={12} >
+										<Grid item style={{ width: "100%" }}>
 											<label style={{ fontSize: 18, marginBottom: 10 }}>作品名字 *</label>
 											<Input
 												placeholder="作品名称"
@@ -443,7 +448,7 @@ class Publish extends Component {
 												className={classes.input}
 											/>
 										</Grid>
-										<Grid item xs={12}>
+										<Grid item style={{width: "100%" }}>
 											<label style={{ fontSize: 18, marginTop: 20 }}>收益比例 *</label>
 											<p style={{ fontSize: 12 }}>当您的作品被成功分享时，您希望从分享价格中获得多少比例的收益</p>
 											<InputNumber
@@ -457,7 +462,7 @@ class Publish extends Component {
 												className={classes.inputNum}
 											/>
 										</Grid>
-										<Grid item xs={12}>
+										<Grid item style={{width: "100%" }}>
 											<label style={{ fontSize: 18, marginTop: 20 }}>售卖价格 (ether)*</label>
 											<InputNumber
 												id="price"
@@ -467,7 +472,7 @@ class Publish extends Component {
 												className={classes.inputNum}
 											/>
 										</Grid>
-										<Grid item xs={12}>
+										<Grid item style={{ width: "100%" }}>
 											<label style={{ fontSize: 18, marginTop: 20 }}>最高分享次数 *</label>
 											<p style={{ fontSize: 12 }}>您希望每一个帮助您传播的用户最多能够分享多少次？</p>
 											<InputNumber
@@ -478,7 +483,7 @@ class Publish extends Component {
 												className={classes.inputNum}
 											/>
 										</Grid>
-										<Grid item xs={12}>
+										<Grid item style={{ width: "100%" }} >
 											<label style={{ fontSize: 18, marginTop: 20 }}>作品描述 *</label>
 											<p style={{ fontSize: 12 }}>请用简单的话语对您的作品进行描述，精准有效的描述能帮助其他用户更准确得了解您的作品</p>
 											<TextArea
@@ -491,7 +496,7 @@ class Publish extends Component {
 									<label style={{ fontSize: 18, marginTop: 50 }}>封面图片 *</label>
 									<p style={{ fontSize: 12 }}>请在下方区域上传您的封面图片 <br />
 										封面文件支持这些格式：JPEG/JPG/PNG</p>
-									<Dragger {...prop} style={{ width: 680, minHeight: 200 }} id="Uploader" accept=".png, .jpg, .jpeg" >
+									<Dragger {...prop} style={{ width: '100%', minHeight: 200 }} id="Uploader" accept=".png, .jpg, .jpeg" >
 										<p className="ant-upload-drag-icon">
 											<InboxOutlined />
 										</p>
@@ -503,7 +508,7 @@ class Publish extends Component {
 
 									<label style={{ fontSize: 18, marginTop: 50 }}>作品文件 *</label>
 									<p style={{ fontSize: 12 }}>请在下方区域上传您的作品文件 </p>
-									<Dragger {...propFile} style={{ width: 680, minHeight: 200 }} id="Uploader2" >
+									<Dragger {...propFile} style={{ width: '100%', minHeight: 200 }} id="Uploader2" >
 										<p className="ant-upload-drag-icon">
 											<InboxOutlined />
 										</p>
@@ -512,18 +517,6 @@ class Publish extends Component {
 											仅支持单个文件的上传，支持多种类型文件的上传
 										</p>
 									</Dragger>
-									{/* <label style={{ fontSize: 18, marginTop: 50 }}>封面图片及作品文件 *</label>
-									<p style={{ fontSize: 12 }}>请在下方区域上传您的封面图片及作品文件 <br />
-										封面文件支持这些格式：JPEG/JPG/PNG 作品支持这些格式： TXT, PDF</p>
-									<Dragger {...prop} style={{ width: 680, minHeight: 200 }} id="Uploader" accept=".jpg, .png, .jpeg, .txt, .pdf" >
-										<p className="ant-upload-drag-icon">
-											<InboxOutlined />
-										</p>
-										<p className="ant-upload-text">上传文件请点击或者拖拽文件到此处</p>
-										<p className="ant-upload-hint">
-											支持单个文件的上传，支持多种类型文件的上传
-										</p>
-									</Dragger> */}
 								</form>
 								<Button
 									variant="contained"

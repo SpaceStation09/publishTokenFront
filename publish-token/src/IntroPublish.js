@@ -22,23 +22,74 @@ const styles = theme => ({
     borderColor: '#e3f2fd',
     fontSize: 16,
   },
+  // btnMain: {
+  //   marginTop: theme.spacing(3),
+  //   color: '#FFFFFF',
+  //   borderWidth: 2,
+  //   borderColor: '#e3f2fd',
+  //   fontSize: 20,
+  //   borderRadius: 15,
+  //   width: 200
+  // },
+  // btnSecond: {
+  //   marginTop: theme.spacing(3),
+  //   color: '#03A9F4',
+  //   borderWidth: 3,
+  //   borderColor: '#03A9F4',
+  //   fontSize: 20,
+  //   borderRadius: 15,
+  //   width: 200
+  // },
   btnMain: {
-    marginTop: theme.spacing(3),
+    // marginTop: theme.spacing(3),
     color: '#FFFFFF',
-    borderWidth: 2,
     borderColor: '#e3f2fd',
-    fontSize: 20,
-    borderRadius: 15,
-    width: 200
+    borderWidth: 2,
+    borderRadius: 25,
+    marginBottom: 100,
+    [theme.breakpoints.between('xs', 'sm')]: {
+      fontSize: 5,
+      width: 95
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      fontSize: 10,
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      fontSize: 16,
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      fontSize: 16,
+      width: 150
+    },
+    [theme.breakpoints.up('xl')]: {
+      fontSize: 16,
+      width: 150
+    },
   },
   btnSecond: {
-    marginTop: theme.spacing(3),
+    // marginTop: theme.spacing(3),
     color: '#03A9F4',
-    borderWidth: 3,
     borderColor: '#03A9F4',
-    fontSize: 20,
-    borderRadius: 15,
-    width: 200
+    borderWidth: 2,
+    borderRadius: 25,
+    [theme.breakpoints.between('xs', 'sm')]: {
+      fontSize: 5,
+      width: 95,
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      fontSize: 10,
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      fontSize: 16,
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      fontSize: 16,
+      width: 150
+    },
+    [theme.breakpoints.up('xl')]: {
+      fontSize: 16,
+      width: 150
+    },
   },
   paper: {
     marginTop: theme.spacing(7),
