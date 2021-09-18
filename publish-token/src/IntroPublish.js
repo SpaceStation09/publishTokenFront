@@ -22,31 +22,37 @@ const styles = theme => ({
     borderColor: '#e3f2fd',
     fontSize: 16,
   },
-  // btnMain: {
-  //   marginTop: theme.spacing(3),
-  //   color: '#FFFFFF',
-  //   borderWidth: 2,
-  //   borderColor: '#e3f2fd',
-  //   fontSize: 20,
-  //   borderRadius: 15,
-  //   width: 200
-  // },
-  // btnSecond: {
-  //   marginTop: theme.spacing(3),
-  //   color: '#03A9F4',
-  //   borderWidth: 3,
-  //   borderColor: '#03A9F4',
-  //   fontSize: 20,
-  //   borderRadius: 15,
-  //   width: 200
-  // },
   btnMain: {
     // marginTop: theme.spacing(3),
     color: '#FFFFFF',
     borderColor: '#e3f2fd',
     borderWidth: 2,
     borderRadius: 25,
-    marginBottom: 100,
+    [theme.breakpoints.between('xs', 'sm')]: {
+      fontSize: 5,
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      fontSize: 10,
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      fontSize: 16,
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      fontSize: 16,
+      width: 150
+    },
+    [theme.breakpoints.up('xl')]: {
+      fontSize: 30,
+      width: 300,
+      height: 70
+    },
+  },
+  btnSecond: {
+    // marginTop: theme.spacing(3),
+    color: '#03A9F4',
+    borderColor: '#03A9F4',
+    borderWidth: 2,
+    borderRadius: 25,
     [theme.breakpoints.between('xs', 'sm')]: {
       fontSize: 5,
       width: 95
@@ -62,42 +68,60 @@ const styles = theme => ({
       width: 150
     },
     [theme.breakpoints.up('xl')]: {
-      fontSize: 16,
-      width: 150
-    },
-  },
-  btnSecond: {
-    // marginTop: theme.spacing(3),
-    color: '#03A9F4',
-    borderColor: '#03A9F4',
-    borderWidth: 2,
-    borderRadius: 25,
-    [theme.breakpoints.between('xs', 'sm')]: {
-      fontSize: 5,
-      width: 95,
-    },
-    [theme.breakpoints.between('sm', 'md')]: {
-      fontSize: 10,
-    },
-    [theme.breakpoints.between('md', 'lg')]: {
-      fontSize: 16,
-    },
-    [theme.breakpoints.between('lg', 'xl')]: {
-      fontSize: 16,
-      width: 150
-    },
-    [theme.breakpoints.up('xl')]: {
-      fontSize: 16,
-      width: 150
+      fontSize: 30,
+      width: 300,
+      height: 70
     },
   },
   paper: {
     marginTop: theme.spacing(7),
-    maxWidth: 900
+    maxWidth: '150%',
+    
   },
-  container: {
-    maxWidth: 1000
-  }
+
+  content: {
+    fontFamily: 'Teko',
+    marginTop: 20,
+    lineHeight: 1.5,
+    [theme.breakpoints.between('xs', 'sm')]: {
+      fontSize: 16,
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      fontSize: 20,
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      fontSize: 20,
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      fontSize: 20,
+    },
+    [theme.breakpoints.up('xl')]: {
+      fontSize: 30,
+    },
+  },
+
+  shouldKnow: {
+    fontFamily: 'Teko', 
+    textAlign: 'center',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      fontSize: 16,
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      fontSize: 20,
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      fontSize: 40,
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      fontSize: 40,
+    },
+    [theme.breakpoints.up('xl')]: {
+      fontSize: 60,
+    },
+  },
+  // container: {
+  //   maxWidth: 1000
+  // }
 });
 
 const theme = createTheme({
@@ -124,22 +148,22 @@ class IntroPublish extends Component {
           <TopBar />
           <Container component="main" className={classes.container}>
             <div className={classes.paper}>
-              <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 40, textAlign: 'center' }} >
+              <Typography color="inherit" noWrap className={classes.shouldKnow}>
                 <b>发布须知</b>
               </Typography>
-              <Typography variant="h4" paragraph style={{ fontFamily: 'Teko', marginTop: 70}}>
+              <Typography variant="h4" paragraph className={classes.content}>
                 在去发布您的作品之前，您需要了解以下信息，它们将有助于您了解完整的发布流程：
               </Typography>
-              <Typography color="textSecondary" paragraph style={{ fontFamily: 'Teko', marginTop: 20, fontSize: 20, lineHeight: 1.5 }}>
+              <Typography color="textSecondary" paragraph className={classes.content}>
                 <b>1.</b> 您的作品将被存储在IPFS（InterPlanetary File System）中，而存储地址将被记录在以太坊上，与您的NFT绑定在一起
               </Typography>
-              <Typography color="textSecondary" paragraph style={{ fontFamily: 'Teko', marginTop: 20, fontSize: 20, lineHeight: 1.5 }}>
+              <Typography color="textSecondary" paragraph className={classes.content}>
                 <b>2.</b> 您可以选择是将您的作品开源得保存在IPFS上，或者加密保存在IPFS上。针对加密的作品，只有持有您发行的NFT的读者才能访问。 <br />
               </Typography>
-              <Typography color="textSecondary" paragraph style={{ fontFamily: 'Teko', marginTop: 20, fontSize: 20, lineHeight: 1.5 }}>
+              <Typography color="textSecondary" paragraph className={classes.content}>
                 <b>3.</b> 如果您选择加密保存在IPFS上，您需要在将作品基本信息上传到链上后，再设置作品的地址。这个过程我们会引导您完成，请勿担心。 <br />
               </Typography>
-              <Typography color="textSecondary" paragraph style={{ fontFamily: 'Teko', marginTop: 20, fontSize: 20, lineHeight: 1.5 }}>
+              <Typography color="textSecondary" paragraph className={classes.content}>
                 <b>4.</b> 当您将作品发布在我们平台时，我们默认您会支持二次创作，处于您宣传网络中的读者有权将他们持有的NFT对应的地址替换为他们自己的二次创作作品。 <br />
               </Typography>
               <Grid container justifyContent="center" style={{ fontFamily: 'Teko', marginTop: 70 }}>

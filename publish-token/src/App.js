@@ -29,7 +29,7 @@ const styles = theme => ({
       fontSize: 100,
     },
     [theme.breakpoints.up('xl')]: {
-      fontSize: 120,
+      fontSize: 150,
     },
   },
   title2: {
@@ -47,7 +47,7 @@ const styles = theme => ({
       fontSize: 35,
     },
     [theme.breakpoints.up('xl')]: {
-      fontSize: 45,
+      fontSize: 55,
     },
   },
   title3: {
@@ -65,7 +65,7 @@ const styles = theme => ({
       fontSize: 25,
     },
     [theme.breakpoints.up('xl')]: {
-      fontSize: 35,
+      fontSize: 45,
     },
   },
   icon: {
@@ -94,8 +94,9 @@ const styles = theme => ({
       width: 150
     },
     [theme.breakpoints.up('xl')]: {
-      fontSize: 16,
-      width: 150
+      fontSize: 30,
+      width: 300,
+      height: 70
     },
   },
   btnSecond: {
@@ -118,8 +119,9 @@ const styles = theme => ({
       width: 150
     },
     [theme.breakpoints.up('xl')]: {
-      fontSize: 16,
-      width: 150
+      fontSize: 30,
+      width: 300,
+      height: 70
     },
   },
   paper: {

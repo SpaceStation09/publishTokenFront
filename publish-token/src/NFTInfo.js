@@ -32,17 +32,6 @@ var CryptoJS = require("crypto-js");
 const sigUtil = require('ethereumjs-util');
 const ethUtil = require('ethereumjs-util');
 
-const jsons = {"name":"热风",
-  "description":"《热风》收作者1918年至1924年所作杂文四十一篇。1925年11月由北京北新书局初版。作者生前共印行十版次。鲁迅在《新青年》的《随感录》中做些短评，还在这前一年，因为所评论的多是小问题，所以无可道，原因也大都忘却了。但就现在的文字看起来，除几条泛沦之外，有的是对于扶乩，静坐，打拳而发的；有的是对于所谓“保存国粹”而发的；有的是对于那时旧官僚的以经验自豪而发的；有的是对于上海《时报》的讽刺画而发的。记得当时的《新青年》是正在四面受敌之中，鲁迅所对付的不过一小部分。",
-  "image":"https://gateway.pinata.cloud/ipfs/QmSnPggQ9K4QV7dJkjLP2GMZVCEsL81kSsouRoAAzEb8K2",
-  "attributes":[
-    {
-      "trait_type":"bonusFee",
-      "value":7
-    }
-  ]
-}
-
 const theme = createTheme({
   palette: {
     primary: {
@@ -251,6 +240,27 @@ const styles = theme => ({
       backgroundColor: '#EFEBE9', width: 350, marginLeft: 10 
     },
   },
+  share: {
+    fontFamily: 'Teko',
+    marginBottom: '10%',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      fontSize: 14,
+      // width: '5%'
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      fontSize: 16,
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      fontSize: 18,
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      fontSize: 20,
+    },
+    [theme.breakpoints.up('xl')]: {
+      fontSize: 20,
+    },
+
+  }
 });
 
 class NFTInfo extends Component{
@@ -318,7 +328,7 @@ class NFTInfo extends Component{
         link.href = url;
         // text/plain application/pdf
         let suffix = '.' + obj.state.fileType;
-        link.setAttribute(this.state.Name, obj.state.Name + suffix); //or any other extension
+        link.setAttribute("download", this.state.Name +  suffix); //or any other extension
         document.body.appendChild(link);
         link.click();
         obj.setState({ onLoading: false })
@@ -457,9 +467,22 @@ class NFTInfo extends Component{
   }
 
   claim = async () => {
-    await contract.methods.claimProfit(this.props.match.params.id).send({
-      from: this.state.account
-  });
+    this.setState({
+      onLoading: true
+    })
+    try{
+      await contract.methods.claimProfit(this.props.match.params.id).send({
+        from: this.state.account
+      });
+    } catch{
+      this.setState({
+        onLoading: false
+      })
+    }
+    
+    this.setState({
+      onLoading: false
+    })
   }
 
   signDataAndDecrypt = async (signer, ciphertext) => {
@@ -564,182 +587,186 @@ class NFTInfo extends Component{
     }
     this.setState({spark: !this.state.spark});
   }
-  sell_info = () => {
-    let url = window.location.host;
-    let toUrl = url + '/#/NFT/Spark/' + this.props.match.params.id;
-    let share = '分享复制链接：' + toUrl;
-    // this.state.onSale
-    if (this.state.spark) {
-      return (
-        <Grid container >
-          <Grid item xs>
-          <Typography variant="h4" gutterBottom >
-            请将下方链接分享给买方，买方会进入此链接来铸造这个NFT的子节点 <br />
-            {toUrl}
-          </Typography>
-          </Grid>
-          <Grid item xs style={{ marginTop: 30 }}>
-            <CopyToClipboard text={toUrl}
-              onCopy={() => this.setState({ copied: true })}>
-              <IconButton color="primary" aria-label="upload picture" component="span">
-                <FileCopyOutlinedIcon style={{ fontSize: 18 }} />
-              </IconButton>
-            </CopyToClipboard>
-          </Grid>
-        </Grid>
-      );
-    }
-  }
+  
 
   render() {
     const { classes } = this.props
     const gateway = this.gateway
-    if(false){
-			// return(
-			// 	<div>
-			// 		<Helmet>
-			// 			<title>SparkNFT | Publish</title>
-			// 		</Helmet>
-
-			// 		<div style={{ width: '300px', height: '300px', position: 'relative', left: '43%', marginTop: '20%' }}>
-			// 			<ReactLoading type={'bars'} color={'#2196f3'} height={300} width={300} />
-			// 		</div>
-			// 	</div>
-			// );
-		} else {
-    return (
-
-      <div>
-        <Helmet>
-          <title>SparkNFT | INFO</title>
-        </Helmet>
-
-        <ThemeProvider theme={theme}>
-          <TopBar />
-          <Container component="main" className={classes.container}>
-            <Grid container direction="row" justifyContent="center" alignItems="flex-start">
-              <Grid>
-            <Button
-              startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: '2rem' }} />}
-              href='/#/collections'
-              style={{ marginTop: 20, marginBottom: 10, fontSize: '2rem' }}
-            >
-              回到我的收藏馆
-            </Button>
+    const sell_info = () => {
+      let url = window.location.host;
+      let toUrl = url + '/#/NFT/Spark/' + this.props.match.params.id;
+      let share = '分享复制链接：' + toUrl;
+      // this.state.onSale
+      if (this.state.spark) {
+        return (
+          <Grid container >
+            <Grid item xs>
+              <Typography color="inherit" align="center" noWrap className={classes.share} >
+                请将下方链接分享给买方，<br /> 买方会进入此链接来购买这个NFT <br />
+                {toUrl}
+                <CopyToClipboard text={toUrl}
+                  onCopy={() => this.setState({ copied: true })}>
+                  <IconButton color="primary" aria-label="upload picture" component="span">
+                    <FileCopyOutlinedIcon />
+                  </IconButton>
+                </CopyToClipboard>
+              </Typography>
             </Grid>
-            <Grid xs={9}></Grid>
-            <Grid container  direction="row" className={classes.cbutton}>
-            <Grid>
-                <Button style={{ marginTop: 10,marginRight: 30, marginBottom: 20}} size="large" variant="contained" color="primary"  className={classes.btnMain} startIcon={<LocalAtmIcon />} onClick={this.claim} >
-                  <Typography id="isSpark" variant="button" component="h3" gutterBottom >
-                    <font size="3" color='white'>
-                          领收益
-                    </font>
+          </Grid>
+        );
+      }
+    }
+
+
+
+    if (this.state.onLoading) {
+      return (
+        <div>
+          <Helmet>
+            <title>SparkNFT | Publish</title>
+          </Helmet>
+          <ThemeProvider theme={theme}>
+            <TopBar />
+            <div style={{ marginLeft: '35%', marginTop: '10%' }}>
+              <ReactLoading type={'bars'} color={'#2196f3'} width={'40%'} />
+            </div>
+          </ThemeProvider>
+        </div>
+      );
+    } else {
+      return (
+
+        <div>
+          <Helmet>
+            <title>SparkNFT | INFO</title>
+          </Helmet>
+
+          <ThemeProvider theme={theme}>
+            <TopBar />
+            <Container component="main" className={classes.container}>
+              <Grid container direction="row" justifyContent="center" alignItems="flex-start">
+                <Grid>
+              <Button
+                startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: '2rem' }} />}
+                href='/#/collections'
+                style={{ marginTop: 20, marginBottom: 10, fontSize: '2rem' }}
+              >
+                回到我的收藏馆
+              </Button>
+              </Grid>
+              <Grid xs={9}></Grid>
+              <Grid container  direction="row" className={classes.cbutton}>
+              <Grid>
+                  <Button style={{ marginTop: 10,marginRight: 30, marginBottom: 20}} size="large" variant="contained" color="primary"  className={classes.btnMain} startIcon={<LocalAtmIcon />} onClick={this.claim} >
+                    <Typography id="isSpark" variant="button" component="h3" gutterBottom >
+                      <font size="3" color='white'>
+                            领收益
+                      </font>
+                    </Typography>
+                  </Button>
+              </Grid>
+              {/* <Grid xs ={1}></Grid> */}
+              <Grid>
+                <Button style={{ marginTop: 10, marginBottom: 20}} size="large" variant="outlined" color="secondary"  className={classes.btnSecond} startIcon={<AttachMoneyIcon />}  href={'/#/sellSingle/' +  this.props.match.params.id}  >
+                  <Typography variant="button" component="h2" gutterBottom >
+                    
+                    <font size="3">
+                    售卖
+                      </font>
                   </Typography>
                 </Button>
-            </Grid>
-            {/* <Grid xs ={1}></Grid> */}
-            <Grid>
-              <Button style={{ marginTop: 10, marginBottom: 20}} size="large" variant="outlined" color="secondary"  className={classes.btnSecond} startIcon={<AttachMoneyIcon />}  href={'/#/sellSingle/' +  this.props.match.params.id}  >
-                 <Typography variant="button" component="h2" gutterBottom >
-                  
-                  <font size="3">
-                  售卖
-                    </font>
-                 </Typography>
-               </Button>
-             </Grid>
-             </Grid>
-             </Grid>
-            <div className={classes.paper}>
-              {/* <Grid container direction="column" justifyContent="center" alignItems="center"> */}
-              {this.state.loadItem ? (
-                <Grid container className={classes.content} spacing={5}>
-                  <Grid item xs={4}>
-                    <Skeleton variant="rect" width={300} height={500} style={{ width: 370, marginLeft: 50, marginBottom: 50 }}/>
-                  </Grid>
-                  <Grid item xs style={{ marginLeft: '5%' }}>
-                    <Skeleton animation="wave" variant="text" width={200} height={30}/>
-                    <Skeleton animation="wave" variant="text" width={400} height={70}/>
-                    <Skeleton animation="wave" variant="rect" width={500} height={300} style={{ marginBottom: 50 }}/>
-
-                  </Grid>
-
-                </Grid>
-              ) : (<Grid container   spacing= {5} className={classes.content}>
-                {/* <Grid xs={2}></Grid> */}
-                {/* <Grid xs={1}></Grid> */}
-                <Grid    style={{ maxWidth: 200}}>
-                       <Paper className={classes.imagePapaer}>
-                        <img className={classes.imageStyle} src={this.state.Cover}></img>  
-                    </Paper>
-    
-                  <Grid>
-                    <font size="3">
-                        目前收益:{this.state.Profit}
-                    </font>
-                  </Grid>
-                </Grid>
-                {/* <Grid xs={1}></Grid> */}
-                <Grid xs={1}></Grid>
-                <Grid   className={classes.content2} >
-                  <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
-                    #{this.props.match.params.id}
-                  </Typography>
-                  <Typography color="inherit" align="left" noWrap style={{ fontFamily: 'Teko', fontSize: 34, marginTop: '2%'}}>
-                    <b>{this.state.Name}</b>
-                  </Typography>
-                  <Typography align="left" color="textSecondary" paragraph style={{ marginTop: '2%', maxWidth: '100%', fontSize: 16 }}>
-                    {this.state.Description}
-                  </Typography>
-                  <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '100%', fontSize: 24 }}>
-                    分红比例: {this.state.BonusFee} %
-                  </Typography>
-                  <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
-                    当前拥有的子节点数量: {this.state.childrenNum}
-                  </Typography>
-                  <Grid container direction="row" className={classes.cbutton}>
-                  <Grid>
-                    <Button size="small" variant="contained"  color="primary" target="_blank" className={classes.btnMain} startIcon={<GetAppIcon />} onClick={this.downloadIPFS} >
-                      <Typography variant="button" component="h2" gutterBottom >
-                        <font size="3" color='white'>
-                          下载
-                        </font>
-                      </Typography>
-                    </Button>
+              </Grid>
+              </Grid>
+              </Grid>
+              <div className={classes.paper}>
+                {/* <Grid container direction="column" justifyContent="center" alignItems="center"> */}
+                {this.state.loadItem ? (
+                  <Grid container className={classes.content} spacing={5}>
+                    <Grid item xs={4}>
+                      <Skeleton variant="rect" width={300} height={500} style={{ width: 370, marginLeft: 50, marginBottom: 50 }}/>
                     </Grid>
-                    <Grid xs ={1}></Grid>
+                    <Grid item xs style={{ marginLeft: '5%' }}>
+                      <Skeleton animation="wave" variant="text" width={200} height={30}/>
+                      <Skeleton animation="wave" variant="text" width={400} height={70}/>
+                      <Skeleton animation="wave" variant="rect" width={500} height={300} style={{ marginBottom: 50 }}/>
+
+                    </Grid>
+
+                  </Grid>
+                ) : (<Grid container   spacing= {5} className={classes.content}>
+                  {/* <Grid xs={2}></Grid> */}
+                  {/* <Grid xs={1}></Grid> */}
+                  <Grid    style={{ maxWidth: 200}}>
+                        <Paper className={classes.imagePapaer}>
+                          <img className={classes.imageStyle} src={this.state.Cover}></img>  
+                      </Paper>
+      
                     <Grid>
-                      <Button size="small"  variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<WhatshotIcon />} onClick={this.spark} >
-                        <Typography id="isSpark" variant="button" component="h2" gutterBottom >
-                          
-                          <font size="3">
-                          点火分享
-                        </font>
+                      <font size="3">
+                          目前收益:{this.state.Profit}
+                      </font>
+                    </Grid>
+                  </Grid>
+                  {/* <Grid xs={1}></Grid> */}
+                  <Grid xs={1}></Grid>
+                  <Grid   className={classes.content2} >
+                    <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
+                      #{this.props.match.params.id}
+                    </Typography>
+                    <Typography color="inherit" align="left" noWrap style={{ fontFamily: 'Teko', fontSize: 34, marginTop: '2%'}}>
+                      <b>{this.state.Name}</b>
+                    </Typography>
+                    <Typography align="left" color="textSecondary" paragraph style={{ marginTop: '2%', maxWidth: '100%', fontSize: 16 }}>
+                      {this.state.Description}
+                    </Typography>
+                    <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '100%', fontSize: 24 }}>
+                      分红比例: {this.state.BonusFee} %
+                    </Typography>
+                    <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
+                      当前拥有的子节点数量: {this.state.childrenNum}
+                    </Typography>
+                    <Grid container direction="row" className={classes.cbutton}>
+                    <Grid>
+                      <Button size="small" variant="contained"  color="primary" target="_blank" className={classes.btnMain} startIcon={<GetAppIcon />} onClick={this.downloadIPFS} >
+                        <Typography variant="button" component="h2" gutterBottom >
+                          <font size="3" color='white'>
+                            下载
+                          </font>
                         </Typography>
                       </Button>
+                      </Grid>
+                      <Grid xs ={1}></Grid>
+                      <Grid>
+                        <Button size="small"  variant="outlined" color="secondary" target="_blank" className={classes.btnSecond} startIcon={<WhatshotIcon />} onClick={this.spark} >
+                          <Typography id="isSpark" variant="button" component="h2" gutterBottom >
+                            
+                            <font size="3">
+                            点火分享
+                          </font>
+                          </Typography>
+                        </Button>
+                      </Grid>
+                      
                     </Grid>
-                    
                   </Grid>
-                </Grid>
-                
-                
-              </Grid>)}
-              <br /><br /><br /><br />
-            </div>
-            <Grid container direction="row" justifyContent="center" alignItems="flex-start">
-           <Grid xs={8}>
-             <div style={{marginTop: 0}}>
-                 {this.sell_info()}
-                 {this.showLoading()}
-             </div>
-           </Grid>
-         </Grid>
-            <br /><br />
-          </Container>
-        </ThemeProvider>
-      </div>
-    );
+                  
+                  
+                </Grid>)}
+                <br /><br /><br /><br />
+              </div>
+              <Grid container direction="row" justifyContent="center" alignItems="flex-start">
+            <Grid xs={8}>
+              <div style={{marginTop: 0}}>
+                  {sell_info()}
+                  {this.showLoading()}
+              </div>
+            </Grid>
+          </Grid>
+              <br /><br />
+            </Container>
+          </ThemeProvider>
+        </div>
+      );
     }
   }
 }

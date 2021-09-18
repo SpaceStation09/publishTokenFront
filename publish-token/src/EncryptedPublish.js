@@ -83,8 +83,16 @@ const styles = theme => ({
       marginLeft: '30%',
       marginTop: 30,
     },
-    [theme.breakpoints.up('lg')]: {
+    [theme.breakpoints.between('md', 'lg')]: {
+      marginLeft: '30%',
+      marginTop: 30,
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
       marginLeft: '40%',
+      marginTop: 30,
+    },
+    [theme.breakpoints.up('xl')]: {
+      marginLeft: '45%',
       marginTop: 30,
     },
   },
@@ -176,14 +184,15 @@ class EncryptedPublish extends Component {
     description: '',
     shareTimes: 0,
     onLoading: false,
-    rootNFTId: '8589934593',
+    rootNFTId: '',
     issueId: '',
     allowSubmitPDF: false,
     usedAcc: '',
     sig: '',
     finished: false,
     open: false,
-    coverURL: 'https://gateway.pinata.cloud/ipfs/QmU7C9hnDYnThfpCvX28bdzZpX8Dtyt8m7J6cUNfmBoN6E'
+    coverURL: '',
+    jumped: false,
   };
 
   async componentDidMount() {
@@ -192,11 +201,11 @@ class EncryptedPublish extends Component {
       window.location.href = '/#/introPublish';
       return;
     }
-    if (!window.ethereum.isConnected()) {
-      alert("请先链接metamask");
-      window.location.href = '/#/introPublish';
-      return;
-    }
+    // if (!window.ethereum.isConnected()) {
+    //   alert("请先链接metamask");
+    //   window.location.href = '/#/introPublish';
+    //   return;
+    // }
     // const chainId = await window.ethereum.request({ method: 'eth_chainId' });
     window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
       if (chainId !== '0x4') {
@@ -264,16 +273,22 @@ class EncryptedPublish extends Component {
     this.setState({
       usedAcc: account
     })
-    await contract.methods.ownerOf(this.state.rootNFTId).call().then(owner => {
-      if (account == owner.toLowerCase()){
-        this.setState({
-          onLoading: false,
-          allowSubmitPDF: true
-        })
-      }else {
-        alert('您并不是此NFT的持有者')
-      }
-    })
+    
+    const owner = await contract.methods.ownerOf(this.state.rootNFTId).call()
+    var issueId = await contract.methods.getIssueIdByNFTId(this.state.rootNFTId).call()
+    
+    var bonus = await contract.methods.getRoyaltyFeeByIssueId(issueId).call()
+    
+    if (account == owner.toLowerCase()) {
+      this.setState({
+        onLoading: false,
+        allowSubmitPDF: true,
+        jumped: true,
+        bonusFee: bonus
+      })
+    } else {
+      alert('您并不是此NFT的持有者')
+    }
   }
 
   submit = async (event) => {
@@ -303,7 +318,8 @@ class EncryptedPublish extends Component {
         console.log(receipt)
         var publish_event = receipt.events.Publish
         var returned_values = publish_event.returnValues
-        var root_nft_id = returned_values.rootNFTId
+        var root_nft_id = String(returned_values.rootNFTId)
+        console.debug(typeof root_nft_id)
         var issue_id = returned_values.issue_id
         obj.setState({
           onLoading: false,
@@ -497,20 +513,6 @@ class EncryptedPublish extends Component {
                 var myblob = new Blob([cipher_text]);
                 resolve(myblob)
               }
-              // }else {
-              //   const reader = new FileReader()
-              //   reader.readAsArrayBuffer(file)
-              //   reader.onload = (e) => {
-              //     var b = e.target.result
-              //     var wordArray = CryptoJS.lib.WordArray.create(b);
-              //     const str = CryptoJS.enc.Hex.stringify(wordArray);
-              //     var cipher_text = CryptoJS.AES.encrypt(str, secret_key).toString();
-              //     var myblob = new Blob([cipher_text], {
-              //       type: 'application/pdf'
-              //     });
-              //     resolve(myblob)
-              //   }
-              // }
               
             } catch (error) {
               if (error.response.status == 400) {
@@ -570,17 +572,36 @@ class EncryptedPublish extends Component {
         </div>
       );
     } else if (this.state.allowSubmitPDF) {
+      
       return (
         <div>
           <Helmet>
             <title>SparkNFT | Publish</title>
           </Helmet>
           <Container component="main" maxWidth="xs" className={classes.main}>
+           
             <div className={classes.paper}>
               <Typography className={classes.titlePub}>
                 <b>上传作品文件</b>
               </Typography>
               <form className={classes.form} noValidate>
+                {this.state.jumped ? (
+                  <div>
+                    <Grid item style={{ width: "100%" }}>
+                      <label style={{ fontSize: 18, marginTop: 20 }}>作品描述 *</label>
+                      <p style={{ fontSize: 14 }}>请用简单的话语对您的作品进行描述，精准有效的描述能帮助其他用户更准确得了解您的作品</p>
+                      <TextArea
+                        rows={4}
+                        id="Description"
+                        onChange={this.handleGetDescription}
+                      />
+                    </Grid>
+                  </div>
+                ) : (
+                  <div>
+
+                  </div>
+                )}
                 <label style={{ fontSize: 18, marginTop: 50 }}>封面图片 *</label>
                 <p style={{ fontSize: 12 }}>请在下方区域上传您的封面图片 <br />
                   封面文件支持这些格式：JPEG/JPG/PNG</p>
@@ -674,7 +695,7 @@ class EncryptedPublish extends Component {
                     </Grid>
                     <Grid item style={{ width: "100%" }}>
                       <label style={{ fontSize: 18, marginTop: 20 }}>收益比例 *</label>
-                      <p style={{ fontSize: 12 }}>当您的作品被成功分享时，您希望从分享价格中获得多少比例的收益</p>
+                      <p style={{ fontSize: 14 }}>当您的作品被成功分享时，您希望从分享价格中获得多少比例的收益</p>
                       <InputNumber
                         id="bonusFee"
                         defaultValue={0}
@@ -698,7 +719,7 @@ class EncryptedPublish extends Component {
                     </Grid>
                     <Grid item style={{ width: "100%" }}>
                       <label style={{ fontSize: 18, marginTop: 20 }}>最高分享次数 *</label>
-                      <p style={{ fontSize: 12 }}>您希望每一个帮助您传播的用户最多能够分享多少次？</p>
+                      <p style={{ fontSize: 14 }}>您希望每一个帮助您传播的用户最多能够分享多少次？</p>
                       <InputNumber
                         id="shareTimes"
                         defaultValue={0}
@@ -709,7 +730,7 @@ class EncryptedPublish extends Component {
                     </Grid>
                     <Grid item style={{ width: "100%" }}>
                       <label style={{ fontSize: 18, marginTop: 20 }}>作品描述 *</label>
-                      <p style={{ fontSize: 12 }}>请用简单的话语对您的作品进行描述，精准有效的描述能帮助其他用户更准确得了解您的作品</p>
+                      <p style={{ fontSize: 14 }}>请用简单的话语对您的作品进行描述，精准有效的描述能帮助其他用户更准确得了解您的作品</p>
                       <TextArea
                         rows={4}
                         id="Description"

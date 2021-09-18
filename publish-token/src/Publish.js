@@ -64,9 +64,8 @@ const styles = theme => ({
 		},
 	},
 	paperImg: {
-		
 		backgroundColor: '#EFEBE9',
-		width: 330, 
+		width: 330,
 		[theme.breakpoints.between('xs', 'sm')]: {
 			marginLeft: '5%',
 			marginTop: 30,
@@ -75,8 +74,16 @@ const styles = theme => ({
 			marginLeft: '30%',
 			marginTop: 30,
 		},
-		[theme.breakpoints.up('lg')]: {
+		[theme.breakpoints.between('md', 'lg')]: {
+			marginLeft: '30%',
+			marginTop: 30,
+		},
+		[theme.breakpoints.between('lg', 'xl')]: {
 			marginLeft: '40%',
+			marginTop: 30,
+		},
+		[theme.breakpoints.up('xl')]: {
+			marginLeft: '45%',
 			marginTop: 30,
 		},
 	},
@@ -154,12 +161,12 @@ class Publish extends Component {
 		description: '',
 		shareTimes: 0,
 		onLoading: false,
-		rootNFTId: '8589934593',
+		rootNFTId: '',
 		usedAcc: '',
 		sig: '',
 		fileType: '',
 		finished: false,
-		coverURL: 'https://gateway.pinata.cloud/ipfs/QmU7C9hnDYnThfpCvX28bdzZpX8Dtyt8m7J6cUNfmBoN6E'
+		coverURL: ''
   };
 
 	async componentDidMount() {
@@ -168,11 +175,11 @@ class Publish extends Component {
 			window.location.href = '/#/introPublish';
 			return;
 		}
-		if (!window.ethereum.isConnected()) {
-			alert("请先链接metamask");
-			window.location.href = '/#/introPublish';
-			return;
-		}
+		// if (!window.ethereum.isConnected()) {
+		// 	alert("请先链接metamask");
+		// 	window.location.href = '/#/introPublish';
+		// 	return;
+		// }
 		// const chainId = await window.ethereum.request({ method: 'eth_chainId' });
 		window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
 			if (chainId !== '0x4') {
@@ -487,7 +494,7 @@ class Publish extends Component {
 										</Grid>
 										<Grid item style={{width: "100%" }}>
 											<label style={{ fontSize: 18, marginTop: 20 }}>收益比例 *</label>
-											<p style={{ fontSize: 12 }}>当您的作品被成功分享时，您希望从分享价格中获得多少比例的收益</p>
+											<p style={{ fontSize: 14 }}>当您的作品被成功分享时，您希望从分享价格中获得多少比例的收益</p>
 											<InputNumber
 												id="bonusFee"
 												defaultValue={0}
@@ -511,7 +518,7 @@ class Publish extends Component {
 										</Grid>
 										<Grid item style={{ width: "100%" }}>
 											<label style={{ fontSize: 18, marginTop: 20 }}>最高分享次数 *</label>
-											<p style={{ fontSize: 12 }}>您希望每一个帮助您传播的用户最多能够分享多少次？</p>
+											<p style={{ fontSize: 14 }}>您希望每一个帮助您传播的用户最多能够分享多少次？</p>
 											<InputNumber
 												id="shareTimes"
 												defaultValue={0}
@@ -522,7 +529,7 @@ class Publish extends Component {
 										</Grid>
 										<Grid item style={{ width: "100%" }} >
 											<label style={{ fontSize: 18, marginTop: 20 }}>作品描述 *</label>
-											<p style={{ fontSize: 12 }}>请用简单的话语对您的作品进行描述，精准有效的描述能帮助其他用户更准确得了解您的作品</p>
+											<p style={{ fontSize: 14 }}>请用简单的话语对您的作品进行描述，精准有效的描述能帮助其他用户更准确得了解您的作品</p>
 											<TextArea
 												rows={6}
 												id="Description"
@@ -531,7 +538,7 @@ class Publish extends Component {
 										</Grid>
 									</Grid>
 									<label style={{ fontSize: 18, marginTop: 50 }}>封面图片 *</label>
-									<p style={{ fontSize: 12 }}>请在下方区域上传您的封面图片 <br />
+									<p style={{ fontSize: 14 }}>请在下方区域上传您的封面图片 <br />
 										封面文件支持这些格式：JPEG/JPG/PNG</p>
 									<Dragger {...prop} style={{ width: '100%', minHeight: 200 }} id="Uploader" accept=".png, .jpg, .jpeg" >
 										<p className="ant-upload-drag-icon">
@@ -544,7 +551,7 @@ class Publish extends Component {
 									</Dragger>
 
 									<label style={{ fontSize: 18, marginTop: 50 }}>作品文件 *</label>
-									<p style={{ fontSize: 12 }}>请在下方区域上传您的作品文件 </p>
+									<p style={{ fontSize: 14 }}>请在下方区域上传您的作品文件 </p>
 									<Dragger {...propFile} style={{ width: '100%', minHeight: 200 }} id="Uploader2" >
 										<p className="ant-upload-drag-icon">
 											<InboxOutlined />

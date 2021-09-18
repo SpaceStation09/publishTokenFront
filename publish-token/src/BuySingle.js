@@ -68,6 +68,84 @@ const styles = theme => ({
     height: 40,
     borderRadius: 5,
   },
+  content: {
+    fontFamily: 'Teko',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      justifyContent: "flex-start",
+      alignItems: "flex-start"
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      justifyContent: "flex-start",
+      alignItems: "flex-start"
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      justifyContent: "flex-start",
+      alignItems: "flex-start"
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      justifyContent: "center",
+      alignItems: "flex-start"
+    },
+    [theme.breakpoints.up('xl')]: {
+      justifyContent: "center",
+      alignItems: "flex-start"
+    },
+  },
+  img: {
+    width: 300,
+    marginBottom: 50,
+    [theme.breakpoints.between('xs', 'sm')]: {
+      marginLeft: '20%'
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      marginLeft: '20%'
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      marginLeft: '20%'
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      marginLeft: '30%'
+    },
+    [theme.breakpoints.up('xl')]: {
+      marginLeft: '40%'
+    },
+  },
+  imgPaper: {
+    width: 350,
+    marginBottom: 50,
+    backgroundColor: '#EFEBE9',
+    [theme.breakpoints.between('sm', 'md')]: {
+      marginLeft: '20%'
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      marginLeft: '20%'
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      marginLeft: '30%'
+    },
+    [theme.breakpoints.up('xl')]: {
+      marginLeft: '40%'
+    },
+  },
+  content2: {
+    fontFamily: 'Teko',
+    textAlign: 'center',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      maxWidth: 500
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      marginLeft: 90, maxWidth: 500
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      marginLeft: 80, maxWidth: 500
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      marginLeft: 50, maxWidth: 500
+    },
+    [theme.breakpoints.up('xl')]: {
+      marginLeft: 60, maxWidth: 500
+    },
+  },
 });
 
 class BuySingle extends Component {
@@ -259,90 +337,102 @@ class BuySingle extends Component {
       }
     }
 
-    const showLoading = () => {
-      if (this.state.onLoading) {
-        return (
-          <div>
-            <ReactLoading type={'bars'} color={'#2196f3'} height={200} width={200} />
-          </div>
-        );
-      }
-    }
+    // const showLoading = () => {
+    //   if (this.state.onLoading) {
+    //     return (
+    //       <div>
+    //         <ReactLoading type={'bars'} color={'#2196f3'} height={200} width={200} />
+    //       </div>
+    //     );
+    //   }
+    // }
 
-    return (
-      <div>
-        <Helmet>
-          <title>SparkNFT | Sell</title>
-        </Helmet>
-
-        <ThemeProvider theme={theme}>
-          <TopBar />
-          <Container component="main" className={classes.container}>
-            <Button
-              startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
-              href='/'
-              style={{ marginTop: 50, marginBottom: 100, fontSize: 22 }}
-            >
-              回到首页
-            </Button>
-            <div className={classes.paper}>
-              {this.state.loadItem ? (
-                <Grid container justifyContent="space-evenly" spacing={5}>
-                  <Grid item xs={4}>
-                    <Skeleton variant="rect" width={300} height={500} style={{ width: 300, marginLeft: 200, marginBottom: 50 }} />
-                  </Grid>
-                  <Grid item xs style={{ marginLeft: '5%' }}>
-                    <Skeleton animation="wave" variant="text" width={200} height={30} />
-                    <Skeleton animation="wave" variant="text" width={400} height={70} />
-                    <Skeleton animation="wave" variant="rect" width={500} height={300} style={{ marginBottom: 50 }} />
-                    {buyButton()}
-                  </Grid>
-                </Grid>
-              ) : (
-                <Grid container justifyContent="space-evenly" spacing={5}>
-                  <Grid item xs={4} style={{ maxWidth: 600 }}>
-                    <Paper style={{ backgroundColor: '#EFEBE9', width: 350, marginLeft: '40%' }}>
-                      <img style={{ width: 300, marginTop: 20, marginBottom: 50 }} src={this.state.coverURL}></img>
-                    </Paper>
-                  </Grid>
-                  <Grid item xs style={{ marginLeft: '5%' }}>
-                    <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
-                      #{this.state.NFTId}
-                    </Typography>
-                    <Typography color="inherit" align="left" noWrap style={{ fontFamily: 'Teko', fontSize: 34 }}>
-                      <b>{this.state.name}</b>
-                    </Typography>
-                    <Typography align="left" color="textSecondary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 16 }}>
-                      {this.state.description}
-                    </Typography>
-                    <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 24 }}>
-                      创作者分红比例: {this.state.bonusFee} %
-                    </Typography>
-                    <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 18 }}>
-                      售价: {this.state.price} ETH
-                    </Typography>
-                    <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '1%', maxWidth: '65%', fontSize: 12 }}>
-                      当前拥有者: {this.state.owner}
-                    </Typography>
-                    <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
-                      当前拥有的子节点数量: {this.state.childrenNum}
-                    </Typography>
-                    <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
-                      NFT作品是否加密: {this.state.encrypted}
-                    </Typography>
-                    {buyButton()}
-                  </Grid>
-                </Grid>
-              )}
-              
-              <div style={{ marginLeft: '40%' }}>
-                {showLoading()}
-              </div>
+    if (this.state.onLoading) {
+      return (
+        <div>
+          <Helmet>
+            <title>SparkNFT | Publish</title>
+          </Helmet>
+          <ThemeProvider theme={theme}>
+            <TopBar />
+            <div style={{ marginLeft: '35%', marginTop: '10%' }}>
+              <ReactLoading type={'bars'} color={'#2196f3'} width={'40%'} />
             </div>
-          </Container>
-        </ThemeProvider>
-      </div>
-    );
+          </ThemeProvider>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <Helmet>
+            <title>SparkNFT | Sell</title>
+          </Helmet>
+
+          <ThemeProvider theme={theme}>
+            <TopBar />
+            <Container component="main" className={classes.container}>
+              <Button
+                startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: 22 }} />}
+                href='/'
+                style={{ marginTop: 50, marginBottom: 100, fontSize: 22 }}
+              >
+                回到首页
+              </Button>
+              <div className={classes.paper}>
+                {this.state.loadItem ? (
+                  <Grid container spacing={5} className={classes.content}>
+                    <Grid item xs={4}>
+                      <Skeleton variant="rect" width={300} height={500} className={classes.img} />
+                    </Grid>
+                    <Grid item xs style={{ marginLeft: '5%', maxWidth: 500, minWidth: 350 }}>
+                      <Skeleton animation="wave" variant="text" width={'70%'} height={30} />
+                      <Skeleton animation="wave" variant="text" width={'100%'} height={70} />
+                      <Skeleton animation="wave" variant="rect" width={'100%'} height={300} style={{ marginBottom: 50 }} />
+                      {buyButton()}
+                    </Grid>
+                  </Grid>
+                ) : (
+                    <Grid container className={classes.content} spacing={5}>
+                    <Grid item xs={4} style={{ maxWidth: 600 }}>
+                      <Paper className={classes.imgPaper}>
+                        <img style={{ width: 300, marginTop: 20, marginBottom: 50 }} src={this.state.coverURL}></img>
+                      </Paper>
+                    </Grid>
+                    <Grid item xs className={classes.content2}>
+                      <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
+                        #{this.state.NFTId}
+                      </Typography>
+                      <Typography color="inherit" align="left" noWrap style={{ fontFamily: 'Teko', fontSize: 34 }}>
+                        <b>{this.state.name}</b>
+                      </Typography>
+                      <Typography align="left" color="textSecondary" paragraph style={{ marginTop: '2%', maxWidth: '100%', fontSize: 16 }}>
+                        {this.state.description}
+                      </Typography>
+                      <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '2%', maxWidth: '65%', fontSize: 20 }}>
+                        创作者分红比例: {this.state.bonusFee} %
+                      </Typography>
+                      <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '2%', maxWidth: '100%', fontSize: 18 }}>
+                        售价: {this.state.price} ETH
+                      </Typography>
+                      <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '1%', maxWidth: '65%', fontSize: 12 }}>
+                        当前拥有者: {this.state.owner}
+                      </Typography>
+                      <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
+                        当前拥有的子节点数量: {this.state.childrenNum}
+                      </Typography>
+                      <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
+                        NFT作品是否加密: {this.state.encrypted}
+                      </Typography>
+                      {buyButton()}
+                    </Grid>
+                  </Grid>
+                )}
+              </div>
+            </Container>
+          </ThemeProvider>
+        </div>
+      );
+    }
   }
 }
 

@@ -7,6 +7,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
+import web3 from './web3';
 
 
 const theme = createTheme({
@@ -55,6 +56,7 @@ const styles = theme => ({
   title: {
     minWidth: 100,
     fontSize: 25,
+    fontFamily: 'Teko',
     [theme.breakpoints.between('xs', 'sm')]: {
       fontSize: 25,
     },
@@ -68,26 +70,28 @@ const styles = theme => ({
       fontSize: 35,
     },
     [theme.breakpoints.up('xl')]: {
-      fontSize: 35,
+      fontSize: 45,
     },
 
   },
   btnGrid: {
-    marginTop: 25,
+    // marginTop: 25,
     marginBottom: 10,
     minWidth: 370,
-    // [theme.breakpoints.between('sm', 'md')]: {
-    //   marginLeft: '10%',
-    // },
+    [theme.breakpoints.between('sm', 'md')]: {
+      marginTop: 10,
+    },
     [theme.breakpoints.between('md', 'lg')]: {
+      marginTop: 25,
       marginLeft: '20%',
     },
     [theme.breakpoints.between('lg', 'xl')]: {
-      marginLeft: '45%',
+      marginTop: 25,
+      marginLeft: '50%',
     },
     [theme.breakpoints.up('xl')]: {
-      fontSize: 20,
-      marginLeft: '50%',
+      marginTop: 25,
+      marginLeft: '60%',
     },
   },
   btn: {
@@ -138,17 +142,37 @@ class TopBar extends Component {
     user_address: ''
   };
 
-  async componentDidMount() {
-    var connect = await window.ethereum.isConnected()
-    this.setState({
-      isConnected: connect
-    });
+  async componentWillMount() {
+    const accounts = await web3.eth.getAccounts();
+    if (accounts.length == 0) {
+      this.setState({
+        isConnected: false
+      });
+    }else{
+      this.setState({
+        isConnected: true
+      });
+    }
+    // const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+    // const account = accounts[0];
+    // this.setState({
+    //   isConnected: true
+    // });
+    // console.debug("connected: ", connect)
+    // this.setState({
+    //   isConnected: connect
+    // });
+  }
+
+  sleep = async (ms) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   getAccount = async () => {
     try {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
       const account = accounts[0];
+      alert('您已经连接metamask')
       this.setState({ isConnected: true, });
       this.setState({ user_address: account, });
     } catch (error) {
@@ -157,24 +181,16 @@ class TopBar extends Component {
     }
   }
 
+  // getConnected = async () => {
+  //   var connect = window.ethereum.isConnected()
+  //   console.debug("connected: ", connect)
+  //   this.setState({
+  //     isConnected: connect
+  //   });
+  // }
+
   render() {
     const { classes } = this.props
-    const account_info = () => {
-      if (!this.state.isConnected) {
-        return (
-          <Button style={{ marginLeft: "1%" }} className={classes.btn} onClick={this.getAccount}>
-            <AccountBalanceWalletIcon style={{ fontSize: 25 }} />
-          </Button>
-        );
-      } else {
-        return (
-          <Button color='primary' className={classes.btnConnected} style={{ marginLeft: "1%" }} >
-            <AccountBalanceWalletIcon style={{ fontSize: 24 }} />
-          </Button>
-        );
-      }
-
-    }
 
     return (
       <div>
@@ -203,11 +219,11 @@ class TopBar extends Component {
               </Button>
               {this.state.isConnected ? (
                 <Button color='primary' className={classes.btnConnected} >
-                  <AccountBalanceWalletIcon className={classes.icon2}/>
+                  <AccountBalanceWalletIcon className={classes.icon2} />
                 </Button>
               ) : (
                 <Button className={classes.btn} onClick={this.getAccount}>
-                    <AccountBalanceWalletIcon className={classes.icon2}/>
+                  <AccountBalanceWalletIcon className={classes.icon2} />
                 </Button>
               )}
             </Grid>

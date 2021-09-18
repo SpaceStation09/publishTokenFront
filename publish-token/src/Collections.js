@@ -91,7 +91,7 @@ const styles = theme => ({
     },
     title: {
       fontFamily: 'Teko',
-      marginTop: '25%',
+      marginTop: '5%',
       [theme.breakpoints.between('xs', 'sm')]: {
         fontSize: 35,
       },
@@ -102,10 +102,10 @@ const styles = theme => ({
         fontSize: 55,
       },
       [theme.breakpoints.between('lg', 'xl')]: {
-        fontSize: 110,
+        fontSize: 90,
       },
       [theme.breakpoints.up('xl')]: {
-        fontSize: 130,
+        fontSize: 110,
       },
     },
     title2: {

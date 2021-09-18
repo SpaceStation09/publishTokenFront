@@ -12,7 +12,7 @@ import contract from './contract';
 import web3 from './web3';
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
 import Skeleton from '@material-ui/lab/Skeleton';
-
+import ReactLoading from 'react-loading';
 const theme = createTheme({
   palette: {
     primary: {
@@ -254,90 +254,61 @@ class NFTSpark extends Component{
       Leaf: 0,
       onLoading: false,
       loadItem: true,
+      open: false,
   };
 
-  shill = async(event) => {
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const account = accounts[0];
-    let nft = contract;
-    
-    let obj = this;
-
-    this.setState({onloading: true});
-    console.log(obj.state.onLoading)
-    nft.methods.acceptShill(this.props.match.params.id).send({
-        from: account,
-        value: this.state.price
-    }).then(function(receipt){
-        // receipt can also be a new contract instance, when coming from a "contract.deploy({...}).send()"
-        alert("交易已上链");
-        obj.setState({onloading: false});
-    }).catch(error => {
-      this.setState({ onLoading: false,});
-    });
-
-  }
-  
-  loadLoadingState = () => {
-    this.setState({onloading: true});
-    
-  }
-
-  handleClickLink = (event) => {
-    var new_url = '/#/NFT/Spark/' + this.state.recommendNFT
-    window.open(new_url)
-  }
-
-  
-
-  constructor(props)  {
+  constructor(props) {
     super(props);
     console.log(this.state.loadItem)
-    if(!window.ethereum) {
+    if (!window.ethereum) {
       alert("请先安装metamask");
       //window.location.href = '/#/collections';
       return;
     }
-    if(!window.ethereum.isConnected()) {
+    if (!window.ethereum.isConnected()) {
       window.ethereum.request({ method: 'eth_requestAccounts' })
       //window.location.href = '/#/collections';
     }
     // const chainId = await window.ethereum.request({ method: 'eth_chainId' });
     window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
-      if(chainId !== '0x4') {
+      if (chainId !== '0x4') {
         alert("请切换至rinkeby network");
-       // window.location.href = '/#/collections';
+        // window.location.href = '/#/collections';
         return;
       }
     })
+    
+  }
+
+  async componentDidMount() {
     let nft = contract;
     let obj = this;
     nft.methods.tokenURI(this.props.match.params.id).call().then(meta => {
-        let hash = meta.split('/');
-  
-        this.setState({hash: hash[hash.length-1]});
-        axios.get(meta).then(res => {
-          let data = res.data;
-          console.log(data);
-          let bouns;
-          for(let i = 0; i < data.attributes.length; i++) {
-            if(data.attributes[i].trait_type === 'bonusFee') {
-              bouns = data.attributes[i].value;
-            }
+      let hash = meta.split('/');
+
+      this.setState({ hash: hash[hash.length - 1] });
+      axios.get(meta).then(res => {
+        let data = res.data;
+        console.log(data);
+        let bouns;
+        for (let i = 0; i < data.attributes.length; i++) {
+          if (data.attributes[i].trait_type === 'bonusFee') {
+            bouns = data.attributes[i].value;
           }
-          this.setState({Name: data.name});
-          this.setState({Description: data.description});
-          this.setState({BonusFee: bouns});
-          this.setState({Cover: data.image});
-        });
+        }
+        this.setState({ Name: data.name });
+        this.setState({ Description: data.description });
+        this.setState({ BonusFee: bouns });
+        this.setState({ Cover: data.image });
       });
-      nft.methods.getShillPriceByNFTId(this.props.match.params.id).call().then(price => {
-        this.setState({price: price});
-        let etherPrice = web3.utils.fromWei(price, 'ether');
-        etherPrice += ' ETH';
-        this.setState({priceString: etherPrice});
-      });
-      
+    });
+    nft.methods.getShillPriceByNFTId(this.props.match.params.id).call().then(price => {
+      this.setState({ price: price });
+      let etherPrice = web3.utils.fromWei(price, 'ether');
+      etherPrice += ' ETH';
+      this.setState({ priceString: etherPrice });
+    });
+
 
     const leafUrl = this.backend + '/api/v1/nft/info?nft_id=' + this.props.match.params.id
     axios.get(leafUrl).then(res => {
@@ -382,9 +353,50 @@ class NFTSpark extends Component{
     console.log(this.state.loadItem)
   }
 
+  shill = async(event) => {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const account = accounts[0];
+    let nft = contract;
+
+    this.setState({ onLoading: true });
+    const receipt = await nft.methods.acceptShill(this.props.match.params.id).send({
+      from: account,
+      value: this.state.price
+    })
+    alert('交易已上链')
+    this.setState({ 
+      onLoading: false,
+      onSale: true
+    });
+  }
+  
+  loadLoadingState = () => {
+    this.setState({onloading: true});
+    
+  }
+
+  handleClickLink = (event) => {
+    var new_url = '/#/NFT/Spark/' + this.state.recommendNFT
+    window.open(new_url)
+  }
+
   render() {
     const { classes } = this.props
-    
+    if (this.state.onLoading) {
+      return (
+        <div>
+          <Helmet>
+            <title>SparkNFT | Publish</title>
+          </Helmet>
+          <ThemeProvider theme={theme}>
+            <TopBar />
+            <div style={{ marginLeft: '35%', marginTop: '10%' }}>
+              <ReactLoading type={'bars'} color={'#2196f3'} width={'40%'} />
+            </div>
+          </ThemeProvider>
+        </div>
+      );
+    } else {
       return (
         <div>
           <Helmet>
@@ -503,6 +515,7 @@ class NFTSpark extends Component{
           </main>
         </div>
       );
+    }
     }
   
 }
