@@ -1,6 +1,6 @@
 
-import React, { Component,useState,setState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { Component} from 'react';
+
 import './App.css';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -10,22 +10,15 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Container from '@material-ui/core/Container';
-import { canUseDOM, Helmet } from 'react-helmet';
-import Toolbar from '@material-ui/core/Toolbar';
+import {  Helmet } from 'react-helmet';
 import Typography from '@material-ui/core/Typography';
 import GitHubIcon from '@material-ui/icons/GitHub';
 //import web3 from './web3';
 // import Web3 from 'web3';
 import contract from './contract';
-import web3 from './web3';
-import { CodeOutlined } from '@ant-design/icons';
-import { render } from '@testing-library/react';
 import TopBar from "./TopBar";
-import BigNumber from 'bignumber.js';
 import Skeleton from '@material-ui/lab/Skeleton';
 import axios from 'axios';
-var $;
-$ = require('jquery');
 
 const theme = createTheme({
     palette: {
@@ -71,31 +64,68 @@ const styles = theme => ({
 	cardContent: {
 		flexGrow: 2,
 	},
-    paper: {
-        marginTop: theme.spacing(7),
-        textAlign: 'center'
+  paper: {
+      marginTop: theme.spacing(7),
+      textAlign: 'center'
+    },
+    container: {
+      maxWidth: '100%'
+    },
+    btnMain: {
+      marginTop: theme.spacing(3),
+      color: '#FFFFFF',
+      borderWidth: 2,
+      borderColor: '#e3f2fd',
+      fontSize: 16,
+      borderRadius: 25,
+      width: 150
+    },
+    btnSecond: {
+      marginTop: theme.spacing(3),
+      color: '#03A9F4',
+      borderWidth: 3,
+      borderColor: '#03A9F4',
+      fontSize: 16,
+      borderRadius: 25,
+      width: 150
+    },
+    title: {
+      fontFamily: 'Teko',
+      marginTop: '25%',
+      [theme.breakpoints.between('xs', 'sm')]: {
+        fontSize: 35,
       },
-      container: {
-        maxWidth: '100%'
+      [theme.breakpoints.between('sm', 'md')]: {
+        fontSize: 40,
       },
-      btnMain: {
-        marginTop: theme.spacing(3),
-        color: '#FFFFFF',
-        borderWidth: 2,
-        borderColor: '#e3f2fd',
+      [theme.breakpoints.between('md', 'lg')]: {
+        fontSize: 55,
+      },
+      [theme.breakpoints.between('lg', 'xl')]: {
+        fontSize: 110,
+      },
+      [theme.breakpoints.up('xl')]: {
+        fontSize: 130,
+      },
+    },
+    title2: {
+      fontFamily: 'Teko',
+      [theme.breakpoints.between('xs', 'sm')]: {
         fontSize: 16,
-        borderRadius: 25,
-        width: 150
       },
-      btnSecond: {
-        marginTop: theme.spacing(3),
-        color: '#03A9F4',
-        borderWidth: 3,
-        borderColor: '#03A9F4',
-        fontSize: 16,
-        borderRadius: 25,
-        width: 150
+      [theme.breakpoints.between('sm', 'md')]: {
+        fontSize: 25,
       },
+      [theme.breakpoints.between('md', 'lg')]: {
+        fontSize: 35,
+      },
+      [theme.breakpoints.between('lg', 'xl')]: {
+        fontSize: 45,
+      },
+      [theme.breakpoints.up('xl')]: {
+        fontSize: 55,
+      },
+    },
 });
 
 class Collections extends Component {
@@ -132,7 +162,7 @@ class Collections extends Component {
             return;
         }
         const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-        console.log(chainId);
+
         if(chainId !== '0x4') {
             alert("请切换至rinkeby网络");
             return;
@@ -143,7 +173,7 @@ class Collections extends Component {
 
         let ids = await this.getNft(nft);
 
-        if(ids.length == 0) {
+        if(ids.length === 0) {
           alert("暂无可展示NFTs");
           document.getElementById('viewButton').innerHTML = '查看我的收藏';
           return;
@@ -254,23 +284,20 @@ class Collections extends Component {
       let balanceId = [];
       showId.map( (id) => {
         //console.log(typeof(viewMap.get(id)) == 'undefined');
-        if(typeof(viewMap.get(id)) == 'undefined' || viewMap.get(id) == false ) {
+        if(typeof(viewMap.get(id)) === 'undefined' || viewMap.get(id) === false ) {
           if(balanceMap.get(id) > 0) {
             balanceId.push(id);
-            console.log(id);
           }
           viewMap.set(id, true);
         }
         
       });
-      console.log(balanceId.length);
+
       if(balanceId.length > 0) {
         this.setState({
           onloading: true,
           SkeletoNumber: balanceId.length
         })
-        console.log("load")
-        console.log(this.state.onloading)
       }
       return balanceId;
   };
@@ -289,12 +316,8 @@ class Collections extends Component {
     
 
 	render(){
-        //const [user_address, setUser] = useState();
-        const ethereumButton = document.querySelector('.enableEthereumButton');
-        const showAccount = document.querySelector('.showAccount');
         //const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9,10,11];
         const { classes } = this.props
-        const gateway = this.gateway;
         // 
 
         let obj = this;
@@ -304,64 +327,44 @@ class Collections extends Component {
         // We recommend reloading the page, unless you must do otherwise
             window.location.reload();
         }
-		
-        const account_info =  () => {
-            if(this.state.user_address !== null) {
-                // window.web3.version;
-                //this.getAccount();
-                return (<Grid item xs={1}>{this.state.user_address}</Grid>);
-            } else {
-                return (
-                    <Button size="large" style={{ marginLeft: "1%" }} className={classes.btn} onClick={this.getAccount}>
-							{<p>connect wallet</p>}
-					</Button>
-                );
-            }
-            return (<p>connect</p>);
-        }
         
         function showCard(card) {
-          console.log(card)
             let res = (
                 <Grid item xs={12} sm={6} md={4}>
-                    
-                        
-                        {
-                        card ?(<Card className={classes.card}>
-                          <CardMedia
-                              className={classes.cardMedia}
-                              image={card.image}
-                              title="Image title" 
-                            />
-                          <CardContent className={classes.cardContent}>
-                          <Typography gutterBottom variant="h5" component="h2">
-                              <b>{card.title}</b>
-                          </Typography>
-                          <Typography>
-                              {obj.renderDescription(card.description)}
-                          </Typography>
-                          </CardContent>
-                          <CardActions>
-                              <Button size="small" variant="contained"  color="primary" target="_blank" href={'/#/NFT/' +  card.id} >
-                                  <b>查看 </b>
-                              </Button>
-                              <Grid xs={3}></Grid>
-                              <Typography variant="body2" gutterBottom>
-                              <b>NFT id: {card.id} </b>
-                              </Typography>
-                          </CardActions>
-                          </Card>):(
-                            <Card className={classes.card}>
-                              <Skeleton variant="rect" style={{marginLeft:40,}} width={210} height={218} />
-                              <Skeleton width="60%" style={{marginTop:40,}} height={30} />
-                              <Skeleton height={30}/>
-                              <Skeleton height={30}/>
-                              <Skeleton height={30}/>
-                            </Card>
-                          )
-                        }
-                       
-                    
+                  {
+                  card ?(<Card className={classes.card}>
+                    <CardMedia
+                        className={classes.cardMedia}
+                        image={card.image}
+                        title="Image title" 
+                      />
+                    <CardContent className={classes.cardContent}>
+                    <Typography gutterBottom variant="h5" component="h2">
+                        <b>{card.title}</b>
+                    </Typography>
+                    <Typography>
+                        {obj.renderDescription(card.description)}
+                    </Typography>
+                    </CardContent>
+                    <CardActions>
+                        <Button size="small" variant="contained"  color="primary" target="_blank" href={'/#/NFT/' +  card.id} >
+                            <b>查看 </b>
+                        </Button>
+                        <Grid xs={3}></Grid>
+                        <Typography variant="body2" gutterBottom>
+                        <b>NFT id: {card.id} </b>
+                        </Typography>
+                    </CardActions>
+                    </Card>):(
+                      <Card className={classes.card}>
+                        <Skeleton variant="rect" style={{marginLeft:70,}} width={260} height={288} />
+                        <Skeleton width="60%" style={{marginTop:40,}} height={33} />
+                        <Skeleton height={33}/>
+                        <Skeleton height={33}/>
+                        <Skeleton height={33}/>
+                      </Card>
+                    )
+                  }          
                 </Grid>
             );
             
@@ -380,14 +383,14 @@ class Collections extends Component {
             <div className={classes.paper}>
               <Grid container justifyContent="center">
                 <Grid item xs={10}>
-                  <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 70, marginTop: 70}}>
+                  <Typography color="inherit" noWrap className={classes.title}>
                     <b>我的收藏馆</b>
                   </Typography>
-                  <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 30}}>
-                    <b>An ERC721 Token Trying to Solve Existing Publishing Dilemma</b>
+                  <Typography color="inherit" noWrap className={classes.title2}>
+                    <b>A ERC721 Token Trying to Solve Existing Publishing Dilemma</b>
                   </Typography>
-                  <Grid container justifyContent="center">
-                    <Grid item xs={3} >
+                  <Grid container justifyContent="center" spacing={5}>
+                    <Grid  >
                       <Button size="large" variant="contained" color="secondary" id='viewButton' className={classes.btnMain} onClick={this.loadNft}>
                         <b>查看我的收藏</b>
                       </Button>
