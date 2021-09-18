@@ -32,6 +32,7 @@ const styles = theme => ({
   icon: {
     marginRight: theme.spacing(2),
   },
+
   btn: {
     color: '#424949',
     borderWidth: 2,
@@ -85,6 +86,154 @@ const styles = theme => ({
   },
   cardContent: {
     flexGrow: 1,
+  },
+  title: {
+    fontFamily: 'Teko',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      fontSize: 48,
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      fontSize: 60,
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      fontSize: 70,
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      fontSize: 75,
+    },
+    [theme.breakpoints.up('xl')]: {
+      fontSize: 80,
+    },
+  },
+  title2: {
+    fontFamily: 'Teko',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      fontSize: 16,
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      fontSize: 25,
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      fontSize: 35,
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      fontSize: 45,
+    },
+    [theme.breakpoints.up('xl')]: {
+      fontSize: 55,
+    },
+  },
+  content: {
+    fontFamily: 'Teko',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      justifyContent:"flex-start",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      justifyContent:"flex-start",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      justifyContent:"flex-start",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      justifyContent:"center",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.up('xl')]: {
+      justifyContent:"center",
+      alignItems:"flex-start"
+    },
+  },
+  content2: {
+    fontFamily: 'Teko',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      marginLeft: 10, maxWidth: 500
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      marginLeft: 90, maxWidth: 500
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      marginLeft: 80, maxWidth: 500
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      marginLeft: 50, maxWidth: 500
+    },
+    [theme.breakpoints.up('xl')]: {
+      marginLeft: 60, maxWidth: 500
+    },
+  },
+  cbutton: {
+    fontFamily: 'Teko',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      justifyContent:"center",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      justifyContent:"center",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      justifyContent:"flex-end",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      justifyContent:"flex-end",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.up('xl')]: {
+      justifyContent:"flex-end",
+      alignItems:"flex-start"
+    },
+  },
+  imageStyle: {
+    [theme.breakpoints.between('xs', 'sm')]: {
+      width: 280,
+      height: 365, 
+      marginTop: 20, 
+      marginBottom: 50
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      width: 290, 
+      height: 385, 
+      marginTop: 20, 
+      marginBottom: 50
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      width: 300, 
+      height: 420, 
+      marginTop: 20, 
+      marginBottom: 50
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      width: 300, 
+      marginTop: 20, 
+      marginBottom: 50 
+    },
+    [theme.breakpoints.up('xl')]: {
+      width: 300, 
+      marginTop: 20, 
+      marginBottom: 50 
+    },
+  },
+  imagePapaer: {
+
+    [theme.breakpoints.between('xs', 'sm')]: {
+      backgroundColor: '#EFEBE9', width: 330, height: 420, marginLeft: 10 
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      backgroundColor: '#EFEBE9', width: 340, height: 440, marginLeft: 10 
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      backgroundColor: '#EFEBE9', width: 350, height: 465, marginLeft: 10
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      backgroundColor: '#EFEBE9', width: 350, marginLeft: 10 
+    },
+    [theme.breakpoints.up('xl')]: {
+      backgroundColor: '#EFEBE9', width: 350, marginLeft: 10 
+    },
   },
 });
 
@@ -257,22 +406,22 @@ class NFTSpark extends Component{
                     回到我的收藏馆
                   </Button>
                 </Grid>
-                <Grid xs={8}></Grid>
+                <Grid xs={9}></Grid>
               </Grid>
 
               <Grid container direction="row" justifyContent="center" alignItems="center" xs={12}>
-                <Typography color="inherit" noWrap style={{ fontFamily: 'Teko', fontSize: 65 }}>
+                <Typography color="inherit" noWrap className={classes.title}>
                   🔥 NFT 🔥
                 </Typography>
               </Grid>
 
               <div className={classes.paper}>
                 {this.state.loadItem ? (
-                  <Grid container justifyContent="space-evenly" spacing={5}>
-                    <Grid item xs={4}>
-                      <Skeleton variant="rect" width={300} height={500} style={{ width: 300, marginLeft: 200, marginBottom: 50 }} />
+                  <Grid container spacing= {5} className={classes.content}>
+                    <Grid item>
+                      <Skeleton variant="rect" width={300} height={500} style={{ width: 370,marginLeft: 50, marginBottom: 50 }} />
                     </Grid>
-                    <Grid item xs style={{ marginLeft: '5%' }}>
+                    <Grid item style={{ marginLeft: '5%' }}>
                       <Skeleton animation="wave" variant="text" width={200} height={30} />
                       <Skeleton animation="wave" variant="text" width={400} height={70} />
                       <Skeleton animation="wave" variant="rect" width={500} height={300} style={{ marginBottom: 50 }} />
@@ -281,13 +430,16 @@ class NFTSpark extends Component{
 
                   </Grid>
                 ) : (
-                    <Grid container  justifyContent="space-evenly" spacing= {5} alignItems="flex-start">
+                    <Grid container  spacing= {5} className={classes.content}>
+                      {/* <Grid xs={2}></Grid> */}
                       <Grid item style={{ maxWidth: 200 }}>
-                        <Paper style={{ backgroundColor: '#FAFAFA', width: 350, marginLeft: 10 }}>
-                          <img style={{ width: 300, marginTop: 20, marginBottom: 50 }} src={this.state.Cover}></img>
+                        <Paper className={classes.imagePapaer}>
+                          <img className={classes.imageStyle} src={this.state.Cover}></img>
                         </Paper>
                       </Grid>
-                      <Grid item xs style={{ marginLeft: 50, maxWidth: 500 }} >
+                      {/* <Grid xs={2}></Grid> */}
+                      <Grid xs={1}></Grid>
+                      <Grid item xs className={classes.content2} >
                         <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
                           #{this.props.match.params.id}
                         </Typography>
@@ -300,7 +452,7 @@ class NFTSpark extends Component{
                         <Typography align="left" color="textPrimary" paragraph style={{ marginTop: '6%', maxWidth: '100%', fontSize: 24 }}>
                           点火价格: {this.state.priceString}
                         </Typography>
-                        <Grid container direction="row" justifyContent="flex-end" alignItems="center">
+                        <Grid container direction="row"  className={classes.cbutton}>
                           <Grid>
                             <Grid container direction="row" justifyContent="center" alignItems="center">
                               <Grid xs={2}></Grid>

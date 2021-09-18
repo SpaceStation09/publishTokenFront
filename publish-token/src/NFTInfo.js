@@ -116,6 +116,141 @@ const styles = theme => ({
   cardContent: {
     flexGrow: 1,
   },
+  content: {
+    fontFamily: 'Teko',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      justifyContent:"flex-start",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      justifyContent:"flex-start",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      justifyContent:"flex-start",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      justifyContent:"center",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.up('xl')]: {
+      justifyContent:"center",
+      alignItems:"flex-start"
+    },
+  },
+  content2: {
+    fontFamily: 'Teko',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      marginLeft: 10, maxWidth: 500
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      marginLeft: 90, maxWidth: 500
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      marginLeft: 80, maxWidth: 500
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      marginLeft: 50, maxWidth: 500
+    },
+    [theme.breakpoints.up('xl')]: {
+      marginLeft: 60, maxWidth: 500
+    },
+  },
+  cbutton: {
+    fontFamily: 'Teko',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      justifyContent:"center",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      justifyContent:"center",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      justifyContent:"flex-end",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      justifyContent:"flex-end",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.up('xl')]: {
+      justifyContent:"flex-end",
+      alignItems:"flex-start"
+    },
+  },
+  dbutton: {
+    fontFamily: 'Teko',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      justifyContent:"center",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      justifyContent:"center",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      justifyContent:"flex-end",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      justifyContent:"flex-end",
+      alignItems:"flex-start"
+    },
+    [theme.breakpoints.up('xl')]: {
+      justifyContent:"flex-end",
+      alignItems:"flex-start"
+    },
+  },
+  imageStyle: {
+    [theme.breakpoints.between('xs', 'sm')]: {
+      width: 280,
+      height: 365, 
+      marginTop: 20, 
+      marginBottom: 50
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      width: 290, 
+      height: 385, 
+      marginTop: 20, 
+      marginBottom: 50
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      width: 300, 
+      height: 420, 
+      marginTop: 20, 
+      marginBottom: 50
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      width: 300, 
+      marginTop: 20, 
+      marginBottom: 50 
+    },
+    [theme.breakpoints.up('xl')]: {
+      width: 300, 
+      marginTop: 20, 
+      marginBottom: 50 
+    },
+  },
+  imagePapaer: {
+
+    [theme.breakpoints.between('xs', 'sm')]: {
+      backgroundColor: '#EFEBE9', width: 330, height: 420, marginLeft: 25 
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      backgroundColor: '#EFEBE9', width: 340, height: 440, marginLeft: 25 
+    },
+    [theme.breakpoints.between('md', 'lg')]: {
+      backgroundColor: '#EFEBE9', width: 350, height: 465, marginLeft: 25 
+    },
+    [theme.breakpoints.between('lg', 'xl')]: {
+      backgroundColor: '#EFEBE9', width: 350, marginLeft: 10 
+    },
+    [theme.breakpoints.up('xl')]: {
+      backgroundColor: '#EFEBE9', width: 350, marginLeft: 10 
+    },
+  },
 });
 
 class NFTInfo extends Component{
@@ -482,18 +617,18 @@ class NFTInfo extends Component{
         <ThemeProvider theme={theme}>
           <TopBar />
           <Container component="main" className={classes.container}>
-            <Grid container direction="row" justifyContent="space-between" alignItems="flex-start">
+            <Grid container direction="row" justifyContent="center" alignItems="flex-start">
               <Grid>
             <Button
               startIcon={<ArrowBackIosOutlinedIcon style={{ fontSize: '2rem' }} />}
               href='/#/collections'
               style={{ marginTop: 20, marginBottom: 10, fontSize: '2rem' }}
             >
-              回到我的NFTs
+              回到我的收藏馆
             </Button>
             </Grid>
-            <Grid xs={5}></Grid>
-            <Grid container  direction="row" justifyContent="flex-end" alignItems="flex-start">
+            <Grid xs={9}></Grid>
+            <Grid container  direction="row" className={classes.cbutton}>
             <Grid>
                 <Button style={{ marginTop: 10,marginRight: 30, marginBottom: 20}} size="large" variant="contained" color="primary"  className={classes.btnMain} startIcon={<LocalAtmIcon />} onClick={this.claim} >
                   <Typography id="isSpark" variant="button" component="h3" gutterBottom >
@@ -519,9 +654,9 @@ class NFTInfo extends Component{
             <div className={classes.paper}>
               {/* <Grid container direction="column" justifyContent="center" alignItems="center"> */}
               {this.state.loadItem ? (
-                <Grid container justifyContent="space-evenly" spacing={5}>
+                <Grid container className={classes.content} spacing={5}>
                   <Grid item xs={4}>
-                    <Skeleton variant="rect" width={300} height={500} style={{ width: 300, marginLeft: 200, marginBottom: 50 }}/>
+                    <Skeleton variant="rect" width={300} height={500} style={{ width: 370, marginLeft: 50, marginBottom: 50 }}/>
                   </Grid>
                   <Grid item xs style={{ marginLeft: '5%' }}>
                     <Skeleton animation="wave" variant="text" width={200} height={30}/>
@@ -531,12 +666,12 @@ class NFTInfo extends Component{
                   </Grid>
 
                 </Grid>
-              ) : (<Grid container  justifyContent="space-evenly" spacing= {5} alignItems="flex-start">
+              ) : (<Grid container   spacing= {5} className={classes.content}>
                 {/* <Grid xs={2}></Grid> */}
+                {/* <Grid xs={1}></Grid> */}
                 <Grid    style={{ maxWidth: 200}}>
-   
-                    <Paper style={{ backgroundColor: '#EFEBE9', width: 350}}>
-                        <img style={{ width: 300, marginTop: 20, marginBottom: 50,marginRight:50}} src={this.state.Cover}></img>  
+                       <Paper className={classes.imagePapaer}>
+                        <img className={classes.imageStyle} src={this.state.Cover}></img>  
                     </Paper>
     
                   <Grid>
@@ -546,7 +681,8 @@ class NFTInfo extends Component{
                   </Grid>
                 </Grid>
                 {/* <Grid xs={1}></Grid> */}
-                <Grid   style={{ marginLeft:50, maxWidth: 500}} >
+                <Grid xs={1}></Grid>
+                <Grid   className={classes.content2} >
                   <Typography color="inherit" align="left" color="textSecondary" noWrap style={{ fontFamily: 'Teko', fontSize: 16, marginTop: '2%' }}>
                     #{this.props.match.params.id}
                   </Typography>
@@ -562,7 +698,7 @@ class NFTInfo extends Component{
                   <Typography align="left" color="textPrimary" paragraph style={{ maxWidth: '65%', fontSize: 12 }}>
                     当前拥有的子节点数量: {this.state.childrenNum}
                   </Typography>
-                  <Grid container direction="row" justifyContent="flex-end" alignItems="center">
+                  <Grid container direction="row" className={classes.cbutton}>
                   <Grid>
                     <Button size="small" variant="contained"  color="primary" target="_blank" className={classes.btnMain} startIcon={<GetAppIcon />} onClick={this.downloadIPFS} >
                       <Typography variant="button" component="h2" gutterBottom >
