@@ -174,7 +174,7 @@ class App extends Component {
                     
                   </Grid>
                   <Grid item xs={5} >
-                    <img src={books} className={classes.books}/>;
+                    <img src={books} className={classes.books}/>
                   </Grid>
                   <Grid container justifyContent="center" spacing={5} >
                     <Grid item >

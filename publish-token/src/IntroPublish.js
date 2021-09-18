@@ -114,7 +114,6 @@ const theme = createTheme({
 class IntroPublish extends Component {
   render() {
     const { classes } = this.props
-    console.log(window.location.host)
     return (
       <div>
         <Helmet>

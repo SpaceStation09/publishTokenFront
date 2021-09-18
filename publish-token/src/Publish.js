@@ -53,6 +53,43 @@ const styles = theme => ({
 			width: 500
 		},
 	},
+	titleCon: {
+		marginTop: 50, 
+		fontFamily: 'Ubuntu',
+		[theme.breakpoints.between('xs', 'sm')]: {
+			fontSize: 30
+		},
+		[theme.breakpoints.up('sm')]: {
+			fontSize: 40
+		},
+	},
+	paperImg: {
+		
+		backgroundColor: '#EFEBE9',
+		width: 330, 
+		[theme.breakpoints.between('xs', 'sm')]: {
+			marginLeft: '5%',
+			marginTop: 30,
+		},
+		[theme.breakpoints.between('sm', 'md')]: {
+			marginLeft: '30%',
+			marginTop: 30,
+		},
+		[theme.breakpoints.up('lg')]: {
+			marginLeft: '40%',
+			marginTop: 30,
+		},
+	},
+	titlePub: {
+		marginTop: "3%",
+		fontFamily: 'Ubuntu',
+		[theme.breakpoints.between('xs', 'sm')]: {
+			fontSize: 30
+		},
+		[theme.breakpoints.up('sm')]: {
+			fontSize: 40
+		},
+	},
 	btn: {
 		color: '#424949',
 		borderWidth: 2,
@@ -117,12 +154,12 @@ class Publish extends Component {
 		description: '',
 		shareTimes: 0,
 		onLoading: false,
-		rootNFTId: '',
+		rootNFTId: '8589934593',
 		usedAcc: '',
 		sig: '',
 		fileType: '',
 		finished: false,
-		coverURL: ''
+		coverURL: 'https://gateway.pinata.cloud/ipfs/QmU7C9hnDYnThfpCvX28bdzZpX8Dtyt8m7J6cUNfmBoN6E'
   };
 
 	async componentDidMount() {
@@ -383,7 +420,7 @@ class Publish extends Component {
 		};
 
 
-		if(this.state.onLoading){
+		if (this.state.onLoading){
 			return(
 				<div>
 					<Helmet>
@@ -391,8 +428,8 @@ class Publish extends Component {
 					</Helmet>
 					<ThemeProvider theme={theme}>
 						<TopBar />
-						<div style={{ width: '300px', height: '300px', position: 'relative', left: '43%', marginTop: '20%' }}>
-							<ReactLoading type={'bars'} color={'#2196f3'} height={300} width={300} />
+						<div style={{marginLeft: '35%', marginTop: '10%'}}>
+							<ReactLoading type={'bars'} color={'#2196f3'} width={'40%'}/>
 						</div>
 					</ThemeProvider>
 				</div>
@@ -406,11 +443,11 @@ class Publish extends Component {
 					<ThemeProvider theme={theme}>
 						<TopBar />
 						<div style={{ textAlign: 'center'}}>
-							<Typography variant="h2" style={{ marginTop: 50, fontFamily: 'Ubuntu' }}>
+							<Typography className={classes.titleCon}>
 								<b> 🎉 恭喜您发布成功</b>
 							</Typography>
 							
-							<Paper style={{ backgroundColor: '#EFEBE9', width: 350, marginLeft: '40%', marginTop: 100 }}>
+							<Paper className={classes.paperImg}>
 								<img style={{ width: 300, marginTop: 20, marginBottom: 50 }} src={this.state.coverURL}></img>
 							</Paper>
 							<Typography variant="h4" style={{ marginTop: 20, fontFamily: 'Ubuntu' }}>
@@ -432,7 +469,7 @@ class Publish extends Component {
 						<Container component="main" maxWidth="xs" className={classes.main}>
 							<div className={classes.paper}>
 								{/* {showLoading()} */}
-								<Typography component="h1" variant="h2" style={{ marginTop: "3%", fontFamily: 'Ubuntu' }}>
+								<Typography className={classes.titlePub}>
 									<b>发布作品信息</b>
 								</Typography>
 								<form className={classes.form} noValidate>

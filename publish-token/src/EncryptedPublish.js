@@ -43,8 +43,71 @@ const theme = createTheme({
 
 
 const styles = theme => ({
-  icon: {
-    marginRight: theme.spacing(2),
+  main: {
+    [theme.breakpoints.between('xs', 'sm')]: {
+      width: '60%'
+    },
+    [theme.breakpoints.up('sm')]: {
+      width: 500
+    },
+  },
+  titleCon: {
+    marginTop: 50,
+    fontFamily: 'Ubuntu',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      fontSize: 30
+    },
+    [theme.breakpoints.up('sm')]: {
+      fontSize: 40
+    },
+  },
+  titlePub: {
+    marginTop: "3%",
+    fontFamily: 'Ubuntu',
+    [theme.breakpoints.between('xs', 'sm')]: {
+      fontSize: 30
+    },
+    [theme.breakpoints.up('sm')]: {
+      fontSize: 40
+    },
+  },
+  paperImg: {
+
+    backgroundColor: '#EFEBE9',
+    width: 330,
+    [theme.breakpoints.between('xs', 'sm')]: {
+      marginLeft: '5%',
+      marginTop: 30,
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      marginLeft: '30%',
+      marginTop: 30,
+    },
+    [theme.breakpoints.up('lg')]: {
+      marginLeft: '40%',
+      marginTop: 30,
+    },
+  },
+  btnPub: {
+    margin: theme.spacing(1),
+    borderRadius: 25,
+    color: '#FFFFFF',
+    backgroundColor: '#2196f3',
+    marginBottom: 20,
+    marginTop: 40,
+    height: 45,
+    minWidth: 200,
+    [theme.breakpoints.between('xs', 'sm')]: {
+      width: '50%',
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      fontSize: 16,
+      width: '30%',
+    },
+    [theme.breakpoints.up('md')]: {
+      fontSize: 16,
+      width: '30%',
+    },
   },
   btn: {
     color: '#424949',
@@ -65,7 +128,7 @@ const styles = theme => ({
     height: 60
   },
   form: {
-    width: '170%',
+    width: '150%',
     marginTop: theme.spacing(7),
   },
   submit: {
@@ -92,7 +155,7 @@ const styles = theme => ({
   inputNum: {
     height: 40,
     borderRadius: 5,
-    width: 675,
+    width: '100%',
     fontSize: 20,
   }
 });
@@ -113,13 +176,14 @@ class EncryptedPublish extends Component {
     description: '',
     shareTimes: 0,
     onLoading: false,
-    rootNFTId: '',
+    rootNFTId: '8589934593',
     issueId: '',
     allowSubmitPDF: false,
     usedAcc: '',
     sig: '',
     finished: false,
     open: false,
+    coverURL: 'https://gateway.pinata.cloud/ipfs/QmU7C9hnDYnThfpCvX28bdzZpX8Dtyt8m7J6cUNfmBoN6E'
   };
 
   async componentDidMount() {
@@ -272,22 +336,6 @@ class EncryptedPublish extends Component {
         return
       }
       var file_url = 'https://gateway.pinata.cloud/ipfs/' + this.state.fileIpfs
-      // var JSONBody = {
-      //   "name": this.state.name,
-      //   "description": trimmed_des,
-      //   "image": this.state.coverURL,
-      //   "attributes": [
-      //     {
-      //       "display_type": "boost_percentage",
-      //       "trait_type": "Bonuse Percentage",
-      //       "value": this.state.bonusFee
-      //     },
-      //     {
-      //       "trait_type": "File Address",
-      //       "value": file_url
-      //     }
-      //   ]
-      // }
       var JSONBody = {
         "name": this.state.name,
         "description": trimmed_des,
@@ -513,10 +561,12 @@ class EncryptedPublish extends Component {
           <Helmet>
             <title>SparkNFT | Publish</title>
           </Helmet>
-
-          <div style={{ width: '300px', height: '300px', position: 'relative', left: '43%', marginTop: '20%' }}>
-            <ReactLoading type={'bars'} color={'#2196f3'} height={300} width={300} />
-          </div>
+          <ThemeProvider theme={theme}>
+            <TopBar />
+            <div style={{ marginLeft: '35%', marginTop: '10%' }}>
+              <ReactLoading type={'bars'} color={'#2196f3'} width={'40%'} />
+            </div>
+          </ThemeProvider>
         </div>
       );
     } else if (this.state.allowSubmitPDF) {
@@ -525,46 +575,50 @@ class EncryptedPublish extends Component {
           <Helmet>
             <title>SparkNFT | Publish</title>
           </Helmet>
+          <Container component="main" maxWidth="xs" className={classes.main}>
+            <div className={classes.paper}>
+              <Typography className={classes.titlePub}>
+                <b>上传作品文件</b>
+              </Typography>
+              <form className={classes.form} noValidate>
+                <label style={{ fontSize: 18, marginTop: 50 }}>封面图片 *</label>
+                <p style={{ fontSize: 12 }}>请在下方区域上传您的封面图片 <br />
+                  封面文件支持这些格式：JPEG/JPG/PNG</p>
+                <Dragger {...prop} style={{ width: '100%', minHeight: 100 }} id="Uploader" accept=".png, .jpg, .jpeg" >
+                  <p className="ant-upload-drag-icon">
+                    <InboxOutlined />
+                  </p>
+                  <p className="ant-upload-text">上传文件请点击或者拖拽文件到此处</p>
+                  <p className="ant-upload-hint">
+                    支持单个文件的上传，支持多种类型文件的上传
+                  </p>
+                </Dragger>
 
-          <div style={{ width: '300px', height: '300px', position: 'relative', left: '30%', marginTop: '10%' }}>
-            <Typography component="h1" variant="h2" style={{ marginTop: "3%", fontFamily: 'Ubuntu' }}>
-              <b>上传作品文件</b>
-            </Typography>
-
-            <label style={{ fontSize: 18, marginTop: 50 }}>封面图片 *</label>
-            <p style={{ fontSize: 12 }}>请在下方区域上传您的封面图片 <br />
-              封面文件支持这些格式：JPEG/JPG/PNG</p>
-            <Dragger {...prop} style={{ width: 680, minHeight: 200 }} id="Uploader" accept=".png, .jpg, .jpeg" >
-              <p className="ant-upload-drag-icon">
-                <InboxOutlined />
-              </p>
-              <p className="ant-upload-text">上传文件请点击或者拖拽文件到此处</p>
-              <p className="ant-upload-hint">
-                支持单个文件的上传，支持多种类型文件的上传
-              </p>
-            </Dragger>
-
-            <label style={{ fontSize: 18, marginTop: 50 }}>作品文件 *</label>
-            <p style={{ fontSize: 12 }}>请在下方区域上传您的作品文件 </p>
-            <Dragger {...propFile} style={{ width: 680, minHeight: 200 }} id="Uploader2">
-              <p className="ant-upload-drag-icon">
-                <InboxOutlined />
-              </p>
-              <p className="ant-upload-text">上传文件请点击或者拖拽文件到此处</p>
-              <p className="ant-upload-hint">
-                支持单个文件的上传和多个文件的上传，支持多种类型文件的上传
-              </p>
-            </Dragger>
-            <Button
-              variant="contained"
-              className={classes.button}
-              startIcon={<CloudUploadIcon />}
-              style={{ marginTop: 50, width: 200, height: 50, marginBottom: 50, marginLeft: 250 }}
-              onClick={this.submitWork}
-            >
-              发布作品
-            </Button>
-          </div>
+                <label style={{ fontSize: 18, marginTop: 50 }}>作品文件 *</label>
+                <p style={{ fontSize: 12 }}>请在下方区域上传您的作品文件 </p>
+                <Dragger {...propFile} style={{ width: '100%', minHeight: 100 }} id="Uploader2">
+                  <p className="ant-upload-drag-icon">
+                    <InboxOutlined />
+                  </p>
+                  <p className="ant-upload-text">上传文件请点击或者拖拽文件到此处</p>
+                  <p className="ant-upload-hint">
+                    支持单个文件的上传和多个文件的上传，支持多种类型文件的上传
+                  </p>
+                </Dragger>
+                <div style={{textAlign: 'center'}}>
+                  <Button
+                    variant="contained"
+                    startIcon={<CloudUploadIcon />}
+                    className={classes.btnPub}
+                    onClick={this.submitWork}
+                  >
+                    发布作品
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </Container>
+          
         </div>
       );
 
@@ -577,11 +631,11 @@ class EncryptedPublish extends Component {
           <ThemeProvider theme={theme}>
             <TopBar />
             <div style={{ textAlign: 'center' }}>
-              <Typography variant="h2" style={{ marginTop: 50, fontFamily: 'Ubuntu' }}>
+              <Typography className={classes.titleCon}>
                 <b> 🎉 恭喜您发布成功</b>
               </Typography>
 
-              <Paper style={{ backgroundColor: '#EFEBE9', width: 350, marginLeft: '40%', marginTop: 100 }}>
+              <Paper className={classes.paperImg}>
                 <img style={{ width: 300, marginTop: 20, marginBottom: 50 }} src={this.state.coverURL}></img>
               </Paper>
               <Typography variant="h4" style={{ marginTop: 20, fontFamily: 'Ubuntu' }}>
@@ -600,14 +654,14 @@ class EncryptedPublish extends Component {
 
           <ThemeProvider theme={theme}>
             <TopBar />
-            <Container component="main" maxWidth="xs">
+            <Container component="main" maxWidth="xs" className={classes.main}>
               <div className={classes.paper}>
-                <Typography component="h1" variant="h2" style={{ marginTop: "3%", fontFamily: 'Ubuntu' }}>
+                <Typography className={classes.titlePub}>
                   <b>发布作品信息</b>
                 </Typography>
                 <form className={classes.form} noValidate>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} >
+                    <Grid item style={{ width: "100%" }}>
                       <label style={{ fontSize: 18, marginBottom: 10 }}>作品名字 *</label>
                       <Input
                         placeholder="作品名称"
@@ -618,7 +672,7 @@ class EncryptedPublish extends Component {
                         className={classes.input}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item style={{ width: "100%" }}>
                       <label style={{ fontSize: 18, marginTop: 20 }}>收益比例 *</label>
                       <p style={{ fontSize: 12 }}>当您的作品被成功分享时，您希望从分享价格中获得多少比例的收益</p>
                       <InputNumber
@@ -632,7 +686,7 @@ class EncryptedPublish extends Component {
                         className={classes.inputNum}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item style={{ width: "100%" }}>
                       <label style={{ fontSize: 18, marginTop: 20 }}>售卖价格 (ether)*</label>
                       <InputNumber
                         id="price"
@@ -642,7 +696,7 @@ class EncryptedPublish extends Component {
                         className={classes.inputNum}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item style={{ width: "100%" }}>
                       <label style={{ fontSize: 18, marginTop: 20 }}>最高分享次数 *</label>
                       <p style={{ fontSize: 12 }}>您希望每一个帮助您传播的用户最多能够分享多少次？</p>
                       <InputNumber
@@ -653,7 +707,7 @@ class EncryptedPublish extends Component {
                         className={classes.inputNum}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item style={{ width: "100%" }}>
                       <label style={{ fontSize: 18, marginTop: 20 }}>作品描述 *</label>
                       <p style={{ fontSize: 12 }}>请用简单的话语对您的作品进行描述，精准有效的描述能帮助其他用户更准确得了解您的作品</p>
                       <TextArea
@@ -665,7 +719,7 @@ class EncryptedPublish extends Component {
                   </Grid>
                 </form>
                 <Grid container alignItems="center" spacing={4} style={{ marginTop: 20, marginBottom: 50}}>
-                  <Grid item xs>
+                  <Grid item xs style={{ textAlign: 'center' }}>
                     <Button
                       variant="contained"
                       className={classes.button}
@@ -676,7 +730,7 @@ class EncryptedPublish extends Component {
                       提交信息
                     </Button>
                   </Grid>
-                  <Grid item xs>
+                  <Grid item xs style={{textAlign: 'center'}}>
                     <Link onClick={this.handleClickOpen} style={{ fontSize: 10, textDecoration: 'underline'}}>
                       已经上传过基本信息？
                     </Link>
